@@ -1,0 +1,6 @@
+[submodule "solutions/conocophillips-predictive-maintenance"]
+	path = solutions/conocophillips-predictive-maintenance
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/conocophillips-predictive-maintenance
+[submodule "solutions/samsung-scm"]
+	path = solutions/samsung-scm
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/samsung-scm
