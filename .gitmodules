@@ -4,3 +4,6 @@
 [submodule "solutions/samsung-scm"]
 	path = solutions/samsung-scm
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/samsung-scm
+[submodule "tools/mlmax-env"]
+	path = tools/mlmax-env
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/mlmax-env
