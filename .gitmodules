@@ -18,3 +18,11 @@
 	path = solutions/cicd-ml-lambda-layer
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/cicd-ml-lambda-layer
 	branch = master
+[submodule "tools/sshssm"]
+	path = tools/sshssm
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/sshssm
+	branch = master
+[submodule "tools/ssheip"]
+	path = tools/ssheip
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/ssheip
+	branch = master
