@@ -10,3 +10,7 @@
 [submodule "solutions/gwf-forecast"]
 	path = solutions/gwf-forecast
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/gwf-forecast
+[submodule "solutions/transurban-traffic-forecast"]
+	path = solutions/transurban-traffic-forecast
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/transurban-traffic-forecast
+	branch = master
