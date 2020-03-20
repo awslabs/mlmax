@@ -14,3 +14,7 @@
 	path = solutions/transurban-traffic-forecast
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/transurban-traffic-forecast
 	branch = master
+[submodule "solutions/cicd-ml-lambda-layer"]
+	path = solutions/cicd-ml-lambda-layer
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/cicd-ml-lambda-layer
+	branch = master
