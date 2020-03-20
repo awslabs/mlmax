@@ -26,3 +26,7 @@
 	path = tools/ssheip
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/ssheip
 	branch = master
+[submodule "solutions/docker-sagemaker-dlc"]
+	path = solutions/docker-sagemaker-dlc
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/docker-sagemaker-dlc
+	branch = master
