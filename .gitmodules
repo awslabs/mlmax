@@ -7,3 +7,6 @@
 [submodule "tools/mlmax-env"]
 	path = tools/mlmax-env
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/mlmax-env
+[submodule "solutions/gwf-forecast"]
+	path = solutions/gwf-forecast
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/gwf-forecast
