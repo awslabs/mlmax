@@ -30,3 +30,6 @@
 	path = tools/docker-sagemaker-dlc
 	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/docker-sagemaker-dlc
 	branch = master
+[submodule "tools/mlmax-python"]
+	path = tools/mlmax-python
+	url = ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/mlmax-python
