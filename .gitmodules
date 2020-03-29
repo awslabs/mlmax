@@ -33,3 +33,4 @@
 [submodule "tools/mlmax-python"]
 	path = tools/mlmax-python
 	url = ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/mlmax-python
+    branch = master
