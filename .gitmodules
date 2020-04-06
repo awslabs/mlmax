@@ -34,3 +34,6 @@
 	path = tools/mlmax-python
 	url = ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/mlmax-python
     branch = master
+[submodule "tools/serverless_sam"]
+	path = tools/serverless_sam
+	url = https://git-codecommit.us-east-1.amazonaws.com/v1/repos/serverless_sam
