@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Create policy"
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: mlmax-bucket
+  TagName:
+    Type: String
+
+Resources:
+  S3Policy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: "/"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowRWAccessToBucket
+            Effect: Allow
+            Action:
+              - "s3:*"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketName}"
+              - !Sub "arn:aws:s3:::${S3BucketName}/*"
+Outputs:
+  # Export S3Policy resource to other stack to use, the actual resource is returned
+  S3PolicyArn:
+    Value: !Ref S3Policy
+    Export:
+      Name: S3PolicyExport

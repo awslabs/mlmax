@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  CodecommitRepo:
+    Type: String
+    Default: test-repo
+  CodecommitBranch:
+    Type: String
+    Default: master
+Resources:
+  # Grant SourceArn permission to trigger lambda function
+  # It is recommended to use
+  PermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt MyFunction.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt TriggerLamdbaRule.Arn
+
+  TriggerLamdbaRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Cloudwatch event rule to trigger lambda on commint on code commit repo"
+      EventPattern:
+        source:
+          - aws.codecommit
+        detail-type:
+          - "CodeCommit Repository State Change"
+        resources:
+          - !Join [
+              "",
+              [
+                "arn:aws:codecommit:",
+                !Ref "AWS::Region",
+                ":",
+                !Ref "AWS::AccountId",
+                ":",
+                !Ref CodecommitRepo,
+              ],
+            ]
+        # https://docs.aws.amazon.com/eventbridge/latest/userguide/event-types.html#codecommit-event-type
+        detail:
+          referenceType:
+            - branch
+          referenceName:
+            - !Ref CodecommitBranch
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt MyFunction.Arn
+          Id: "TargetFunctionV1"
+
+  MyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import json
+          import os
+
+          def lambda_handler(event, context):
+              print('Full event data:')
+              print(event)
+
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps('Hello from Lambda!')
+              }
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.6
+      Timeout: 60
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"

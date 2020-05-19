@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: mlmax-bucket
+  KeyName:
+    Type: String
+    Default: aws-sandbox-keypair-sg
+  TagName:
+    # For resource tagging
+    Type: String
+    Default: mlmax
+
+Resources:
+  Policy:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./iam_policy.yaml
+      Parameters:
+        S3BucketName: !Ref S3BucketName
+        TagName: !Ref TagName
+
+  Storage:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./s3_bucket.yaml
+      Parameters:
+        S3BucketName: !Ref S3BucketName
+        TagName: !Ref TagName
+
+  # Compute:
+  #   Type: AWS::CloudFormation::Stack
+  #   # Need policy to be created first
+  #   DependsOn: Policy
+  #   Properties:
+  #     TemplateURL: ./ec2_eip.yaml
+  #     Parameters:
+  #       S3BucketName: !Ref S3BucketName
+  #       KeyName: !Ref KeyName
+  #       TagName: !Ref TagName
+
+  # Ec2Scheduler:
+  #   Type: AWS::CloudFormation::Stack
+  #   # Need policy to be created first
+  #   DependsOn: Policy
+  #   Properties:
+  #     TemplateURL: ./ec2_scheduler.yaml
+
+  Sagemaker:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: Policy
+    Properties:
+      TemplateURL: ./sagemaker_nb.yaml
+      Parameters:
+        TagName: !Ref TagName
+
+Outputs:
+  val1:
+    Description: Output message
+    Value: !Sub ${AWS::Region}
+  val2:
+    Description: Policy message
+    Value: !Ref Policy
