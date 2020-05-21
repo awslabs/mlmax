@@ -1,5 +1,0 @@
-numpy
-pandas
-torch
-pytest
-black
