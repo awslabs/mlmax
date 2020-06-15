@@ -4,6 +4,6 @@ APP_DIR=$(PWD)
 docker stop app
 docker rm app
 #docker rmi appimage
-docker build --tag appimage .
+#docker build --tag appimage .
 docker run -v $APP_DIR:/app -p 3000:3000 -d --name app appimage
 docker exec -it app /bin/bash

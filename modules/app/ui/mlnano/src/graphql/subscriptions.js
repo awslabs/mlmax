@@ -2,50 +2,41 @@
 // this is an auto generated file. This will be overwritten
 
 export const onCreateDataSet = /* GraphQL */ `
-  subscription OnCreateDataSet {
-    onCreateDataSet {
+  subscription OnCreateDataSet($owner: String!) {
+    onCreateDataSet(owner: $owner) {
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;
 export const onUpdateDataSet = /* GraphQL */ `
-  subscription OnUpdateDataSet {
-    onUpdateDataSet {
+  subscription OnUpdateDataSet($owner: String!) {
+    onUpdateDataSet(owner: $owner) {
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;
 export const onDeleteDataSet = /* GraphQL */ `
-  subscription OnDeleteDataSet {
-    onDeleteDataSet {
+  subscription OnDeleteDataSet($owner: String!) {
+    onDeleteDataSet(owner: $owner) {
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;

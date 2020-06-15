@@ -10,13 +10,10 @@ export const createDataSet = /* GraphQL */ `
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;
@@ -29,13 +26,10 @@ export const updateDataSet = /* GraphQL */ `
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;
@@ -48,13 +42,10 @@ export const deleteDataSet = /* GraphQL */ `
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;

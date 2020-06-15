@@ -7,13 +7,10 @@ export const getDataSet = /* GraphQL */ `
       id
       name
       description
-      file {
-        bucket
-        region
-        key
-      }
+      fileKey
       createdAt
       updatedAt
+      owner
     }
   }
 `;
@@ -28,13 +25,10 @@ export const listDataSets = /* GraphQL */ `
         id
         name
         description
-        file {
-          bucket
-          region
-          key
-        }
+        fileKey
         createdAt
         updatedAt
+        owner
       }
       nextToken
     }

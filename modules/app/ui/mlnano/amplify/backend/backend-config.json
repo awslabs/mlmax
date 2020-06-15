@@ -7,10 +7,9 @@
 				"authConfig": {
 					"additionalAuthenticationProviders": [],
 					"defaultAuthentication": {
-						"authenticationType": "API_KEY",
-						"apiKeyConfig": {
-							"description": "mlnano-api-key",
-							"apiKeyExpirationDays": "365"
+						"authenticationType": "AMAZON_COGNITO_USER_POOLS",
+						"userPoolConfig": {
+							"userPoolId": "authmlnano87e9af14"
 						}
 					}
 				}
@@ -18,26 +17,19 @@
 		}
 	},
 	"auth": {
-		"mlnano28887663": {
+		"mlnano87e9af14": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation",
 			"dependsOn": [],
 			"customAuth": false
 		}
 	},
-	"hosting": {
-		"amplifyhosting": {
-			"service": "amplifyhosting",
-			"providerPlugin": "awscloudformation",
-			"type": "manual"
+	"hosting": {},
+	"function": {},
+	"storage": {
+		"mlnano": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
 		}
-	},
-	"function": {
-		"S3Trigger8faf86b0": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true
-		}
-	},
-	"storage": {}
+	}
 }

@@ -68,12 +68,14 @@ function App() {
             key,
             region,
         }
-        const inputData = { dataSetname, avatar: fileForUpload }
+        const inputData = { name: dataSetname, file: fileForUpload }
 
         try {
           await Storage.put(key, file, {
+            level: 'private',
             contentType: mimeType
           })
+          console.log(inputData)
           await API.graphql(graphqlOperation(CreateDataSet, { input: inputData }))
           updateDataSetname('')
           console.log('successfully stored dataSet data!')
@@ -109,7 +111,7 @@ function App() {
       />
       <button
         style={styles.button}
-        onClick={createDataSet}>Save Image</button>
+        onClick={createDataSet}>Save Data Set</button>
       {
         state.dataSets.map((u, i) => {
           return (
@@ -118,7 +120,7 @@ function App() {
             >
               <p
                 style={styles.dataSetname}
-               onClick={() => fetchImage(u.avatar.key)}>{u.dataSetname}</p>
+               onClick={() => fetchImage(u.file.key)}>{u.dataSetname}</p>
             </div>
           )
         })
