@@ -1,0 +1,8 @@
+figure.figsize : 7.5, 7
+savefig.dpi : 300
+axes.titlesize : 18
+axes.titlepad : 20
+font.size : 14
+axes.linewidth : 2
+lines.linewidth : 2
+axes.xmargin : 0.01
