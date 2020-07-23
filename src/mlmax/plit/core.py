@@ -17,8 +17,8 @@ import numpy as np
 import os
 
 COLORS = ["g", "b", "r", "k", "c"]
-VISUAL_DIR = "../reports/figures"
-STYLESHEET = "../config/default.mplstyle"
+VISUAL_DIR = "../../../reports/figures"
+STYLESHEET = "../../../config/default.mplstyle"
 plt.style.use(STYLESHEET)
 
 
