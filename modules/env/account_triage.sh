@@ -3,12 +3,33 @@
 # Todo: code commit, sagemaker, efs, cloudwatch, vpc
 
 ##### BEGIN CHANGES #########
-S3_BUCKET="josiah-2017"   # existing bucket for testing access to
-S3_KEY="test_file.txt"    # existing in bucket existing for sample download
-REGION="ap-southeast-1"   # region for testing resource creation
+S3_BUCKET=""   # existing bucket for testing access to (e.g. "josiah-2017")
+S3_KEY=""      # existing in bucket existing for sample download (e.g. "test_file.txt")
+REGION=""      # region for testing resource creation (e.g. "ap-southeast-1")
 ##### END CHANGES ##########
 
 S3_TMP_BUCKET=tmp-`date "+%Y-%m-%d-%H-%M-%S"`
+
+check_env_variables() {
+  if [ -z ${S3_BUCKET} ]; then 
+    echo "S3_BUCKET is unset"
+    exit 1
+  else 
+    echo "S3_BUCKET is set to '$S3_BUCKET'"; 
+  fi
+  if [ -z ${S3_KEY} ]; then 
+    echo "S3_KEY is unset"
+    exit 1
+  else 
+    echo "S3_KEY is set to '$S3_KEY'"; 
+  fi
+  if [ -z ${REGION} ]; then 
+    echo "REGION is unset"
+    exit 1
+  else 
+    echo "REGION is set to '$REGION'"; 
+  fi
+}
 
 runc() {
     $1 &>/dev/null
@@ -42,6 +63,7 @@ test_ec2(){
 }
 
 echo "############################################"
+check_env_variables
 echo " "
 echo "S3"
 echo "-------"
