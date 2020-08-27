@@ -1,0 +1,5 @@
+# vscode-python-2020.7.0 automatically loads if this file is present.
+# https://github.com/microsoft/vscode-python/blob/master/CHANGELOG.md#enhancements-1
+
+[tool.black]
+line-length = 88
