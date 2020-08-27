@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+mode='brief'
+declare -a AWS_CLI_OPTS=()
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        key="$1"
+        case $key in
+        -h|--help)
+            echo "List AWS CodeCommit repositories."
+            echo "Usage: $(basename ${BASH_SOURCE[0]}) [-f|--full]"
+            exit 0
+            ;;
+        -f|--full)
+            mode=full
+            shift
+            ;;
+        *)
+            AWS_CLI_OPTS+=($key)
+            shift
+            ;;
+        esac
+    done
+}
+
+parse_args "$@"
+declare -a repo_names=( $(aws codecommit "${AWS_CLI_OPTS[@]}" list-repositories | jq -r '.repositories[].repositoryName') )
+[[ ${#repo_names[@]} -lt 1 ]] && exit 0
+
+if [[ $mode == "full" ]]; then
+    aws codecommit "${AWS_CLI_OPTS[@]}" batch-get-repositories --repository-names "${repo_names[@]}" |  jq '.repositories'
+else
+    aws codecommit "${AWS_CLI_OPTS[@]}" batch-get-repositories --repository-names "${repo_names[@]}" | jq '[.repositories[] | {repositoryName, cloneUrlHttp, cloneUrlSsh}]'
+fi
