@@ -1,50 +1,139 @@
-# Temporary and binary files
+# DS specific: exclude anything under $GITROOT/data/
+/data/
+
+# Vscode: whitelist only the launch configuration
+.vscode/*
+!.vscode/launch.json
+
 *~
+
+# Jupyter notebook's checkpoints
+.ipynb_checkpoints
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
+*$py.class
+
+# C extensions
 *.so
-*.cfg
-!.isort.cfg
-!setup.cfg
-*.orig
-*.log
-*.pot
-__pycache__/*
-.cache/*
-.*.swp
-*/.ipynb_checkpoints/*
+
+# MS-Office temporary files
+~$*
+
+# OSX specific
 .DS_Store
 
-# Project files
+# VIM temporary files
+.*.sw[po]
+*.sw[po]
+
+# Python distribution / packaging
+MANIFEST
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+junit.xml
+cover/*
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuffs
+instance/
+.webassets-cache
+
+# Scrappy stuffs
+.scrapy
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Sphinx documentation
+docs/api/*
+docs/_rst/*
+docs/_build/*
+
+# mkdocs documentation
+/site
+
+# Database
+*.db
+*.rdb
+
+# PyBuilder
+target/
+
+# Mypy cache
+.mypy_cache/
+
+# ctags
+tags
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv*/
+
+# IDE (NOTE: .vscode at the top of this file)
+.c9/
+.idea/
+.spyproject
+.spyderproject
 .ropeproject
 .project
 .pydevproject
 .settings
-.idea
-tags
-
-# Package files
-*.egg
-*.eggs/
-.installed.cfg
-*.egg-info
-
-# Unittest and coverage
-htmlcov/*
-.coverage
-.tox
-junit.xml
-coverage.xml
-.pytest_cache/
-
-# Build and docs folder/files
-build/*
-dist/*
-sdist/*
-docs/api/*
-docs/_rst/*
-docs/_build/*
-cover/*
-MANIFEST
-
-# Per-project virtualenvs
-.venv*/
