@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+declare -a AWS_CLI_OPTS=()
+declare -i ALL_FOR_AWS_CLI=0
+declare -i CREATE_PRESIGNED_URL=0
+declare -i WATCH=1
+declare -a WATCH_ARGS=()
+
+
+################################################################################
+# Helper functions
+################################################################################
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        key="$1"
+        case $key in
+        -h|--help)
+            echo "Watch Amazon SageMaker Notebook instance."
+            echo "Usage: $(basename ${BASH_SOURCE[0]}) <NB_NAME> --awscli-arg=val -- --awscli-arg val"
+            exit 0
+            ;;
+        -n|--no-watch)
+            WATCH=0
+            shift
+            ;;
+        --)
+            # Anything after this means "--option value"
+            ALL_FOR_AWS_CLI=1
+            shift
+            ;;
+        -*)
+            # This takes care "--option=value"
+            AWS_CLI_OPTS+=($key)
+            shift
+            ;;
+        *)
+            [[ ${ALL_FOR_AWS_CLI} > 0 ]] && AWS_CLI_OPTS+=($key) || NB_NAME=$key
+            shift
+            ;;
+        esac
+    done
+}
+
+start_smnb() {
+    echo "Starting ${NB_NAME}"
+    cmd="aws ${AWS_CLI_OPTS[@]} sagemaker start-notebook-instance --notebook-instance-name ${NB_NAME}"
+    #echo $cmd
+    eval $cmd
+    echo "Started ${NB_NAME}"
+}
+
+stop_smnb() {
+    echo "Stopping ${NB_NAME}"
+    cmd="aws ${AWS_CLI_OPTS[@]} sagemaker stop-notebook-instance --notebook-instance-name ${NB_NAME}"
+    #echo $cmd
+    eval $cmd
+    echo "Stopped ${NB_NAME}"
+}
+
+create_presigned_url() {
+    echo -e "\nPresigned url for ${NB_NAME}:"
+    cmd="aws ${AWS_CLI_OPTS[@]} sagemaker create-presigned-notebook-instance-url --notebook-instance-name ${NB_NAME}"
+    #echo $cmd
+    eval $cmd
+}
+
+status_smnb() {
+    cmd="aws ${AWS_CLI_OPTS[@]} sagemaker describe-notebook-instance --notebook-instance-name ${NB_NAME} | egrep --color=always '^.*NotebookInstanceStatus.*$|$'"
+    eval $cmd
+}
+
+watch_smnb() {
+    [[ "$1" == "preamble" ]] && echo && read -n 1 -s -r -p "Press any key to watch... (while watching, press ^C to stop watching)"
+    cmd="aws ${AWS_CLI_OPTS[@]} sagemaker describe-notebook-instance --notebook-instance-name ${NB_NAME} | egrep --color=always '^.*NotebookInstanceStatus.*$|$'"
+    watch --color -n 30 "${cmd}; echo '\nPress ^C to exit...'"
+}
+
+
+################################################################################
+# Main
+################################################################################
+parse_args "$@"
+[[ "${NB_NAME}" == "" ]] && exit 0
+
+# Dispatch task (where some tasks create a mini state machine).
+case $(basename ${BASH_SOURCE[0]}) in
+    *start*)
+        start_smnb
+        CREATE_PRESIGNED_URL=1
+        WATCH_ARGS+=(preamble)
+        ;;
+    *stop*)
+        stop_smnb
+        WATCH_ARGS+=(preamble)
+        ;;
+    *url*)
+        # Always --no-watch
+        WATCH=0
+        CREATE_PRESIGNED_URL=1
+        ;;
+    *status*)
+        # Always --no-watch
+        WATCH=0
+        ;;
+    *watch*)
+        # Over-rule --no-watch
+        WATCH=1
+        ;;
+    *)
+        echo "Unknown task"
+        exit 1
+        ;;
+esac
+
+[[ ${WATCH} < 1 ]] && status_smnb || watch_smnb "${WATCH_ARGS[@]}"
+[[ ${CREATE_PRESIGNED_URL} == 1 ]] && create_presigned_url
