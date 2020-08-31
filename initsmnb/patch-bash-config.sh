@@ -19,7 +19,6 @@ git_branch() {
    local branch=\$(/usr/bin/git branch 2>/dev/null | grep '^*' | colrm 1 2)
    [[ "\$branch" == "" ]] && echo "" || echo "(\$branch) "
 }
-export -f git_branch
 
 # All colors are bold
 COLOR_GREEN="\[\033[1;32m\]"
