@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  TrainingPipelineName:
+    Type: String
+    Default: "MlMax-Training-Pipeline-Demo"
+  TargetEnv:
+    Type: String
+    Default: "dev"
+
+Resources:
+  # Define Roles
+  IAMRoles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./roles.yaml
+      Parameters:
+        TargetEnv: !Ref TargetEnv
+  # Training Pipeline Step Function
+  StepFunctionTrainingPipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./my_training_pipeline.yaml
+      Parameters:
+        TrainingPipelineName: !Ref TrainingPipelineName
+        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
+        TargetEnv: !Ref TargetEnv
+    DependsOn: IAMRoles
+

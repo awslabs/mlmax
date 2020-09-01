@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for AWS Step Functions - State Machine
+Resources:
+  StateMachineComponent:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: inference-pipeline-integtest-20200818115345
+      DefinitionString: |-
+        {
+          "StartAt": "Train Preprocessor",
+          "States": {
+            "Train Preprocessor": {
+              "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+              "Parameters": {
+                "AlgorithmSpecification.$": "$$.Execution.Input['Train Preprocessor'].AlgorithmSpecification",
+                "OutputDataConfig.$": "$$.Execution.Input['Train Preprocessor'].OutputDataConfig",
+                "StoppingCondition.$": "$$.Execution.Input['Train Preprocessor'].StoppingCondition",
+                "ResourceConfig.$": "$$.Execution.Input['Train Preprocessor'].ResourceConfig",
+                "RoleArn.$": "$$.Execution.Input['Train Preprocessor'].RoleArn",
+                "InputDataConfig.$": "$$.Execution.Input['Train Preprocessor'].InputDataConfig",
+                "HyperParameters.$": "$$.Execution.Input['Train Preprocessor'].HyperParameters",
+                "TrainingJobName.$": "$$.Execution.Input['Train Preprocessor'].TrainingJobName",
+                "DebugHookConfig.$": "$$.Execution.Input['Train Preprocessor'].DebugHookConfig"
+              },
+              "Type": "Task",
+              "Next": "Create Preprocessor Model"
+            },
+            "Create Preprocessor Model": {
+              "Parameters": {
+                "ModelName.$": "$$.Execution.Input['Create Preprocessor Model'].ModelName",
+                "PrimaryContainer.$": "$$.Execution.Input['Create Preprocessor Model'].PrimaryContainer",
+                "ExecutionRoleArn.$": "$$.Execution.Input['Create Preprocessor Model'].ExecutionRoleArn"
+              },
+              "Resource": "arn:aws:states:::sagemaker:createModel",
+              "Type": "Task",
+              "Next": "Transform Input"
+            },
+            "Transform Input": {
+              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+              "Parameters": {
+                "TransformJobName.$": "$$.Execution.Input['Transform Input'].TransformJobName",
+                "ModelName.$": "$$.Execution.Input['Transform Input'].ModelName",
+                "TransformInput.$": "$$.Execution.Input['Transform Input'].TransformInput",
+                "TransformOutput.$": "$$.Execution.Input['Transform Input'].TransformOutput",
+                "TransformResources.$": "$$.Execution.Input['Transform Input'].TransformResources",
+                "MaxPayloadInMB.$": "$$.Execution.Input['Transform Input'].MaxPayloadInMB",
+                "Environment.$": "$$.Execution.Input['Transform Input'].Environment"
+              },
+              "Type": "Task",
+              "Next": "Training"
+            },
+            "Training": {
+              "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+              "Parameters": {
+                "AlgorithmSpecification.$": "$$.Execution.Input['Training'].AlgorithmSpecification",
+                "OutputDataConfig.$": "$$.Execution.Input['Training'].OutputDataConfig",
+                "StoppingCondition.$": "$$.Execution.Input['Training'].StoppingCondition",
+                "ResourceConfig.$": "$$.Execution.Input['Training'].ResourceConfig",
+                "RoleArn.$": "$$.Execution.Input['Training'].RoleArn",
+                "InputDataConfig.$": "$$.Execution.Input['Training'].InputDataConfig",
+                "HyperParameters.$": "$$.Execution.Input['Training'].HyperParameters",
+                "TrainingJobName.$": "$$.Execution.Input['Training'].TrainingJobName",
+                "DebugHookConfig.$": "$$.Execution.Input['Training'].DebugHookConfig"
+              },
+              "Type": "Task",
+              "Next": "Create Pipeline Model"
+            },
+            "Create Pipeline Model": {
+              "Parameters": {
+                "ModelName.$": "$$.Execution.Input['Create Pipeline Model'].ModelName",
+                "Containers.$": "$$.Execution.Input['Create Pipeline Model'].Containers",
+                "ExecutionRoleArn.$": "$$.Execution.Input['Create Pipeline Model'].ExecutionRoleArn"
+              },
+              "Resource": "arn:aws:states:::sagemaker:createModel",
+              "Type": "Task",
+              "Next": "Configure Endpoint"
+            },
+            "Configure Endpoint": {
+              "Resource": "arn:aws:states:::sagemaker:createEndpointConfig",
+              "Parameters": {
+                "EndpointConfigName.$": "$$.Execution.Input['Configure Endpoint'].EndpointConfigName",
+                "ProductionVariants.$": "$$.Execution.Input['Configure Endpoint'].ProductionVariants"
+              },
+              "Type": "Task",
+              "Next": "Deploy"
+            },
+            "Deploy": {
+              "Resource": "arn:aws:states:::sagemaker:createEndpoint",
+              "Parameters": {
+                "EndpointConfigName.$": "$$.Execution.Input['Deploy'].EndpointConfigName",
+                "EndpointName.$": "$$.Execution.Input['Deploy'].EndpointName"
+              },
+              "Type": "Task",
+              "End": true
+            }
+          }
+        }
+      RoleArn: arn:aws:iam::671846148176:role/StepFunctionsWorkflowExecutionRole

@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for AWS Step Functions - State Machine
+Resources:
+  StateMachineComponent:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: training-pipeline-2020-08-18-11-37-27
+      DefinitionString: |-
+        {
+          "StartAt": "Training",
+          "States": {
+            "Training": {
+              "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+              "Parameters": {
+                "AlgorithmSpecification.$": "$$.Execution.Input['Training'].AlgorithmSpecification",
+                "OutputDataConfig.$": "$$.Execution.Input['Training'].OutputDataConfig",
+                "StoppingCondition.$": "$$.Execution.Input['Training'].StoppingCondition",
+                "ResourceConfig.$": "$$.Execution.Input['Training'].ResourceConfig",
+                "RoleArn.$": "$$.Execution.Input['Training'].RoleArn",
+                "InputDataConfig.$": "$$.Execution.Input['Training'].InputDataConfig",
+                "HyperParameters.$": "$$.Execution.Input['Training'].HyperParameters",
+                "TrainingJobName.$": "$$.Execution.Input['Training'].TrainingJobName",
+                "DebugHookConfig.$": "$$.Execution.Input['Training'].DebugHookConfig"
+              },
+              "Type": "Task",
+              "Next": "Create Model"
+            },
+            "Create Model": {
+              "Parameters": {
+                "ModelName.$": "$$.Execution.Input['Create Model'].ModelName",
+                "PrimaryContainer.$": "$$.Execution.Input['Create Model'].PrimaryContainer",
+                "ExecutionRoleArn.$": "$$.Execution.Input['Create Model'].ExecutionRoleArn"
+              },
+              "Resource": "arn:aws:states:::sagemaker:createModel",
+              "Type": "Task",
+              "Next": "Configure Endpoint"
+            },
+            "Configure Endpoint": {
+              "Resource": "arn:aws:states:::sagemaker:createEndpointConfig",
+              "Parameters": {
+                "EndpointConfigName.$": "$$.Execution.Input['Configure Endpoint'].EndpointConfigName",
+                "ProductionVariants.$": "$$.Execution.Input['Configure Endpoint'].ProductionVariants"
+              },
+              "Type": "Task",
+              "Next": "Deploy"
+            },
+            "Deploy": {
+              "Resource": "arn:aws:states:::sagemaker:createEndpoint",
+              "Parameters": {
+                "EndpointConfigName.$": "$$.Execution.Input['Deploy'].EndpointConfigName",
+                "EndpointName.$": "$$.Execution.Input['Deploy'].EndpointName"
+              },
+              "Type": "Task",
+              "End": true
+            }
+          }
+        }
+      RoleArn: arn:aws:iam::671846148176:role/StepFunctionsWorkflowExecutionRole

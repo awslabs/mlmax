@@ -1,0 +1,246 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for AWS Step Functions - State Machine
+Resources:
+  StateMachineComponent:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: MlMax-Training-Pipeline-Demo-dev
+      DefinitionString: |-
+        {
+          "StartAt": "SageMaker pre-processing step",
+          "States": {
+            "SageMaker pre-processing step": {
+              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
+              "Parameters": {
+                "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
+                "ProcessingInputs": [
+                  {
+                    "InputName": "input-1",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['InputDataURL']",
+                      "LocalPath": "/opt/ml/processing/input",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  },
+                  {
+                    "InputName": "code",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['PreprocessingCodeURL']",
+                      "LocalPath": "/opt/ml/processing/input/code",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  }
+                ],
+                "ProcessingOutputConfig": {
+                  "Outputs": [
+                    {
+                      "OutputName": "train_data",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedTrainDataURL']",
+                        "LocalPath": "/opt/ml/processing/train",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    },
+                    {
+                      "OutputName": "test_data",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']",
+                        "LocalPath": "/opt/ml/processing/test",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    }
+                  ]
+                },
+                "AppSpecification": {
+                  "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "ContainerArguments": [
+                    "--train-test-split-ratio",
+                    "0.2"
+                  ],
+                  "ContainerEntrypoint": [
+                    "python3",
+                    "/opt/ml/processing/input/code/preprocessing.py"
+                  ]
+                },
+                "RoleArn": "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196",
+                "ProcessingResources": {
+                  "ClusterConfig": {
+                    "InstanceCount": 1,
+                    "InstanceType": "ml.m5.xlarge",
+                    "VolumeSizeInGB": 30
+                  }
+                },
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 1200
+                }
+              },
+              "Type": "Task",
+              "Next": "SageMaker Training Step",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "SageMaker Training Step": {
+              "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+              "Parameters": {
+                "AlgorithmSpecification": {
+                  "TrainingImage": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "TrainingInputMode": "File"
+                },
+                "OutputDataConfig": {
+                  "S3OutputPath.$": "$$.Execution.Input['SMOutputDataURL']"
+                },
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 86400
+                },
+                "ResourceConfig": {
+                  "InstanceCount": 1,
+                  "InstanceType": "ml.m5.xlarge",
+                  "VolumeSizeInGB": 30
+                },
+                "RoleArn": "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196",
+                "HyperParameters": {
+                  "sagemaker_submit_directory.$": "$$.Execution.Input['SMSubmitDirURL']",
+                  "sagemaker_program": "\"train.py\"",
+                  "sagemaker_enable_cloudwatch_metrics": "false",
+                  "sagemaker_container_log_level": "20",
+                  "sagemaker_job_name.$": "$$.Execution.Input['TrainingJobName']",
+                  "sagemaker_region.$": "$$.Execution.Input['SMRegion']"
+                },
+                "TrainingJobName.$": "$$.Execution.Input['TrainingJobName']",
+                "InputDataConfig": [
+                  {
+                    "DataSource": {
+                      "S3DataSource": {
+                        "S3DataType": "S3Prefix",
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedTrainDataURL']",
+                        "S3DataDistributionType": "FullyReplicated"
+                      }
+                    },
+                    "ChannelName": "train"
+                  },
+                  {
+                    "DataSource": {
+                      "S3DataSource": {
+                        "S3DataType": "S3Prefix",
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']",
+                        "S3DataDistributionType": "FullyReplicated"
+                      }
+                    },
+                    "ChannelName": "test"
+                  }
+                ],
+                "DebugHookConfig": {
+                  "S3OutputPath.$": "$$.Execution.Input['SMDebugOutputURL']"
+                }
+              },
+              "Type": "Task",
+              "Next": "SageMaker Processing Model Evaluation step",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "SageMaker Processing Model Evaluation step": {
+              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
+              "Parameters": {
+                "ProcessingJobName.$": "$$.Execution.Input['EvaluationProcessingJobName']",
+                "ProcessingInputs": [
+                  {
+                    "InputName": "input-1",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']",
+                      "LocalPath": "/opt/ml/processing/test",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  },
+                  {
+                    "InputName": "input-2",
+                    "S3Input": {
+                      "S3Uri.$": "$['ModelArtifacts']['S3ModelArtifacts']",
+                      "LocalPath": "/opt/ml/processing/model",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  },
+                  {
+                    "InputName": "code",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['EvaluationCodeURL']",
+                      "LocalPath": "/opt/ml/processing/input/code",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  }
+                ],
+                "ProcessingOutputConfig": {
+                  "Outputs": [
+                    {
+                      "OutputName": "evaluation",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['EvaluationResultURL']",
+                        "LocalPath": "/opt/ml/processing/evaluation",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    }
+                  ]
+                },
+                "AppSpecification": {
+                  "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "ContainerEntrypoint": [
+                    "python3",
+                    "/opt/ml/processing/input/code/evaluation.py"
+                  ]
+                },
+                "RoleArn": "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196",
+                "ProcessingResources": {
+                  "ClusterConfig": {
+                    "InstanceCount": 1,
+                    "InstanceType": "ml.m5.xlarge",
+                    "VolumeSizeInGB": 30
+                  }
+                },
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 1200
+                }
+              },
+              "Type": "Task",
+              "End": true,
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "ML Workflow failed": {
+              "Cause": "SageMakerProcessingJobFailed",
+              "Type": "Fail"
+            }
+          }
+        }
+      RoleArn: arn:aws:iam::671846148176:role/StepFunctionsWorkflowExecutionRole
