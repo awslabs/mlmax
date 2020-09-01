@@ -5,3 +5,4 @@ stepfunctions>=1.1.0
 fsspec
 s3fs
 sklearn
+matplotlib
