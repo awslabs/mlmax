@@ -92,7 +92,6 @@ Resources:
   SagerMakerRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: SageMakerExecutionRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
