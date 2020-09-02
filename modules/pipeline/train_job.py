@@ -40,7 +40,7 @@ def define_training_pipeline(sm_role,
 
     sm_role:                    ARN of the SageMaker execution role
     workflow_execution_role:    ARN of the StepFunction execution role
-    return_yaml:                Return YAML representation or not, if False, 
+    return_yaml:                Return YAML representation or not, if False,
                                 it returns an instance of `stepfunctions.workflow.WorkflowObject`
     dump_yaml_file:             If not None, a YAML file will be generated at this file location
 
@@ -267,6 +267,9 @@ def example_execute_training_pipeline():
     MODELTRAINING_SCRIPT_LOCATION = 'train.py'
 
     sagemaker_session = sagemaker.Session()
+
+    # To do: parameterize this in case running AWS CLI in a different region to the step function deploy region.
+
     region = sagemaker_session.boto_region_name
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,

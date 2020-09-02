@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation template for AWS Step Functions - State Machine
 
+# Need to add by the script
 Parameters:
   TrainingPipelineName:
     Type: String

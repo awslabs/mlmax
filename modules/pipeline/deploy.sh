@@ -5,6 +5,8 @@
 REGION=$1
 TARGET_ENV=$2
 STACK_PREFIX=$3
+PACKAGE_BUCKET=${4:-sagemaker-${REGION}-671846148176}
+echo $PACKAGE_BUCKET
 
 # Package the AWS cloud formation templates
 aws cloudformation package \
@@ -31,4 +33,4 @@ deploy () {
     rm -f ./templates/master_packaged.yaml
 }
 
-deploy $1 $2 $3
+deploy
