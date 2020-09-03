@@ -12,7 +12,7 @@ required to tie these together to deliver robust production infrastructure.
 This project provides an example so you can get started quickly without having
 to make many design choices. The aim is to standardize the approach and hence
 achieve efficiency in delivery. There are nine independent yet coherent
-modules: 
+modules:
 
 ## Quick Start Guide
 ```
@@ -22,7 +22,11 @@ git clone codecommit::us-east-1://mlmax
 cd mlmax
 pip3 install -r requirements.txt
 cd modules/pipeline
-./deploy.sh <region> <target_env> <stack_prefix>
+python train_job.py -e define
+python format_template_str.py
+#./deploy.sh <region> <target_env> <stack_prefix>
+./deploy.sh us-east-1 dev MlMax-Training-Pipeline-Demo
+python train_job.py -e execute
 ```
 
 After creating the step function you should be able to execute the

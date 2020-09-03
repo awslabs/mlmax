@@ -235,7 +235,7 @@ def example_define_training_pipeline():
         fout.write(yaml_rep)
 
 
-def example_execute_training_pipeline():
+def example_execute_training_pipeline(region='us-east-1'):
     """
     execute the Workflow, which consists of four steps:
 
@@ -270,7 +270,7 @@ def example_execute_training_pipeline():
 
     # To do: parameterize this in case running AWS CLI in a different region to the step function deploy region.
 
-    region = sagemaker_session.boto_region_name
+    #region = sagemaker_session.boto_region_name
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
