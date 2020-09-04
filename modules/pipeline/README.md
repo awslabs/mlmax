@@ -22,11 +22,10 @@ git clone codecommit::us-east-1://mlmax
 cd mlmax
 pip3 install -r requirements.txt
 cd modules/pipeline
-python train_job.py -e define
-python format_template_str.py
+python training_pipeline_create.py
 #./deploy.sh <region> <target_env> <stack_prefix>
 ./deploy.sh us-east-1 dev MlMax-Training-Pipeline-Demo
-python train_job.py -e execute
+python training_pipeline_run.py
 ```
 
 After creating the step function you should be able to execute the

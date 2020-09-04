@@ -12,7 +12,7 @@ echo $PACKAGE_BUCKET
 aws cloudformation package \
       --region ${REGION} \
       --template-file templates/master.yaml \
-      --s3-bucket sagemaker-${REGION}-671846148176 \
+      --s3-bucket ${PACKAGE_BUCKET} \
       --s3-prefix clouformation-packaged \
       --output-template-file templates/master_packaged.yaml
 
