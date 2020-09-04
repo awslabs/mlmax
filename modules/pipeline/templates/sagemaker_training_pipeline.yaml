@@ -68,7 +68,7 @@ Resources:
                     "/opt/ml/processing/input/code/preprocessing.py"
                   ]
                 },
-                "RoleArn": "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196",
+                "RoleArn": "dummy",
                 "ProcessingResources": {
                   "ClusterConfig": {
                     "InstanceCount": 1,
@@ -109,7 +109,7 @@ Resources:
                   "InstanceType": "ml.m5.xlarge",
                   "VolumeSizeInGB": 30
                 },
-                "RoleArn": "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196",
+                "RoleArn": "dummy",
                 "HyperParameters": {
                   "sagemaker_submit_directory.$": "$$.Execution.Input['SMSubmitDirURL']",
                   "sagemaker_program": "\"train.py\"",
@@ -214,7 +214,7 @@ Resources:
                     "/opt/ml/processing/input/code/evaluation.py"
                   ]
                 },
-                "RoleArn": "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196",
+                "RoleArn": "dummy",
                 "ProcessingResources": {
                   "ClusterConfig": {
                     "InstanceCount": 1,
@@ -243,4 +243,4 @@ Resources:
             }
           }
         }
-      RoleArn: arn:aws:iam::671846148176:role/StepFunctionsWorkflowExecutionRole
+      RoleArn: dummy

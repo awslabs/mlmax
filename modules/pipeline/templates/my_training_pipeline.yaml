@@ -10,7 +10,7 @@ Parameters:
   WorkflowExecutionRoleArn:
     Type: String
   TargetEnv:
-      Type: String
+    Type: String
 
 Resources:
   StateMachineComponent:
