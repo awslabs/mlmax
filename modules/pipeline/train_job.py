@@ -1,6 +1,7 @@
 import uuid
 import tarfile
 import argparse
+import configparser
 
 import stepfunctions
 from stepfunctions import steps
@@ -234,8 +235,21 @@ def example_define_training_pipeline():
     with open('/tmp/my_training_pipeline.yaml', 'w') as fout:
         fout.write(yaml_rep)
 
+def get_existing_training_pipeline(workflow_arn):
+    """
+    Create a dummpy implementation of get existing training pipeline
+    """
+    training_pipeline = Workflow(
+        name='training_pipeline_name',
+        definition=Chain([]),
+        role='workflow_execution_role',
+    )
 
-def example_execute_training_pipeline(region='us-east-1'):
+    #return training_pipeline.attach('arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev')
+    return training_pipeline.attach(workflow_arn)
+
+
+def example_execute_training_pipeline(workflow_arn='arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev'):
     """
     execute the Workflow, which consists of four steps:
 
@@ -245,16 +259,9 @@ def example_execute_training_pipeline(region='us-east-1'):
     4. Execute the workflow with populated parameters, and monitor the progress
     5. Inspect the evaluation result when the execution is completed
     """
-    sm_role = 'arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196'
-    workflow_execution_role = 'arn:aws:iam::671846148176:role/StepFunctionsWorkflowExecutionRole'
-    training_pipeline_name = 'MlMax-Training-Pipeline-Demo-dev'
-    training_pipeline = define_training_pipeline(sm_role=sm_role,
-                                                 workflow_execution_role=workflow_execution_role,
-                                                 training_pipeline_name=training_pipeline_name,
-                                                 return_yaml=False)
-
-    smarn = training_pipeline.create()
-    print(f'ARN of the stepfunction pipeline is {smarn}')
+    region = workflow_arn.split(':')[3] # TODO brittle?
+    training_pipeline = get_existing_training_pipeline(workflow_arn)
+    
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
     training_job_name = f"scikit-learn-training-{uuid.uuid1().hex}"

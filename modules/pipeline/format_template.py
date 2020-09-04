@@ -1,12 +1,12 @@
 # debug
-#import yaml
+import yaml
 
-import ruamel.yaml as yaml
+#import ruamel.yaml as yaml
 
 #infile = yaml.load(open('yamlfile'), Loader=yaml.RoundTripLoader)
 
-with open("/tmp/my_training_pipeline.yaml") as f:
-    pipeline = yaml.load(f, Loader=yaml.RoundTripLoader)
+with open("templates/sagemaker_training_pipeline.yaml") as f:
+    pipeline = yaml.load(f, yaml.FullLoader)
 
 #print(pipeline['Resources']['StateMachineComponent']['Properties']['DefinitionString'])
 
@@ -46,4 +46,7 @@ pipeline['Resources']['StateMachineComponent']['Properties']['RoleArn'] = "!Sub 
 
 #with open("./templates/my_training_pipeline_formatted.yaml", "w") as f:
 #    yaml.dump(f, Dumper=yaml.RoundTripDumper)
-print(yaml.dump(pipeline, Dumper=yaml.RoundTripDumper))
+#print(yaml.dump(pipeline, Dumper=yaml.RoundTripDumper))
+
+with open("/tmp/my_training_pipeline.yaml", 'w') as f:
+    f.write(pipeline)
