@@ -43,7 +43,7 @@ get_region
 check_config
 
 PACKAGE_BUCKET=${3:-sagemaker-${REGION}-671846148176}
-
+echo $PACKAGE_BUCKET
 # package the aws cloud formation templates
 aws cloudformation package \
       --region ${REGION} \
@@ -53,6 +53,7 @@ aws cloudformation package \
       --output-template-file templates/master_packaged.yaml
 
 # Validate the AWS cloud formation template
-#aws cloudformation validate-template --template-body file://./templates/master_packaged.yaml
+aws cloudformation validate-template --template-body file://./templates/master_packaged.yaml
 
 deploy
+
