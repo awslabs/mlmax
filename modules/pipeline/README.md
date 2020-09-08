@@ -23,10 +23,8 @@ cd mlmax
 pip3 install -r requirements.txt
 cd modules/pipeline
 python training_pipeline_create.py
-#./deploy.sh <region> <target_env> <stack_prefix>
-./deploy.sh us-east-1 dev MlMax-Training-Pipeline-Demo
-python training_pipeline_run.py
+#./deploy.sh <target_env> <stack_prefix> <s3_bucket>
+./deploy.sh dev MlMax-Training-Pipeline-Demo sagemaker-us-east-1-671846148176
+#python training_pipeline_run -w statemachine-arn
+python training_pipeline_run.py -w arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev
 ```
-
-After creating the step function you should be able to execute the
-step function. This can be done from the command line or the console.
