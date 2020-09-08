@@ -1,23 +1,29 @@
 #!/bin/bash -ex
 
-# example command: ./deploy.sh us-east-1 dev MlMax-Training-Pipeline-Demo
+# example command: ./deploy.sh dev MlMax-Training-Pipeline-Demo sagemaker-us-east-1234
 
-REGION=$1
-TARGET_ENV=$2
-STACK_PREFIX=$3
-PACKAGE_BUCKET=${4:-sagemaker-${REGION}-671846148176}
-echo $PACKAGE_BUCKET
+TARGET_ENV=$1
+STACK_PREFIX=$2
 
-# Package the AWS cloud formation templates
-aws cloudformation package \
-      --region ${REGION} \
-      --template-file templates/master.yaml \
-      --s3-bucket ${PACKAGE_BUCKET} \
-      --s3-prefix clouformation-packaged \
-      --output-template-file templates/master_packaged.yaml
+get_region() {
+  REGION=$(aws configure get region)
+  if [ "$REGION" == "None" ]; then 
+    echo "REGION is unset in your AWS configuration";
+    exit 1;
+  else
+    echo "REGION is set to ${REGION}";
+  fi
+}
 
-# Validate the AWS cloud formation template
-aws cloudformation validate-template --template-body file://./templates/master_packaged.yaml
+
+check_config() {
+  if [ ! -f config/deploy-${REGION}-${TARGET_ENV}.ini ]; then 
+    echo "Config file does not exist for ${REGION}, ${TARGET_ENV}";
+    exit 1;
+  else
+    echo "Config file exists";
+  fi
+}
 
 deploy () {
     local STACK_NAME=${STACK_PREFIX}-${TARGET_ENV}
@@ -32,5 +38,21 @@ deploy () {
 
     rm -f ./templates/master_packaged.yaml
 }
+
+get_region
+check_config
+
+PACKAGE_BUCKET=${3:-sagemaker-${REGION}-671846148176}
+
+# package the aws cloud formation templates
+aws cloudformation package \
+      --region ${REGION} \
+      --template-file templates/master.yaml \
+      --s3-bucket ${PACKAGE_BUCKET} \
+      --s3-prefix clouformation-packaged \
+      --output-template-file templates/master_packaged.yaml
+
+# Validate the AWS cloud formation template
+#aws cloudformation validate-template --template-body file://./templates/master_packaged.yaml
 
 deploy
