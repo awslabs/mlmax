@@ -1,9 +1,7 @@
 #!/bin/bash -ex
 
 # example command: ./deploy.sh dev MlMax-Training-Pipeline-Demo sagemaker-us-east-1234
-
 TARGET_ENV=$1
-STACK_PREFIX=$2
 
 get_region() {
   REGION=$(aws configure get region)
@@ -16,17 +14,19 @@ get_region() {
 }
 
 
-check_config() {
+get_config() {
   if [ ! -f config/deploy-${REGION}-${TARGET_ENV}.ini ]; then 
     echo "Config file does not exist for ${REGION}, ${TARGET_ENV}";
     exit 1;
   else
     echo "Config file exists";
+    . config/deploy-${REGION}-${TARGET_ENV}.ini
+    STACK_NAME="$TrainingPipelineName-$TargetEnv"
+    echo $STACK_NAME 
   fi
 }
 
 deploy () {
-    local STACK_NAME=${STACK_PREFIX}-${TARGET_ENV}
 
     local CMD="aws cloudformation --region=${REGION}"
 
@@ -39,11 +39,11 @@ deploy () {
     rm -f ./templates/master_packaged.yaml
 }
 
-get_region
-check_config
 
-PACKAGE_BUCKET=${3:-sagemaker-${REGION}-671846148176}
-echo $PACKAGE_BUCKET
+get_region
+get_config
+
+PACKAGE_BUCKET=${2:-sagemaker-${REGION}-671846148176}
 # package the aws cloud formation templates
 aws cloudformation package \
       --region ${REGION} \
