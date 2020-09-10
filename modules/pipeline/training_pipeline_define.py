@@ -25,11 +25,14 @@ from sagemaker.sklearn.processing import SKLearnProcessor
 
 from sagemaker.sklearn.estimator import SKLearn
 
-def define_training_pipeline(sm_role,
-                             workflow_execution_role,
-                             training_pipeline_name,
-                             return_yaml=True,
-                             dump_yaml_file='templates/sagemaker_training_pipeline.yaml'):
+
+def define_training_pipeline(
+    sm_role,
+    workflow_execution_role,
+    training_pipeline_name,
+    return_yaml=True,
+    dump_yaml_file="templates/sagemaker_training_pipeline.yaml",
+):
     """
     Return YAML definition of the training pipeline, which consists of multiple Amazon StepFunction steps
 
@@ -79,7 +82,7 @@ def define_training_pipeline(sm_role,
         ProcessingInput(
             source=execution_input["InputDataURL"],
             destination="/opt/ml/processing/input",
-            input_name="input-1"
+            input_name="input-1",
         ),
         ProcessingInput(
             source=execution_input["PreprocessingCodeURL"],
@@ -109,14 +112,17 @@ def define_training_pipeline(sm_role,
         outputs=outputs,
         container_arguments=["--train-test-split-ratio", "0.2"],
         container_entrypoint=[
-            "python3", "/opt/ml/processing/input/code/preprocessing.py"],
+            "python3",
+            "/opt/ml/processing/input/code/preprocessing.py",
+        ],
     )
 
     """
     Training using the pre-processed data
     """
-    sklearn = SKLearn(entry_point="train.py",
-                      train_instance_type="ml.m5.xlarge", role=sm_role)
+    sklearn = SKLearn(
+        entry_point="train.py", train_instance_type="ml.m5.xlarge", role=sm_role
+    )
 
     training_step = MLMaxTrainingStep(
         "SageMaker Training Step",
@@ -175,8 +181,7 @@ def define_training_pipeline(sm_role,
         job_name=execution_input["EvaluationProcessingJobName"],
         inputs=inputs_evaluation,
         outputs=outputs_evaluation,
-        container_entrypoint=["python3",
-                              "/opt/ml/processing/input/code/evaluation.py"],
+        container_entrypoint=["python3", "/opt/ml/processing/input/code/evaluation.py"],
     )
 
     # Create Fail state to mark the workflow failed in case any of the steps fail.
@@ -194,8 +199,7 @@ def define_training_pipeline(sm_role,
     training_step.add_catch(catch_state_processing)
 
     # Create the Workflow
-    workflow_graph = Chain(
-        [processing_step, training_step, processing_evaluation_step])
+    workflow_graph = Chain([processing_step, training_step, processing_evaluation_step])
     training_pipeline = Workflow(
         name=training_pipeline_name,
         definition=workflow_graph,

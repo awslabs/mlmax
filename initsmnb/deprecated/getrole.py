@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 
 # https://github.com/aws/sagemaker-python-sdk/blob/d8b3012c23fbccdcd1fda977ed9efa4507386a49/src/sagemaker/session.py#L45
-NOTEBOOK_METADATA_FILE="/opt/ml/metadata/resource-metadata.json"
+NOTEBOOK_METADATA_FILE = "/opt/ml/metadata/resource-metadata.json"
+
 
 def get_sm_execution_role() -> str:
     if Path(NOTEBOOK_METADATA_FILE).is_file():

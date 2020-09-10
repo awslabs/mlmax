@@ -5,16 +5,32 @@ from stepfunctions.steps.utils import tags_dict_to_kv_list
 
 from sagemaker.workflow.airflow import training_config
 
+
 class MLMaxTrainingStep(Task):
 
     """
     Creates a Task State to execute a `SageMaker Training Job <https://docs.aws.amazon.com/sagemaker/latest/dg/API_CreateTrainingJob.html>`_. The TrainingStep will also create a model by default, and the model shares the same name as the training job.
     """
 
-    def __init__(self, state_id, estimator, job_name, data=None, hyperparameters=None, 
-                    mini_batch_size=None, experiment_config=None, wait_for_completion=True, tags=None,
-                    train_data=None, test_data=None, sm_submit_url=None, sm_region=None, 
-                    sm_output_data=None, sm_debug_output_data=None, **kwargs):
+    def __init__(
+        self,
+        state_id,
+        estimator,
+        job_name,
+        data=None,
+        hyperparameters=None,
+        mini_batch_size=None,
+        experiment_config=None,
+        wait_for_completion=True,
+        tags=None,
+        train_data=None,
+        test_data=None,
+        sm_submit_url=None,
+        sm_region=None,
+        sm_output_data=None,
+        sm_debug_output_data=None,
+        **kwargs
+    ):
         """
         Args:
             state_id (str): State name whose length **must be** less than or equal to 128 unicode characters. State names **must be** unique within the scope of the whole state machine.
@@ -45,68 +61,102 @@ class MLMaxTrainingStep(Task):
         self.job_name = job_name
 
         if wait_for_completion:
-            kwargs[Field.Resource.value] = 'arn:aws:states:::sagemaker:createTrainingJob.sync'
+            kwargs[
+                Field.Resource.value
+            ] = "arn:aws:states:::sagemaker:createTrainingJob.sync"
         else:
-            kwargs[Field.Resource.value] = 'arn:aws:states:::sagemaker:createTrainingJob'
+            kwargs[
+                Field.Resource.value
+            ] = "arn:aws:states:::sagemaker:createTrainingJob"
 
         if isinstance(job_name, str):
-            parameters = training_config(estimator=estimator, inputs=data, job_name=job_name, mini_batch_size=mini_batch_size)
+            parameters = training_config(
+                estimator=estimator,
+                inputs=data,
+                job_name=job_name,
+                mini_batch_size=mini_batch_size,
+            )
         else:
-            parameters = training_config(estimator=estimator, inputs=data, mini_batch_size=mini_batch_size)
+            parameters = training_config(
+                estimator=estimator, inputs=data, mini_batch_size=mini_batch_size
+            )
 
-        if (data is None and train_data is not None and test_data is not None):
-            if (isinstance(train_data, (ExecutionInput, StepInput)) and 
-                isinstance(test_data, (ExecutionInput, StepInput))):
-                parameters['InputDataConfig'] = [{'DataSource': {'S3DataSource': {'S3DataType': 'S3Prefix', 
-                'S3Uri': train_data, 
-                'S3DataDistributionType': 'FullyReplicated'}}, 'ChannelName': 'train'}, 
-                {'DataSource': {'S3DataSource': {'S3DataType': 'S3Prefix', 
-                'S3Uri': test_data, 
-                'S3DataDistributionType': 'FullyReplicated'}}, 'ChannelName': 'test'}]
+        if data is None and train_data is not None and test_data is not None:
+            if isinstance(train_data, (ExecutionInput, StepInput)) and isinstance(
+                test_data, (ExecutionInput, StepInput)
+            ):
+                parameters["InputDataConfig"] = [
+                    {
+                        "DataSource": {
+                            "S3DataSource": {
+                                "S3DataType": "S3Prefix",
+                                "S3Uri": train_data,
+                                "S3DataDistributionType": "FullyReplicated",
+                            }
+                        },
+                        "ChannelName": "train",
+                    },
+                    {
+                        "DataSource": {
+                            "S3DataSource": {
+                                "S3DataType": "S3Prefix",
+                                "S3Uri": test_data,
+                                "S3DataDistributionType": "FullyReplicated",
+                            }
+                        },
+                        "ChannelName": "test",
+                    },
+                ]
 
-        if (sm_output_data is not None):
-            parameters['OutputDataConfig']['S3OutputPath'] = sm_output_data
+        if sm_output_data is not None:
+            parameters["OutputDataConfig"]["S3OutputPath"] = sm_output_data
 
         if estimator.debugger_hook_config != None:
-            parameters['DebugHookConfig'] = estimator.debugger_hook_config._to_request_dict()
+            parameters[
+                "DebugHookConfig"
+            ] = estimator.debugger_hook_config._to_request_dict()
 
         if estimator.rules != None:
-            parameters['DebugRuleConfigurations'] = [rule.to_debugger_rule_config_dict() for rule in estimator.rules]
-        
-        if (sm_debug_output_data is not None):
-            parameters['DebugHookConfig']['S3OutputPath'] = sm_debug_output_data
+            parameters["DebugRuleConfigurations"] = [
+                rule.to_debugger_rule_config_dict() for rule in estimator.rules
+            ]
+
+        if sm_debug_output_data is not None:
+            parameters["DebugHookConfig"]["S3OutputPath"] = sm_debug_output_data
 
         if isinstance(job_name, (ExecutionInput, StepInput)):
-            parameters['TrainingJobName'] = job_name
+            parameters["TrainingJobName"] = job_name
 
         if hyperparameters is not None:
-            if 'HyperParameters' in parameters:
+            if "HyperParameters" in parameters:
                 # try to void overwriting reserved hyperparameters:
                 # https://github.com/aws/sagemaker-training-toolkit/blob/master/src/sagemaker_training/params.py
-                parameters['HyperParameters'].update(hyperparameters)
+                parameters["HyperParameters"].update(hyperparameters)
             else:
-                parameters['HyperParameters'] = hyperparameters
-        
+                parameters["HyperParameters"] = hyperparameters
+
         if isinstance(job_name, (ExecutionInput, StepInput)):
-            parameters['HyperParameters']['sagemaker_job_name'] = job_name
-        
-        if (sm_submit_url is not None and isinstance(sm_submit_url, (ExecutionInput, StepInput))):
-            parameters['HyperParameters']['sagemaker_submit_directory'] = sm_submit_url
-        
-        if (sm_region is not None and isinstance(sm_region, (ExecutionInput, StepInput))):
-            parameters['HyperParameters']['sagemaker_region'] = sm_region
+            parameters["HyperParameters"]["sagemaker_job_name"] = job_name
+
+        if sm_submit_url is not None and isinstance(
+            sm_submit_url, (ExecutionInput, StepInput)
+        ):
+            parameters["HyperParameters"]["sagemaker_submit_directory"] = sm_submit_url
+
+        if sm_region is not None and isinstance(sm_region, (ExecutionInput, StepInput)):
+            parameters["HyperParameters"]["sagemaker_region"] = sm_region
 
         if experiment_config is not None:
-            parameters['ExperimentConfig'] = experiment_config
+            parameters["ExperimentConfig"] = experiment_config
 
-        if 'S3Operations' in parameters:
-            del parameters['S3Operations']
+        if "S3Operations" in parameters:
+            del parameters["S3Operations"]
 
         if tags:
-            parameters['Tags'] = tags_dict_to_kv_list(tags)
+            parameters["Tags"] = tags_dict_to_kv_list(tags)
 
         kwargs[Field.Parameters.value] = parameters
-        #print(kwargs)
+        # print(kwargs)
         super(MLMaxTrainingStep, self).__init__(state_id, **kwargs)
 
     def get_expected_model(self, model_name=None):

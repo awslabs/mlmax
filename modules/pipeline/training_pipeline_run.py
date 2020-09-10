@@ -27,17 +27,18 @@ from sagemaker.sklearn.estimator import SKLearn
 
 import pandas as pd
 
+
 def get_existing_training_pipeline(workflow_arn):
     """
     Create a dummpy implementation of get existing training pipeline
     """
     training_pipeline = Workflow(
-        name='training_pipeline_name',
+        name="training_pipeline_name",
         definition=Chain([]),
-        role='workflow_execution_role',
+        role="workflow_execution_role",
     )
 
-    #return training_pipeline.attach('arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev')
+    # return training_pipeline.attach('arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev')
     return training_pipeline.attach(workflow_arn)
 
 
@@ -51,9 +52,8 @@ def example_run_training_pipeline(workflow_arn):
     4. Execute the workflow with populated parameters, and monitor the progress
     5. Inspect the evaluation result when the execution is completed
     """
-    region = workflow_arn.split(':')[3] # TODO brittle?
+    region = workflow_arn.split(":")[3]  # TODO brittle?
     training_pipeline = get_existing_training_pipeline(workflow_arn)
-    
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
     training_job_name = f"scikit-learn-training-{uuid.uuid1().hex}"
@@ -63,13 +63,13 @@ def example_run_training_pipeline(workflow_arn):
     # Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
     PREPROCESSING_SCRIPT_LOCATION = "preprocessing.py"
     MODELEVALUATION_SCRIPT_LOCATION = "evaluation.py"
-    MODELTRAINING_SCRIPT_LOCATION = 'train.py'
+    MODELTRAINING_SCRIPT_LOCATION = "train.py"
 
     sagemaker_session = sagemaker.Session()
 
     # To do: parameterize this in case running AWS CLI in a different region to the step function deploy region.
 
-    #region = sagemaker_session.boto_region_name
+    # region = sagemaker_session.boto_region_name
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
@@ -81,25 +81,29 @@ def example_run_training_pipeline(workflow_arn):
         key_prefix="data/sklearn_processing/code",
     )
     s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
-    sm_submit_dir_url = f"{s3_bucket_base_uri}/{training_job_name}/source/sourcedir.tar.gz"
-    tar = tarfile.open('/tmp/sourcedir.tar.gz', "w:gz")
+    sm_submit_dir_url = (
+        f"{s3_bucket_base_uri}/{training_job_name}/source/sourcedir.tar.gz"
+    )
+    tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
     # TODO need to add directory if source_dir is specified.
     tar.add(MODELTRAINING_SCRIPT_LOCATION)
     tar.close()
     sagemaker_session.upload_data(
-        '/tmp/sourcedir.tar.gz',
+        "/tmp/sourcedir.tar.gz",
         bucket=sagemaker_session.default_bucket(),
         key_prefix=f"{training_job_name}/source",
     )
 
     # Step 3 - Define data URLs, preprocessed data URLs can be made specifically to this training job
-    input_data = f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
+    input_data = (
+        f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
+    )
     output_data = f"{s3_bucket_base_uri}/data/sklearn_processing/output"
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
 
     # Step 4 - Execute workflow
-    print(f'Training Job Name is {training_job_name}')
+    print(f"Training Job Name is {training_job_name}")
     execution = training_pipeline.execute(
         inputs={
             "InputDataURL": input_data,
@@ -117,7 +121,7 @@ def example_run_training_pipeline(workflow_arn):
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
             "SMOutputDataURL": f"{s3_bucket_base_uri}/",
-            "SMDebugOutputURL": f"{s3_bucket_base_uri}/"
+            "SMDebugOutputURL": f"{s3_bucket_base_uri}/",
         }
     )
     execution.get_output(wait=True)
@@ -132,18 +136,23 @@ def example_run_training_pipeline(workflow_arn):
     for output in evaluation_output_config["Outputs"]:
         if output["OutputName"] == "evaluation":
             evaluation_s3_uri = "{}/{}".format(
-                output["S3Output"]["S3Uri"], "evaluation.json")
+                output["S3Output"]["S3Uri"], "evaluation.json"
+            )
             break
 
     evaluation_output = S3Downloader.read_file(evaluation_s3_uri)
     evaluation_output_dict = json.loads(evaluation_output)
     print(json.dumps(evaluation_output_dict, sort_keys=True, indent=4))
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--workflow-arn', '-w', type=str, 
-                        default='arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev')
+    parser.add_argument(
+        "--workflow-arn",
+        "-w",
+        type=str,
+        default="arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev",
+    )
     args, _ = parser.parse_known_args()
-   
+
     example_run_training_pipeline(args.workflow_arn)
-    
