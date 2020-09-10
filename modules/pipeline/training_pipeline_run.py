@@ -53,7 +53,6 @@ def example_run_training_pipeline(workflow_arn, region):
     4. Execute the workflow with populated parameters, and monitor the progress
     5. Inspect the evaluation result when the execution is completed
     """
-    # region = workflow_arn.split(":")[3]  # TODO brittle?
     training_pipeline = get_existing_training_pipeline(workflow_arn)
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
@@ -68,9 +67,6 @@ def example_run_training_pipeline(workflow_arn, region):
 
     sagemaker_session = sagemaker.Session()
 
-    # To do: parameterize this in case running AWS CLI in a different region to the step function deploy region.
-
-    # region = sagemaker_session.boto_region_name
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
