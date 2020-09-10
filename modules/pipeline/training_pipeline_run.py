@@ -39,7 +39,6 @@ def get_existing_training_pipeline(workflow_arn):
         role="workflow_execution_role",
     )
 
-    # return training_pipeline.attach('arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev')
     return training_pipeline.attach(workflow_arn)
 
 
