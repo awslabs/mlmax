@@ -1,26 +1,12 @@
-import uuid
-import tarfile
-import argparse
-import configparser
-
 import stepfunctions
-from stepfunctions import steps
 from stepfunctions.inputs import ExecutionInput
 from stepfunctions.steps import (
     Chain,
-    ChoiceRule,
-    ModelStep,
     ProcessingStep,
-    TrainingStep,
-    TransformStep,
 )
 from custom_steps import MLMaxTrainingStep
 from stepfunctions.workflow import Workflow
-
-import sagemaker
-from sagemaker import get_execution_role
 from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.s3 import S3Uploader
 from sagemaker.sklearn.processing import SKLearnProcessor
 
 from sagemaker.sklearn.estimator import SKLearn
@@ -34,13 +20,16 @@ def define_training_pipeline(
     dump_yaml_file="templates/sagemaker_training_pipeline.yaml",
 ):
     """
-    Return YAML definition of the training pipeline, which consists of multiple Amazon StepFunction steps
+    Return YAML definition of the training pipeline, which consists of multiple
+    Amazon StepFunction steps
 
     sm_role:                    ARN of the SageMaker execution role
     workflow_execution_role:    ARN of the StepFunction execution role
     return_yaml:                Return YAML representation or not, if False,
-                                it returns an instance of `stepfunctions.workflow.WorkflowObject`
-    dump_yaml_file:             If not None, a YAML file will be generated at this file location
+                                it returns an instance of
+                                    `stepfunctions.workflow.WorkflowObject`
+    dump_yaml_file:             If not None, a YAML file will be generated at
+                                    this file location
 
     """
 
@@ -51,7 +40,8 @@ def define_training_pipeline(
             "PreprocessingJobName": str,
             "PreprocessingCodeURL": str,
             "TrainingJobName": str,
-            # Prevent sagemaker config hardcode sagemaker_submit_directory in workflow definition
+            # Prevent sagemaker config hardcode sagemaker_submit_directory in
+            # workflow definition
             "SMSubmitDirURL": str,
             # Prevent sagemaker config hardcode sagemaker_region in workflow definition
             "SMRegion": str,
