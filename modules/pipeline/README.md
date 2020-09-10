@@ -15,16 +15,35 @@ achieve efficiency in delivery. There are nine independent yet coherent
 modules:
 
 ## Quick Start Guide
+
+### 1. Clone repo
 ```
+isengard assume # select ml-proserve 
 conda create --name <name> python=3.7
 conda activate <name>
 git clone codecommit::us-east-1://mlmax
+```
+
+### 2. Instal dependencies
+```
 cd mlmax
 pip3 install -r requirements.txt
+```
+
+### 3. Create the CloudFormation
+```
 cd modules/pipeline
 python training_pipeline_create.py
-#./deploy.sh <target_env> <stack_prefix> <s3_bucket>
-./deploy.sh dev MlMax-Training-Pipeline-Demo sagemaker-us-east-1-671846148176
-#python training_pipeline_run -w statemachine-arn
-python training_pipeline_run.py -w arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev
+```
+
+### 4. Deploy the CloudFormation
+```
+# ./deploy.sh <target_env> <s3_bucket>
+./deploy.sh dev sagemaker-us-east-1-671846148176
+```
+
+### 5. Run the Training Pipeline
+```
+# python training_pipeline_run -e <target_env>
+python training_pipeline_run.py dev
 ```
