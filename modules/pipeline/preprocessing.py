@@ -8,10 +8,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import (
     StandardScaler,
     OneHotEncoder,
-    LabelBinarizer,
     KBinsDiscretizer,
 )
-from sklearn.preprocessing import PolynomialFeatures
 from sklearn.compose import make_column_transformer
 
 from sklearn.exceptions import DataConversionWarning

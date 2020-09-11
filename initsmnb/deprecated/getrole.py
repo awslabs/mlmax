@@ -1,9 +1,11 @@
-"""Merged to https://github.com/verdimrc/smallmatter/blob/master/src/smallmatter/sm.py and will be maintained there."""
+"""Merged to
+https://github.com/verdimrc/smallmatter/blob/master/src/smallmatter/sm.py and
+will be maintained there."""
 
-import os
 from pathlib import Path
 
-# https://github.com/aws/sagemaker-python-sdk/blob/d8b3012c23fbccdcd1fda977ed9efa4507386a49/src/sagemaker/session.py#L45
+# https://github.com/aws/sagemaker-python-sdk/blob/
+# d8b3012c23fbccdcd1fda977ed9efa4507386a49/src/sagemaker/session.py#L45
 NOTEBOOK_METADATA_FILE = "/opt/ml/metadata/resource-metadata.json"
 
 

@@ -4,15 +4,16 @@ Time Series Labeller/Annotator
 Product Feature Request (Amazon VPN):
 https://aws-crm--c.na67.visual.force.com/a2v0z000002HTaa
 
-Multivariate Time Series (MTS) is a very common problem in the real-world which usually
-suffers from low signal-to-noise ratio, e.g. predictive maintenance, financial forecasting, etc.
-Also MTS are difficult to clean, preprocess and transform in order to build ML models due to the
-complex informations it contains from their sources.
+Multivariate Time Series (MTS) is a very common problem in the real-world which
+usually suffers from low signal-to-noise ratio, e.g. predictive maintenance,
+financial forecasting, etc.  Also MTS are difficult to clean, preprocess and
+transform in order to build ML models due to the complex informations it
+contains from their sources.
 
 It would be very crucial to have an effective labelling/annotation tool to
-handle MTS labelling/preprocessing/segmentation/transforming.
-This would laid an important foundation for the following steps of forecasting/classification/regression
-with ML models.
+handle MTS labelling/preprocessing/segmentation/transforming.  This would laid
+an important foundation for the following steps of
+forecasting/classification/regression with ML models.
 """
 
 
@@ -69,7 +70,8 @@ class TimeSeriesAnnotator:
     >>> # dimension of variant
     >>> sensor_id = sample_nasa_telemetry.columns[1:]
     >>> # self-define different events to annotate
-    >>> events = ["Normal", "Planned_Shutting_Down", "Accident", "Recovery", "Miscellaneous"]
+    >>> events = ["Normal", "Planned_Shutting_Down",
+             "Accident", "Recovery", "Miscellaneous"]
     >>> # define the output path
     >>> ANNOTATION_PATH = "../data/raw/CMAPSSData/anno_res.txt"
     >>> tsa = TimeSeriesAnnotator(

@@ -1,31 +1,9 @@
 import uuid
 import tarfile
 import argparse
-import configparser
-
-import stepfunctions
-from stepfunctions import steps
-from stepfunctions.inputs import ExecutionInput
-from stepfunctions.steps import (
-    Chain,
-    ChoiceRule,
-    ModelStep,
-    ProcessingStep,
-    TrainingStep,
-    TransformStep,
-)
-from custom_steps import MLMaxTrainingStep
+from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
-
 import sagemaker
-from sagemaker import get_execution_role
-from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.s3 import S3Uploader
-from sagemaker.sklearn.processing import SKLearnProcessor
-
-from sagemaker.sklearn.estimator import SKLearn
-
-import pandas as pd
 
 
 def get_existing_training_pipeline(workflow_arn):
@@ -38,7 +16,6 @@ def get_existing_training_pipeline(workflow_arn):
         role="workflow_execution_role",
     )
 
-    # return training_pipeline.attach('arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev')
     return training_pipeline.attach(workflow_arn)
 
 
@@ -67,7 +44,8 @@ def example_run_training_pipeline(workflow_arn):
 
     sagemaker_session = sagemaker.Session()
 
-    # To do: parameterize this in case running AWS CLI in a different region to the step function deploy region.
+    # To do: parameterize this in case running AWS CLI in a different region to
+    # the step function deploy region.
 
     # region = sagemaker_session.boto_region_name
     input_preprocessing_code = sagemaker_session.upload_data(
@@ -94,7 +72,8 @@ def example_run_training_pipeline(workflow_arn):
         key_prefix=f"{training_job_name}/source",
     )
 
-    # Step 3 - Define data URLs, preprocessed data URLs can be made specifically to this training job
+    # Step 3 - Define data URLs, preprocessed data URLs can be made
+    # specifically to this training job
     input_data = (
         f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
     )
@@ -117,7 +96,9 @@ def example_run_training_pipeline(workflow_arn):
             # Each SageMaker processing job requires a unique name,
             "EvaluationProcessingJobName": evaluation_job_name,
             "EvaluationCodeURL": input_evaluation_code,
-            "EvaluationResultURL": f"{s3_bucket_base_uri}/{training_job_name}/evaluation",
+            "EvaluationResultURL": (
+                f"{s3_bucket_base_uri}/{training_job_name}/evaluation"
+            ),
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
             "SMOutputDataURL": f"{s3_bucket_base_uri}/",
@@ -148,10 +129,7 @@ def example_run_training_pipeline(workflow_arn):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--workflow-arn",
-        "-w",
-        type=str,
-        default="arn:aws:states:us-east-1:671846148176:stateMachine:MlMax-Training-Pipeline-Demo-dev",
+        "--workflow-arn", "-w", type=str,
     )
     args, _ = parser.parse_known_args()
 
