@@ -5,11 +5,15 @@ import warnings
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelBinarizer, KBinsDiscretizer
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import (
+    StandardScaler,
+    OneHotEncoder,
+    KBinsDiscretizer,
+)
 from sklearn.compose import make_column_transformer
 
 from sklearn.exceptions import DataConversionWarning
+
 warnings.filterwarnings(action="ignore", category=DataConversionWarning)
 
 columns = [

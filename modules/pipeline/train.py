@@ -4,6 +4,7 @@ import argparse
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
+
 try:
     from sklearn.externals import joblib
 except:
@@ -11,12 +12,12 @@ except:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train', type=str, default=os.environ.get('SM_CHANNEL_TRAIN'))
-    parser.add_argument('--test', type=str, default=os.environ.get('SM_CHANNEL_TEST'))
-    parser.add_argument('--model-dir', type=str, default=os.environ.get('SM_MODEL_DIR'))
+    parser.add_argument("--train", type=str, default=os.environ.get("SM_CHANNEL_TRAIN"))
+    parser.add_argument("--test", type=str, default=os.environ.get("SM_CHANNEL_TEST"))
+    parser.add_argument("--model-dir", type=str, default=os.environ.get("SM_MODEL_DIR"))
     args, _ = parser.parse_known_args()
 
-    training_data_dir = args.train #"/opt/ml/input/data/train"
+    training_data_dir = args.train  # "/opt/ml/input/data/train"
     test_data_dir = args.test
 
     train_features_data = os.path.join(training_data_dir, "train_features.csv")
@@ -47,5 +48,3 @@ if __name__ == "__main__":
     model_output_directory = os.path.join(args.model_dir, "model.joblib")
     print("Saving model to {}".format(model_output_directory))
     joblib.dump(model, model_output_directory)
-
-

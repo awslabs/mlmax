@@ -1,0 +1,15 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.1.0
+  hooks:
+  - id: detect-aws-credentials
+    args: [--allow-missing-credentials]
+- repo: https://github.com/psf/black
+  rev: 19.10b0
+  hooks:
+  - id: black
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.7.9
+  hooks:
+  - id: flake8
+    args: [--max-complexity=20]

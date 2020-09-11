@@ -1,21 +1,7 @@
 import uuid
 import tarfile
 import argparse
-import configparser
-
-import boto3
-import stepfunctions
-from stepfunctions import steps
-from stepfunctions.inputs import ExecutionInput
-from stepfunctions.steps import (
-    Chain,
-    ChoiceRule,
-    ModelStep,
-    ProcessingStep,
-    TrainingStep,
-    TransformStep,
-)
-from custom_steps import MLMaxTrainingStep
+from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
 
 import sagemaker
@@ -52,8 +38,9 @@ def example_run_training_pipeline(workflow_arn, region):
     4. Execute the workflow with populated parameters, and monitor the progress
     5. Inspect the evaluation result when the execution is completed
     """
+    
     training_pipeline = get_existing_training_pipeline(workflow_arn)
-
+    
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
     training_job_name = f"scikit-learn-training-{uuid.uuid1().hex}"
     preprocessing_job_name = f"scikit-learn-sm-preprocessing-{uuid.uuid1().hex}"
@@ -65,7 +52,6 @@ def example_run_training_pipeline(workflow_arn, region):
     MODELTRAINING_SCRIPT_LOCATION = "train.py"
 
     sagemaker_session = sagemaker.Session()
-
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
@@ -90,7 +76,9 @@ def example_run_training_pipeline(workflow_arn, region):
         key_prefix=f"{training_job_name}/source",
     )
 
-    # Step 3 - Define data URLs, preprocessed data URLs can be made specifically to this training job
+
+    # Step 3 - Define data URLs, preprocessed data URLs can be made
+    # specifically to this training job
     input_data = (
         f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
     )
@@ -113,7 +101,9 @@ def example_run_training_pipeline(workflow_arn, region):
             # Each SageMaker processing job requires a unique name,
             "EvaluationProcessingJobName": evaluation_job_name,
             "EvaluationCodeURL": input_evaluation_code,
-            "EvaluationResultURL": f"{s3_bucket_base_uri}/{training_job_name}/evaluation",
+            "EvaluationResultURL": (
+                f"{s3_bucket_base_uri}/{training_job_name}/evaluation"
+            ),
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
             "SMOutputDataURL": f"{s3_bucket_base_uri}/",
