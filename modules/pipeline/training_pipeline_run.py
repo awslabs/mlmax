@@ -5,14 +5,8 @@ from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
 
 import sagemaker
-from sagemaker import get_execution_role
-from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.s3 import S3Uploader
-from sagemaker.sklearn.processing import SKLearnProcessor
-
-from sagemaker.sklearn.estimator import SKLearn
-
-import pandas as pd
+import configparser
+import boto3
 
 
 def get_existing_training_pipeline(workflow_arn):
@@ -38,9 +32,9 @@ def example_run_training_pipeline(workflow_arn, region):
     4. Execute the workflow with populated parameters, and monitor the progress
     5. Inspect the evaluation result when the execution is completed
     """
-    
+
     training_pipeline = get_existing_training_pipeline(workflow_arn)
-    
+
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
     training_job_name = f"scikit-learn-training-{uuid.uuid1().hex}"
     preprocessing_job_name = f"scikit-learn-sm-preprocessing-{uuid.uuid1().hex}"
@@ -75,7 +69,6 @@ def example_run_training_pipeline(workflow_arn, region):
         bucket=sagemaker_session.default_bucket(),
         key_prefix=f"{training_job_name}/source",
     )
-
 
     # Step 3 - Define data URLs, preprocessed data URLs can be made
     # specifically to this training job
