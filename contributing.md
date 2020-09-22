@@ -4,6 +4,13 @@ Thank you for taking the time to contribute to this project!
 
 ## For your first contribution
 
+Install the [git code commit helper](https://github.com/aws/git-remote-codecommit).
+```
+pip3 install git-remote-codecommit 
+```
+
+Install the [isengard cli](https://w.amazon.com/bin/view/Isengard-cli/).
+
 (Make sure you are on the Amazon VPN.)
 
 ```

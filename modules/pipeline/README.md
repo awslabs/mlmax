@@ -15,6 +15,16 @@ achieve efficiency in delivery. There are nine independent yet coherent
 modules:
 
 ## Quick Start Guide
+ 
+### 0. Prerequisites
+
+Install the [git code commit helper](https://github.com/aws/git-remote-codecommit).
+
+```
+pip3 install git-remote-codecommit 
+```
+
+Install the [isengard cli](https://w.amazon.com/bin/view/Isengard-cli/).
 
 ### 1. Clone repo
 ```
