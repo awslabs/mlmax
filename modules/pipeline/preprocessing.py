@@ -118,7 +118,7 @@ if __name__ == "__main__":
     print("Saving test labels to {}".format(test_labels_output_path))
     y_test.to_csv(test_labels_output_path, header=False, index=False)
 
-    model_output_directory = os.path.join("/opt/ml/processing/model", "model.joblib")
+    model_output_directory = "./model.joblib"
     print("Saving model to {}".format(model_output_directory))
     joblib.dump(preprocess, model_output_directory)
     # tar the model
