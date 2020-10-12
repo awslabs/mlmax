@@ -68,6 +68,14 @@ Resources:
                         "LocalPath": "/opt/ml/processing/test",
                         "S3UploadMode": "EndOfJob"
                       }
+                    },
+                    {
+                      "OutputName": "proc_model",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedModelURL']",
+                        "LocalPath": "/opt/ml/processing/model",
+                        "S3UploadMode": "EndOfJob"
+                      }
                     }
                   ]
                 },

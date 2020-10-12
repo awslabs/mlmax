@@ -116,6 +116,7 @@ def example_run_training_pipeline(workflow_arn, region):
             "EvaluationResultURL": f"{s3_bucket_base_uri}/{training_job_name}/evaluation",
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
+            "PreprocessedModelURL": f"{s3_bucket_base_uri}/{preprocessing_job_name}/output",
             "SMOutputDataURL": f"{s3_bucket_base_uri}/",
             "SMDebugOutputURL": f"{s3_bucket_base_uri}/",
         }
