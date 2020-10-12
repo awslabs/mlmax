@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for AWS Step Functions - State Machine
+
+# Added by script
+Parameters:
+  InferencePipelineName:
+    Type: String
+  SagerMakerRoleArn:
+    Type: String
+  WorkflowExecutionRoleArn:
+    Type: String
+  TargetEnv:
+    Type: String
+
+Resources:
+  StateMachineComponent:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      # Replaced by script
+      StateMachineName: !Sub "${InferencePipelineName}-${TargetEnv}"
+      # Replaced by script
+      DefinitionString: !Sub |-
+        {
+          "StartAt": "SageMaker Preprocess BatchTransform step",
+          "States": {
+            "SageMaker Preprocess BatchTransform step": {
+              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+              "Parameters": {
+                "TransformJobName.$": "$$.Execution.Input['PreprocessingJobName']",
+                "ModelName.$": "$$.Execution.Input['ProcModelName']",
+                "TransformInput": {
+                  "DataSource": {
+                    "S3DataSource": {
+                      "S3DataType": "S3Prefix",
+                      "S3Uri.$": "$$.Execution.Input['InputDataURL']"
+                    }
+                  },
+                  "SplitType": "Line"
+                },
+                "TransformOutput": {
+                  "S3OutputPath.$": "$$.Execution.Input['PreprocessedTestDataURL']"
+                },
+                "TransformResources": {
+                  "InstanceCount": 1,
+                  "InstanceType": "ml.c5.xlarge"
+                },
+                "BatchStrategy": "MultiRecord",
+                "MaxPayloadInMB": 100
+              },
+              "Type": "Task",
+              "Next": "SageMaker Inference BatchTransform step",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "SageMaker Inference BatchTransform step": {
+              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+              "Parameters": {
+                "TransformJobName.$": "$$.Execution.Input['BatchTransformJobName']",
+                "ModelName.$": "$$.Execution.Input['ModelName']",
+                "TransformInput": {
+                  "DataSource": {
+                    "S3DataSource": {
+                      "S3DataType": "S3Prefix",
+                      "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']"
+                    }
+                  },
+                  "SplitType": "Line"
+                },
+                "TransformOutput": {
+                  "S3OutputPath.$": "$$.Execution.Input['OutputPathURL']"
+                },
+                "TransformResources": {
+                  "InstanceCount": 1,
+                  "InstanceType": "ml.c5.xlarge"
+                },
+                "BatchStrategy": "MultiRecord"
+              },
+              "Type": "Task",
+              "End": true,
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "ML Workflow failed": {
+              "Cause": "SageMakerProcessingJobFailed",
+              "Type": "Fail"
+            }
+          }
+        }
+      # Replaced by script
+      RoleArn: !Sub "${WorkflowExecutionRoleArn}"

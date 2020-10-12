@@ -6,16 +6,22 @@ import pandas as pd
 import tarfile
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelBinarizer, KBinsDiscretizer
+from sklearn.preprocessing import (
+    StandardScaler,
+    OneHotEncoder,
+    LabelBinarizer,
+    KBinsDiscretizer,
+)
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.compose import make_column_transformer
-
 from sklearn.exceptions import DataConversionWarning
 warnings.filterwarnings(action="ignore", category=DataConversionWarning)
 try:
     from sklearn.externals import joblib
 except:
     import joblib
+
+from io import StringIO
 
 columns = [
     "age",
@@ -28,6 +34,51 @@ columns = [
     "dividends from stocks",
     "income",
 ]
+
+original_columns = [
+    "age",
+    "class of worker",
+    "detailed industry recode",
+    "detailed occupation recode",
+    "education",
+    "wage per hour",
+    "enroll in edu inst last wk",
+    "marital stat",
+    "major industry code",
+    "major occupation code",
+    "race",
+    "hispanic origin",
+    "sex",
+    "member of a labor union",
+    "reason for unemployment",
+    "fill inc questionnaire for veteran's admin",
+    "veterans benefits",
+    "capital gains",
+    "capital losses",
+    "dividends from stocks",
+    "tax filer stat",
+    "region of previous residence",
+    "state of previous residence",
+    "detailed household and family stat",
+    "detailed household summary in household",
+    "instance weight",
+    "migration code-change in msa",
+    "migration code-change in reg",
+    "migration code-move within reg",
+    "live in this house 1 year ago",
+    "migration prev res in sunbelt",
+    "num persons worked for employer",
+    "family members under 18",
+    "country of birth father",
+    "country of birth mother",
+    "country of birth self",
+    "citizenship",
+    "own business or self employed",
+    "weeks worked in year",
+    "year",
+    "income",
+]
+
 class_labels = [" - 50000.", " 50000+."]
 
 
@@ -39,6 +90,75 @@ def print_shape(df):
         )
     )
 
+def model_fn(model_dir):
+    """
+    This loads returns a Scikit-learn Classifier from a model.joblib file in
+    the SageMaker model directory model_dir.
+    """
+    clf = joblib.load(os.path.join(model_dir, "model.joblib"))
+    return clf
+
+
+# TODO try to comment out the "input_fn" function below, see what happens?
+def input_fn(request_body, request_content_type):
+    """Takes request data and de-serializes the data into an object for prediction.
+        When an InvokeEndpoint operation is made against an Endpoint running SageMaker model server,
+        the model server receives two pieces of information:
+            - The request Content-Type, for example "application/json"
+            - The request data, which is at most 5 MB (5 * 1024 * 1024 bytes) in size.
+        The input_fn is responsible to take the request data and pre-process it before prediction.
+    Args:
+        input_data (obj): the request data.
+        content_type (str): the request Content-Type.
+    Returns:
+        (obj): data ready for prediction.
+    """
+
+    # print(request_body)
+    print(request_content_type)
+    input_data_path = "input.csv"
+    print(f"input_fn is called, length is {len(request_body) // 1024 ** 2} MBytes")
+    with open(input_data_path, "w") as fout:
+        fout.write(request_body)
+
+    print("Reading input data from {}".format(input_data_path))
+    df = pd.read_csv(input_data_path)
+    # df = pd.read_csv(input_data_path, names=original_columns)
+    print("Just read it in", df.head(1))
+    print("Before selection of DF = ", df.shape)
+    df = pd.DataFrame(data=df, columns=columns[:-1]) # get rid of the income column (label)
+    print("After selection of DF = ", df.shape)
+    print(f"null sum = {df.isnull().sum()}")
+    df.dropna(inplace=True)
+    print(f"after null sum = {df.isnull().sum()}")
+    print(f"final shape = {df.shape}")
+    print("final head()", df.head(1))
+    return df
+
+
+def predict_fn(input_data, model):
+    """Preprocess input data
+
+    We implement this because the default predict_fn uses .predict(), but our model is a preprocessor
+    so we want to use .transform().
+
+    The output is returned in the following order:
+
+        rest of features either one hot encoded or standardized
+    """
+    print(f"predict_fn: input_data - {input_data.columns}")
+    print(f"predict_fn: {input_data.head()}")
+    print(f"predict_fn: proc_model is {model}")
+    features = model.transform(input_data)
+    print(f"predict_fn: features extracted {features}")
+    return features
+
+
+def output_fn(prediction, response_content_type):
+
+    strio = StringIO()
+    pd.DataFrame(prediction).to_csv(strio, header=False, index=False)
+    return strio.getvalue()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
