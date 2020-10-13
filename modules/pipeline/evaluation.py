@@ -8,7 +8,7 @@ try:
     from sklearn.externals import joblib
 except:
     import joblib
-    
+
 from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
 
 if __name__ == "__main__":

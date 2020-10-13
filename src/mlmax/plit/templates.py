@@ -4,7 +4,7 @@
 
 import numpy as np
 from functools import partial
-from .core import plot, bar, hist
+from .core import plot, hist
 
 prob_hist = partial(
     hist,

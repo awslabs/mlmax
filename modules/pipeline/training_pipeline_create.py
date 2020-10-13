@@ -26,6 +26,7 @@ from sagemaker.sklearn.processing import SKLearnProcessor
 from sagemaker.sklearn.estimator import SKLearn
 from training_pipeline_define import define_training_pipeline
 
+
 def format_template_str():
     with open("/tmp/my_training_pipeline.yaml", "r") as file:
         data = file.read()
@@ -93,6 +94,7 @@ def create_training_pipeline(sm_role,
     else:
         return training_pipeline
 
+
 def example_create_training_pipeline():
     """
     An example on obtaining YAML CF template from the training pipeline definition
@@ -107,6 +109,7 @@ def example_create_training_pipeline():
     with open('/tmp/my_training_pipeline.yaml', 'w') as fout:
         fout.write(yaml_rep)
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":   
     example_create_training_pipeline()
     format_template_str()

@@ -10,7 +10,6 @@ Includes plot (for line chart and scatter), hist, and bar.
         * make sure time series works with line chart
 """
 
-from functools import partial
 import matplotlib.ticker as mtick
 import matplotlib.pyplot as plt
 import numpy as np
@@ -147,7 +146,7 @@ def bar(
 
     if overlap:
         x_adj = np.zeros_like(x_adj)
-        w *= len(y_li)
+    w *= len(y_li)
     if colors is None:
         colors = COLORS
     for i in range(len(y_li)):

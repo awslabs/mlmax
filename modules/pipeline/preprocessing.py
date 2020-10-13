@@ -1,6 +1,7 @@
 import argparse
 import os
 import warnings
+
 import numpy as np
 import pandas as pd
 import tarfile
@@ -9,12 +10,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import (
     StandardScaler,
     OneHotEncoder,
-    LabelBinarizer,
     KBinsDiscretizer,
 )
-from sklearn.preprocessing import PolynomialFeatures
 from sklearn.compose import make_column_transformer
+
 from sklearn.exceptions import DataConversionWarning
+
 warnings.filterwarnings(action="ignore", category=DataConversionWarning)
 try:
     from sklearn.externals import joblib
@@ -237,7 +238,6 @@ if __name__ == "__main__":
 
     print("Saving test labels to {}".format(test_labels_output_path))
     y_test.to_csv(test_labels_output_path, header=False, index=False)
-
     model_output_directory = "./model.joblib"
     print("Saving model to {}".format(model_output_directory))
     joblib.dump(preprocess, model_output_directory)
