@@ -152,7 +152,7 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     with open(f"config/deploy-{region}-{args.target_env}.ini") as f:
         config.read_string("[default]\n" + f.read())
-    training_pipeline_name = config["default"]["TrainingPipelineName"]
+    training_pipeline_name = config["default"]["PipelineName"] + '-Training'
     target_env = config["default"]["TargetEnv"]
     workflow_arn = (
         f"arn:aws:states:{region}:{account}:"

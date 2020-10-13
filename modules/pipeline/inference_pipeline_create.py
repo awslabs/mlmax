@@ -39,7 +39,7 @@ Description: CloudFormation template for AWS Step Functions - State Machine
 
 # Added by script
 Parameters:
-  InferencePipelineName:
+  PipelineName:
     Type: String
   SagerMakerRoleArn:
     Type: String
@@ -52,7 +52,7 @@ Parameters:
     )
 
     # replace StateMachineName
-    data = data.replace("StateMachineName: ${InferencePipelineName}", "# Replaced by script\n      StateMachineName: !Sub \"${InferencePipelineName}-${TargetEnv}\"")
+    data = data.replace("StateMachineName: ${InferencePipelineName}", "# Replaced by script\n      StateMachineName: !Sub \"${PipelineName}-Inference-${TargetEnv}\"")
 
     # replace DefinitionString
     data = data.replace("DefinitionString:", "# Replaced by script\n      DefinitionString: !Sub")

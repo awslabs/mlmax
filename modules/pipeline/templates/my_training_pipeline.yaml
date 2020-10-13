@@ -3,7 +3,7 @@ Description: CloudFormation template for AWS Step Functions - State Machine
 
 # Added by script
 Parameters:
-  TrainingPipelineName:
+  PipelineName:
     Type: String
   SagerMakerRoleArn:
     Type: String
@@ -17,7 +17,7 @@ Resources:
     Type: AWS::StepFunctions::StateMachine
     Properties:
       # Replaced by script
-      StateMachineName: !Sub "${TrainingPipelineName}-${TargetEnv}"
+      StateMachineName: !Sub "${PipelineName}-Training-${TargetEnv}"
       # Replaced by script
       DefinitionString: !Sub |-
         {

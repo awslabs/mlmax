@@ -39,7 +39,7 @@ Description: CloudFormation template for AWS Step Functions - State Machine
 
 # Added by script
 Parameters:
-  TrainingPipelineName:
+  PipelineName:
     Type: String
   SagerMakerRoleArn:
     Type: String
@@ -52,7 +52,7 @@ Parameters:
     )
 
     # replace StateMachineName
-    data = data.replace("StateMachineName: ${TrainingPipelineName}", "# Replaced by script\n      StateMachineName: !Sub \"${TrainingPipelineName}-${TargetEnv}\"")
+    data = data.replace("StateMachineName: ${TrainingPipelineName}", "# Replaced by script\n      StateMachineName: !Sub \"${PipelineName}-Training-${TargetEnv}\"")
 
     # replace DefinitionString
     data = data.replace("DefinitionString:", "# Replaced by script\n      DefinitionString: !Sub")
@@ -107,6 +107,6 @@ def example_create_training_pipeline():
     with open('/tmp/my_training_pipeline.yaml', 'w') as fout:
         fout.write(yaml_rep)
 
-if __name__ == "__main__":   
+if __name__ == "__main__":
     example_create_training_pipeline()
     format_template_str()

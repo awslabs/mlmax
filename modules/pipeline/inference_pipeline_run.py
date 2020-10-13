@@ -60,7 +60,7 @@ def get_latest_models():
     return proc_model_s3, model_s3
 
 
-def example_run_inference_pipeline(workflow_arn, region):
+def example_run_inference_pipeline(workflow_arn, region, role):
     """
     execute the Workflow, which consists of four steps:
 
@@ -72,43 +72,9 @@ def example_run_inference_pipeline(workflow_arn, region):
     """
     inference_pipeline = get_existing_inference_pipeline(workflow_arn)
 
-    # Ad hoc SageMaker Execution Role
-    role = "arn:aws:iam::671846148176:role/service-role/AmazonSageMaker-ExecutionRole-20200419T120196"
-
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job (Batch Transform)
     preprocessing_job_name = f"scikit-learn-sm-preprocessing-{uuid.uuid1().hex}"
     inference_job_name = f"scikit-learn-sm-inference-{uuid.uuid1().hex}"
-
-    ## Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
-    #PREPROCESSING_SCRIPT_LOCATION = "preprocessing.py"
-    ##MODELEVALUATION_SCRIPT_LOCATION = "evaluation.py"
-    ##MODELTRAINING_SCRIPT_LOCATION = "train.py"
-
-    #sagemaker_session = sagemaker.Session()
-
-    #input_preprocessing_code = sagemaker_session.upload_data(
-    #    PREPROCESSING_SCRIPT_LOCATION,
-    #    bucket=sagemaker_session.default_bucket(),
-    #    key_prefix="data/sklearn_processing/code",
-    #)
-    #input_evaluation_code = sagemaker_session.upload_data(
-    #    MODELEVALUATION_SCRIPT_LOCATION,
-    #    bucket=sagemaker_session.default_bucket(),
-    #    key_prefix="data/sklearn_processing/code",
-    #)
-    #s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
-    #sm_submit_dir_url = (
-    #    f"{s3_bucket_base_uri}/{training_job_name}/source/sourcedir.tar.gz"
-    #)
-    #tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
-    ## TODO need to add directory if source_dir is specified.
-    #tar.add(MODELTRAINING_SCRIPT_LOCATION)
-    #tar.close()
-    #sagemaker_session.upload_data(
-    #    "/tmp/sourcedir.tar.gz",
-    #    bucket=sagemaker_session.default_bucket(),
-    #    key_prefix=f"{training_job_name}/source",
-    #)
 
     # Step 2 - Get the lastest preprocessing and ml models
     proc_model_s3, model_s3 = get_latest_models()
@@ -119,12 +85,6 @@ def example_run_inference_pipeline(workflow_arn, region):
     input_data = (
         f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
     )
-
-    #input_code = sagemaker_session.upload_data(
-    #    PREPROCESSING_SCRIPT_LOCATION,
-    #    bucket=sagemaker_session.default_bucket(),
-    #    key_prefix="data/sklearn_processing/code",
-    #)
 
     s3_bucket_base_uri = "{}{}".format("s3://", sagemaker_session.default_bucket())
     output_data = "{}/{}".format(s3_bucket_base_uri, "data/sklearn_processing/output")
@@ -204,11 +164,28 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     with open(f"config/deploy-{region}-{args.target_env}.ini") as f:
         config.read_string("[default]\n" + f.read())
-    inference_pipeline_name = config["default"]["InferencePipelineName"]
+    inference_pipeline_name = config["default"]["PipelineName"] + "-Inference"
     target_env = config["default"]["TargetEnv"]
+    stack_name = config["default"]["PipelineName"] + '-' + config["default"]["TargetEnv"]
     workflow_arn = (
         f"arn:aws:states:{region}:{account}:"
         f"stateMachine:{inference_pipeline_name}-{target_env}"
     )
     print(f"State Machine Name is {inference_pipeline_name}-{target_env}")
-    example_run_inference_pipeline(workflow_arn, region)
+
+    # get the sagemaker role
+    client = boto3.client('cloudformation')
+    response = client.describe_stack_resource(
+        StackName=stack_name,
+        LogicalResourceId='IAMRoles'
+    )
+    stack_roles = response['StackResourceDetail']['PhysicalResourceId']
+    response = client.describe_stack_resource(
+        StackName=stack_roles,
+        LogicalResourceId='SagerMakerRole'
+    )
+    role_id = response['StackResourceDetail']['PhysicalResourceId']
+    role = f"arn:aws:iam::{account}:role/{role_id}"
+    print(f"Sagemaker role arn is {role}")
+
+    example_run_inference_pipeline(workflow_arn, region, role)
