@@ -79,7 +79,8 @@ def create_inference_pipeline(sm_role,
 
     """
     inference_pipeline = define_inference_pipeline(sm_role, workflow_execution_role,
-                                                   inference_pipeline_name, return_yaml, dump_yaml_file)
+                                                   inference_pipeline_name,
+                                                   return_yaml, dump_yaml_file)
     # dump YAML cloud formation template
     yml = inference_pipeline.get_cloudformation_template()
 

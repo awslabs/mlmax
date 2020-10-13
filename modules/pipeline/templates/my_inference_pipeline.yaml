@@ -21,8 +21,36 @@ Resources:
       # Replaced by script
       DefinitionString: !Sub |-
         {
-          "StartAt": "SageMaker Preprocess BatchTransform step",
+          "StartAt": "SageMaker Preprocess Model Creating step",
           "States": {
+            "SageMaker Preprocess Model Creating step": {
+              "Parameters": {
+                "ModelName.$": "$$.Execution.Input['ProcModelName']",
+                "PrimaryContainer": {
+                  "Image": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "Environment": {
+                    "SAGEMAKER_PROGRAM": "preprocessing.py",
+                    "SAGEMAKER_SUBMIT_DIRECTORY.$": "$$.Execution.Input['SmProcSubmitDirUrl']",
+                    "SAGEMAKER_ENABLE_CLOUDWATCH_METRICS": "false",
+                    "SAGEMAKER_CONTAINER_LOG_LEVEL": "20",
+                    "SAGEMAKER_REGION": "us-east-1"
+                  },
+                  "ModelDataUrl.$": "$$.Execution.Input['ProcModelS3']"
+                },
+                "ExecutionRoleArn": "${SagerMakerRoleArn}"
+              },
+              "Resource": "arn:aws:states:::sagemaker:createModel",
+              "Type": "Task",
+              "Next": "SageMaker Preprocess BatchTransform step",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
             "SageMaker Preprocess BatchTransform step": {
               "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
               "Parameters": {
@@ -47,6 +75,34 @@ Resources:
                 "BatchStrategy": "MultiRecord",
                 "MaxPayloadInMB": 100
               },
+              "Type": "Task",
+              "Next": "SageMaker Inference Model Creating step",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "SageMaker Inference Model Creating step": {
+              "Parameters": {
+                "ModelName.$": "$$.Execution.Input['ModelName']",
+                "PrimaryContainer": {
+                  "Image": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "Environment": {
+                    "SAGEMAKER_PROGRAM": "inference.py",
+                    "SAGEMAKER_SUBMIT_DIRECTORY.$": "$$.Execution.Input['SmSubmitDirUrl']",
+                    "SAGEMAKER_ENABLE_CLOUDWATCH_METRICS": "false",
+                    "SAGEMAKER_CONTAINER_LOG_LEVEL": "20",
+                    "SAGEMAKER_REGION": "us-east-1"
+                  },
+                  "ModelDataUrl.$": "$$.Execution.Input['ModelS3']"
+                },
+                "ExecutionRoleArn": "${SagerMakerRoleArn}"
+              },
+              "Resource": "arn:aws:states:::sagemaker:createModel",
               "Type": "Task",
               "Next": "SageMaker Inference BatchTransform step",
               "Catch": [

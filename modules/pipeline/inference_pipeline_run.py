@@ -60,7 +60,7 @@ def get_latest_models():
     return proc_model_s3, model_s3
 
 
-def example_run_inference_pipeline(workflow_arn, region, role):
+def example_run_inference_pipeline(workflow_arn, region):
     """
     execute the Workflow, which consists of four steps:
 
@@ -73,13 +73,49 @@ def example_run_inference_pipeline(workflow_arn, region, role):
     inference_pipeline = get_existing_inference_pipeline(workflow_arn)
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job (Batch Transform)
-    preprocessing_job_name = f"scikit-learn-sm-preprocessing-{uuid.uuid1().hex}"
-    inference_job_name = f"scikit-learn-sm-inference-{uuid.uuid1().hex}"
+    preprocessing_job_name = f"sklearn-sm-preprocessing-bt-{uuid.uuid1().hex}"
+    inference_job_name = f"sklearn-sm-inference-bt-{uuid.uuid1().hex}"
+    proc_model_name = f"sklearn-sm-preprocessing-model-{uuid.uuid1().hex}"
+    model_name =  f"sklearn-sm-inference-model-{uuid.uuid1().hex}"
 
-    # Step 2 - Get the lastest preprocessing and ml models
+    # Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
+    PREPROCESSING_SCRIPT_LOCATION = "preprocessing.py"
+    MODELINFERENCE_SCRIPT_LOCATION = "inference.py"
+
+    sagemaker_session = sagemaker.Session()
+    s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
+    ## upload preprocessing script
+    sm_proc_submit_dir_url = (
+        f"{s3_bucket_base_uri}/{preprocessing_job_name}/source/sourcedir.tar.gz"
+    )
+    tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
+    # TODO need to add directory if source_dir is specified.
+    tar.add(PREPROCESSING_SCRIPT_LOCATION)
+    tar.close()
+    sagemaker_session.upload_data(
+        "/tmp/sourcedir.tar.gz",
+        bucket=sagemaker_session.default_bucket(),
+        key_prefix=f"{preprocessing_job_name}/source",
+    )
+
+    ## upload inference script
+    sm_submit_dir_url = (
+        f"{s3_bucket_base_uri}/{inference_job_name}/source/sourcedir.tar.gz"
+    )
+    tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
+    # TODO need to add directory if source_dir is specified.
+    tar.add(MODELINFERENCE_SCRIPT_LOCATION)
+    tar.close()
+    sagemaker_session.upload_data(
+        "/tmp/sourcedir.tar.gz",
+        bucket=sagemaker_session.default_bucket(),
+        key_prefix=f"{inference_job_name}/source",
+    )
+
+    # Step 3 - Get the lastest preprocessing and ml models
     proc_model_s3, model_s3 = get_latest_models()
 
-    # Step 3 - Define data URLs, preprocessed data URLs can be made specifically to this training job
+    # Step 4 - Define data URLs, preprocessed data URLs can be made specifically to this training job
     sagemaker_session = sagemaker.Session()
 
     input_data = (
@@ -91,35 +127,9 @@ def example_run_inference_pipeline(workflow_arn, region, role):
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
 
-    # To do: put this into step function
-    proc_model = SKLearnModel(
-        model_data=proc_model_s3,
-        role=role,
-        framework_version="0.20.0",
-        entry_point="preprocessing.py",
-    )
-
-    transformer = proc_model.transformer(instance_count=1, instance_type="ml.c5.xlarge")
-
-    proc_model_name = proc_model.name
-    print(f"proc_model is {proc_model_name}")
-
-    # To do: put this into step function
-    model = SKLearnModel(
-        model_data=model_s3,
-        role=role,
-        framework_version="0.20.0",
-        entry_point="inference.py",
-    )
-
-    transformer = model.transformer(instance_count=1, instance_type="ml.c5.xlarge")
-
-    model_name = model.name
-    print(f"model name is {model_name}")
-
-    # Step 4 - Execute workflow
-    print(f"Preprocessing Job Name is {preprocessing_job_name}")
-    print(f"Inference Job Name is {inference_job_name}")
+    # Step 5 - Execute workflow
+    print(f"Preprocessing Batch Transform Job Name is {preprocessing_job_name}")
+    print(f"Inference Batch Transform Job Name is {inference_job_name}")
     execution = inference_pipeline.execute(
         inputs={
             "InputDataURL": input_data,
@@ -128,6 +138,10 @@ def example_run_inference_pipeline(workflow_arn, region, role):
             "BatchTransformJobName": inference_job_name,  # Each SageMaker processing job requires a unique name,
             "ModelName": model_name,
             "ProcModelName": proc_model_name,
+            "ProcModelS3": proc_model_s3,
+            "ModelS3": model_s3,
+            "SmProcSubmitDirUrl": sm_proc_submit_dir_url,
+            "SmSubmitDirUrl": sm_submit_dir_url,
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
             "OutputPathURL": f"{s3_bucket_base_uri}/{model_name}",
@@ -136,7 +150,7 @@ def example_run_inference_pipeline(workflow_arn, region, role):
     execution.get_output(wait=True)
     execution.render_progress()
 
-    ## Step 5 - Inspect the output of the Workflow execution
+    ## Step 6 - Inspect the output of the Workflow execution
     #workflow_execution_output_json = execution.get_output(wait=True)
     #from sagemaker.s3 import S3Downloader
     #import json
@@ -173,19 +187,4 @@ if __name__ == "__main__":
     )
     print(f"State Machine Name is {inference_pipeline_name}-{target_env}")
 
-    # get the sagemaker role
-    client = boto3.client('cloudformation')
-    response = client.describe_stack_resource(
-        StackName=stack_name,
-        LogicalResourceId='IAMRoles'
-    )
-    stack_roles = response['StackResourceDetail']['PhysicalResourceId']
-    response = client.describe_stack_resource(
-        StackName=stack_roles,
-        LogicalResourceId='SagerMakerRole'
-    )
-    role_id = response['StackResourceDetail']['PhysicalResourceId']
-    role = f"arn:aws:iam::{account}:role/{role_id}"
-    print(f"Sagemaker role arn is {role}")
-
-    example_run_inference_pipeline(workflow_arn, region, role)
+    example_run_inference_pipeline(workflow_arn, region)

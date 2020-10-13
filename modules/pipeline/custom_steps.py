@@ -3,7 +3,8 @@ from stepfunctions.steps.states import Task
 from stepfunctions.steps.fields import Field
 from stepfunctions.steps.utils import tags_dict_to_kv_list
 
-from sagemaker.workflow.airflow import training_config, transform_config
+from sagemaker.workflow.airflow import training_config, transform_config, model_config
+from sagemaker.model import Model, FrameworkModel
 
 
 class MLMaxBatchTransformStep(Task):
@@ -205,3 +206,55 @@ class MLMaxTrainingStep(Task):
             model.name = self.job_name
         model.model_data = self.output()["ModelArtifacts"]["S3ModelArtifacts"]
         return model
+
+
+class MLMaxModelStep(Task):
+
+    """
+    Creates a Task State to `create a model in SageMaker <https://docs.aws.amazon.com/sagemaker/latest/dg/API_CreateModel.html>`_.
+    """
+
+    def __init__(self, state_id, model, model_data_url=None, sagemaker_submit_directory=None,
+                              model_name=None, instance_type=None, tags=None, **kwargs):
+        """
+        Args:
+            state_id (str): State name whose length **must be** less than or equal to 128 unicode characters. State names **must be** unique within the scope of the whole state machine.
+            model (sagemaker.model.Model): The SageMaker model to use in the ModelStep. If :py:class:`TrainingStep` was used to train the model and saving the model is the next step in the workflow, the output of :py:func:`TrainingStep.get_expected_model()` can be passed here.
+            model_name (str or Placeholder, optional): Specify a model name, this is required for creating the model. We recommend to use :py:class:`~stepfunctions.inputs.ExecutionInput` placeholder collection to pass the value dynamically in each execution.
+            instance_type (str, optional): The EC2 instance type to deploy this Model to. For example, 'ml.p2.xlarge'. This parameter is typically required when the estimator used is not an `Amazon built-in algorithm <https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html>`_.
+            tags (list[dict], optional): `List to tags <https://docs.aws.amazon.com/sagemaker/latest/dg/API_Tag.html>`_ to associate with the resource.
+        """
+        if isinstance(model, FrameworkModel):
+            parameters = model_config(model=model, instance_type=instance_type, role=model.role, image=model.image)
+            if model_name:
+                parameters['ModelName'] = model_name
+            # placeholder for model data url
+            if model_data_url:
+                parameters['PrimaryContainer']['ModelDataUrl'] = model_data_url
+            # placeholder for sagemaker script
+            if sagemaker_submit_directory:
+                parameters['PrimaryContainer']['Environment']['SAGEMAKER_SUBMIT_DIRECTORY'] = sagemaker_submit_directory
+            print(parameters)
+        elif isinstance(model, Model):
+            parameters = {
+                'ExecutionRoleArn': model.role,
+                'ModelName': model_name or model.name,
+                'PrimaryContainer': {
+                    'Environment': {},
+                    'Image': model.image,
+                    'ModelDataUrl': model.model_data
+                }
+            }
+        else:
+            raise ValueError("Expected 'model' parameter to be of type 'sagemaker.model.Model', but received type '{}'".format(type(model).__name__))
+
+        if 'S3Operations' in parameters:
+            del parameters['S3Operations']
+
+        if tags:
+            parameters['Tags'] = tags_dict_to_kv_list(tags)
+
+        kwargs[Field.Parameters.value] = parameters
+        kwargs[Field.Resource.value] = 'arn:aws:states:::sagemaker:createModel'
+
+        super(MLMaxModelStep, self).__init__(state_id, **kwargs)
