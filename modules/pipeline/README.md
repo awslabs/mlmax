@@ -44,6 +44,7 @@ pip3 install -r requirements.txt
 ```
 cd modules/pipeline
 python training_pipeline_create.py
+python inference_pipeline_create.py
 ```
 
 ### 4. Deploy the CloudFormation
@@ -56,4 +57,10 @@ python training_pipeline_create.py
 ```
 # python training_pipeline_run -e <target_env>
 python training_pipeline_run.py dev
+```
+
+### 6. Run the Inference Pipeline
+```
+# python inference_pipeline_run -e <target_env>
+python inference_pipeline_run.py dev
 ```

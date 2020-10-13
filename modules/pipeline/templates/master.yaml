@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
-  TrainingPipelineName:
+  PipelineName:
     Type: String
-    Default: "MlMax-Training-Pipeline-Demo"
+    Default: "MlMax-Pipeline-Demo"
   TargetEnv:
     Type: String
     Default: "dev"
@@ -23,9 +23,20 @@ Resources:
       # The Template URL is relative path to this template file.
       TemplateURL: ./my_training_pipeline.yaml
       Parameters:
-        TrainingPipelineName: !Ref TrainingPipelineName
+        PipelineName: !Ref PipelineName
         SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
         WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
         TargetEnv: !Ref TargetEnv
     DependsOn: IAMRoles
-
+    # Inference Pipeline Step Function
+  StepFunctionInferencePipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./my_inference_pipeline.yaml
+      Parameters:
+        PipelineName: !Ref PipelineName
+        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
+        TargetEnv: !Ref TargetEnv
+    DependsOn: IAMRoles

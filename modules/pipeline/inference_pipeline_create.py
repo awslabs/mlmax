@@ -14,7 +14,7 @@ from stepfunctions.steps import (
     TrainingStep,
     TransformStep,
 )
-from custom_steps import MLMaxTrainingStep
+from custom_steps import MLMaxBatchTransformStep
 from stepfunctions.workflow import Workflow
 
 import sagemaker
@@ -24,11 +24,10 @@ from sagemaker.s3 import S3Uploader
 from sagemaker.sklearn.processing import SKLearnProcessor
 
 from sagemaker.sklearn.estimator import SKLearn
-from training_pipeline_define import define_training_pipeline
-
+from inference_pipeline_define import define_inference_pipeline
 
 def format_template_str():
-    with open("/tmp/my_training_pipeline.yaml", "r") as file:
+    with open("/tmp/my_inference_pipeline.yaml", "r") as file:
         data = file.read()
 
     # add the parameters
@@ -53,7 +52,7 @@ Parameters:
     )
 
     # replace StateMachineName
-    data = data.replace("StateMachineName: ${TrainingPipelineName}", "# Replaced by script\n      StateMachineName: !Sub \"${PipelineName}-Training-${TargetEnv}\"")
+    data = data.replace("StateMachineName: ${InferencePipelineName}", "# Replaced by script\n      StateMachineName: !Sub \"${PipelineName}-Inference-${TargetEnv}\"")
 
     # replace DefinitionString
     data = data.replace("DefinitionString:", "# Replaced by script\n      DefinitionString: !Sub")
@@ -61,16 +60,16 @@ Parameters:
     # replace Role Arn
     data = data.replace("RoleArn: ${WorkflowExecutionRoleArn}", "# Replaced by script\n      RoleArn: !Sub \"${WorkflowExecutionRoleArn}\"")
 
-    with open("./templates/my_training_pipeline.yaml", "w") as file:
+    with open("./templates/my_inference_pipeline.yaml", "w") as file:
         file.write(data)
 
-def create_training_pipeline(sm_role,
+def create_inference_pipeline(sm_role,
                              workflow_execution_role,
-                             training_pipeline_name,
+                             inference_pipeline_name,
                              return_yaml=True,
-                             dump_yaml_file='templates/sagemaker_training_pipeline.yaml'):
+                             dump_yaml_file='templates/sagemaker_inference_pipeline.yaml'):
     """
-    Return YAML definition of the training pipeline, which consists of multiple Amazon StepFunction steps
+    Return YAML definition of the inference pipeline, which consists of multiple Amazon StepFunction steps
 
     sm_role:                    ARN of the SageMaker execution role
     workflow_execution_role:    ARN of the StepFunction execution role
@@ -79,37 +78,34 @@ def create_training_pipeline(sm_role,
     dump_yaml_file:             If not None, a YAML file will be generated at this file location
 
     """
-
-
-    training_pipeline = define_training_pipeline(sm_role, workflow_execution_role, training_pipeline_name, return_yaml, dump_yaml_file)
+    inference_pipeline = define_inference_pipeline(sm_role, workflow_execution_role,
+                                                   inference_pipeline_name, return_yaml, dump_yaml_file)
     # dump YAML cloud formation template
-    yml = training_pipeline.get_cloudformation_template()
+    yml = inference_pipeline.get_cloudformation_template()
 
-    if (dump_yaml_file is not None):
+    if dump_yaml_file is not None:
         with open(dump_yaml_file, 'w') as fout:
             fout.write(yml)
 
-    if (return_yaml):
+    if return_yaml:
         return yml
     else:
-        return training_pipeline
+        return inference_pipeline
 
-
-def example_create_training_pipeline():
+def example_create_inference_pipeline():
     """
-    An example on obtaining YAML CF template from the training pipeline definition
+    An example on obtaining YAML CF template from the inference pipeline definition
     """
     sm_role = "${SagerMakerRoleArn}"
     workflow_execution_role = "${WorkflowExecutionRoleArn}"
-    training_pipeline_name = "${TrainingPipelineName}"
-    yaml_rep = create_training_pipeline(sm_role=sm_role,
+    inference_pipeline_name = "${InferencePipelineName}"
+    yaml_rep = create_inference_pipeline(sm_role=sm_role,
                                         workflow_execution_role=workflow_execution_role,
-                                        training_pipeline_name=training_pipeline_name,
+                                        inference_pipeline_name=inference_pipeline_name,
                                         dump_yaml_file=None)
-    with open('/tmp/my_training_pipeline.yaml', 'w') as fout:
+    with open('/tmp/my_inference_pipeline.yaml', 'w') as fout:
         fout.write(yaml_rep)
 
-
-if __name__ == "__main__":   
-    example_create_training_pipeline()
+if __name__ == "__main__":
+    example_create_inference_pipeline()
     format_template_str()

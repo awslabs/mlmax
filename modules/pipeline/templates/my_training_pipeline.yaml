@@ -3,7 +3,7 @@ Description: CloudFormation template for AWS Step Functions - State Machine
 
 # Added by script
 Parameters:
-  TrainingPipelineName:
+  PipelineName:
     Type: String
   SagerMakerRoleArn:
     Type: String
@@ -17,7 +17,7 @@ Resources:
     Type: AWS::StepFunctions::StateMachine
     Properties:
       # Replaced by script
-      StateMachineName: !Sub "${TrainingPipelineName}-${TargetEnv}"
+      StateMachineName: !Sub "${PipelineName}-Training-${TargetEnv}"
       # Replaced by script
       DefinitionString: !Sub |-
         {
@@ -66,6 +66,14 @@ Resources:
                       "S3Output": {
                         "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']",
                         "LocalPath": "/opt/ml/processing/test",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    },
+                    {
+                      "OutputName": "proc_model",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedModelURL']",
+                        "LocalPath": "/opt/ml/processing/model",
                         "S3UploadMode": "EndOfJob"
                       }
                     }

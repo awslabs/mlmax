@@ -50,6 +50,7 @@ def define_training_pipeline(
             "EvaluationResultURL": str,
             "PreprocessedTrainDataURL": str,
             "PreprocessedTestDataURL": str,
+            "PreprocessedModelURL": str,
             "SMOutputDataURL": str,
             "SMDebugOutputURL": str,
         }
@@ -91,6 +92,11 @@ def define_training_pipeline(
             source="/opt/ml/processing/test",
             destination=execution_input["PreprocessedTestDataURL"],
             output_name="test_data",
+        ),
+        ProcessingOutput(
+            source="/opt/ml/processing/model",
+            destination=execution_input["PreprocessedModelURL"],
+            output_name="proc_model",
         ),
     ]
 

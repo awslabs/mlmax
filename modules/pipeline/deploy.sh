@@ -6,7 +6,7 @@ PACKAGE_BUCKET=${2:-sagemaker-us-east-1-671846148176}
 
 get_region() {
   REGION=$(aws configure get region)
-  if [ "$REGION" == "None" ]; then 
+  if [ "$REGION" == "None" ]; then
     echo "REGION is unset in your AWS configuration";
     exit 1;
   else
@@ -16,14 +16,14 @@ get_region() {
 
 
 get_config() {
-  if [ ! -f config/deploy-${REGION}-${TARGET_ENV}.ini ]; then 
+  if [ ! -f config/deploy-${REGION}-${TARGET_ENV}.ini ]; then
     echo "Config file does not exist for ${REGION}, ${TARGET_ENV}";
     exit 1;
   else
     echo "Config file exists";
     . config/deploy-${REGION}-${TARGET_ENV}.ini
-    STACK_NAME="$TrainingPipelineName-$TargetEnv"
-    echo $STACK_NAME 
+    STACK_NAME="$PipelineName-$TargetEnv"
+    echo $STACK_NAME
   fi
 }
 
