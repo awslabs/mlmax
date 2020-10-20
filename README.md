@@ -1,4 +1,4 @@
-# mlmax
+# MLMax
 
 Delivering ML solutions to production is hard. It is difficult to know where to
 start, what tools to use, and whether you are doing it right. Often each
@@ -13,17 +13,15 @@ This project provides an example so you can get started quickly without having
 to make many design choices. The aim is to standardize the approach and hence
 achieve efficiency in delivery.
 
+## Architecture
+
+The training and inference pipeline uses sagemaker within step functions as follows.
+
+![arch](reports/figures/training-inference.png)
+
 ## Usage
 
-For instructions on how to use the various modules, see the relevant subdirectories:
-
-- [Training Pipeline](modules/pipeline/README.md)
-- Inference Pipeline - Coming soon!
-- [Environment](modules/env/regulated_environment/README.md)
-
-For instructions on how to transfer a repo to another (non-isengard) repo, ou
-can follow the steps in Part 1 of this [blog
-post](https://aws.amazon.com/blogs/devops/replicating-and-automating-sync-ups-for-a-repository-with-aws-codecommit/)
+For instructions on how to use please see [Training and Inference Pipeline](modules/pipeline/README.md)
 
 ## Contributing
 
