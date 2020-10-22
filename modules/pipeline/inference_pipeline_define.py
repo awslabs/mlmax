@@ -4,13 +4,9 @@ from stepfunctions.steps import (
     Chain,
     ProcessingStep,
 )
-from custom_steps import MLMaxBatchTransformStep, MLMaxModelStep
 from stepfunctions.workflow import Workflow
 
-import sagemaker
 from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.sklearn.model import SKLearnModel
-from sagemaker.transformer import Transformer
 
 from sagemaker.sklearn.processing import SKLearnProcessor
 
@@ -38,17 +34,12 @@ def define_inference_pipeline(
     execution_input = ExecutionInput(
         schema={
             "InputDataURL": str,
-            # "InputCodeURL": str,
             "PreprocessingJobName": str,
-            "BatchTransformJobName": str,
+            "InferenceJobName": str,
             "ProcModelS3": str,
-            "ProcModelName": str,
             "PreprocessingCodeURL": str,
-            "PreprocessedModelURL": str,
+            "InferenceCodeURL": str,
             "ModelS3": str,
-            "ModelName": str,
-            "SmProcSubmitDirUrl": str,
-            "SmSubmitDirUrl": str,
             "PreprocessedTrainDataURL": str,
             "PreprocessedTestDataURL": str,
             "OutputPathURL": str,
@@ -58,22 +49,7 @@ def define_inference_pipeline(
     """
     Create Preprocessing Model from model artifact.
     """
-    sagemaker_session = sagemaker.Session()
-    # proc_model = SKLearnModel(
-    #     model_data="dummy_proc_model_data",
-    #     role=sm_role,
-    #     framework_version="0.20.0",
-    #     entry_point="preprocessing.py",
-    #     sagemaker_session=sagemaker_session,
-    # )
-
-    # proc_model_step = MLMaxModelStep(
-    #     "SageMaker Preprocess Model Creating step",
-    #     proc_model,
-    #     model_data_url=execution_input["ProcModelS3"],
-    #     sagemaker_submit_directory=execution_input["SmProcSubmitDirUrl"],
-    #     model_name=execution_input["ProcModelName"],
-    # )
+    # sagemaker_session = sagemaker.Session()
 
     sklearn_processor = SKLearnProcessor(
         framework_version="0.20.0",
@@ -96,7 +72,7 @@ def define_inference_pipeline(
             input_name="code",
         ),
         ProcessingInput(
-            source=execution_input["PreprocessedModelURL"],
+            source=execution_input["ProcModelS3"],
             destination="/opt/ml/processing/model",
             input_name="proc_model",
         ),
@@ -122,66 +98,53 @@ def define_inference_pipeline(
             "/opt/ml/processing/input/code/preprocessing.py",
         ],
     )
-    # """
-    # Preprocessing transformer
-    # """
-    # transformer_proc = Transformer(
-    #     model_name="dummy_proc_transformer_name",
-    #     instance_count=1,
-    #     instance_type="ml.c5.xlarge",
-    #     strategy="MultiRecord",
-    #     max_payload=100,
-    # )
-
-    # process_transformer_step = MLMaxBatchTransformStep(
-    #     "SageMaker Preprocess BatchTransform step",
-    #     transformer_proc,
-    #     job_name=execution_input["PreprocessingJobName"],
-    #     model_name=execution_input["ProcModelName"],
-    #     data=execution_input["InputDataURL"],
-    #     outputpath=execution_input["PreprocessedTestDataURL"],
-    #     split_type="Line",
-    # )
 
     """
-    Create Inference Model from model artifact.
-    """
+    Create inference with sklearn processing step.
 
-    model = SKLearnModel(
-        model_data="dummy_model_data",
-        role=sm_role,
+    Inputs are the preprocessed data S3 URL, the inference code S3 URL, and
+    the model S3 URL. Output is the inferred data.
+    """
+    sklearn_processor2 = SKLearnProcessor(
         framework_version="0.20.0",
-        entry_point="inference.py",
-        sagemaker_session=sagemaker_session,
-    )
-
-    model_step = MLMaxModelStep(
-        "SageMaker Inference Model Creating step",
-        model,
-        model_data_url=execution_input["ModelS3"],
-        sagemaker_submit_directory=execution_input["SmSubmitDirUrl"],
-        model_name=execution_input["ModelName"],
-    )
-
-    """
-    Inference (batch transform) using the pre-processed data and previous model.
-    """
-
-    transformer = Transformer(
-        model_name="dummy_transformer_name",
+        role=sm_role,
+        instance_type="ml.m5.xlarge",
         instance_count=1,
-        instance_type="ml.c5.xlarge",
-        strategy="MultiRecord",
+        max_runtime_in_seconds=1200,
     )
+    inputs = [
+        ProcessingInput(
+            source=execution_input["PreprocessedTestDataURL"],
+            destination="/opt/ml/processing/input",
+            input_name="input-1",
+        ),
+        ProcessingInput(
+            source=execution_input["InferenceCodeURL"],
+            destination="/opt/ml/processing/input/code",
+            input_name="code",
+        ),
+        ProcessingInput(
+            source=execution_input["ModelS3"],
+            destination="/opt/ml/processing/model",
+            input_name="model",
+        ),
+    ]
 
-    infer_transformer_step = MLMaxBatchTransformStep(
-        "SageMaker Inference BatchTransform step",
-        transformer,
-        job_name=execution_input["BatchTransformJobName"],
-        model_name=execution_input["ModelName"],
-        data=execution_input["PreprocessedTestDataURL"],
-        outputpath=execution_input["OutputPathURL"],
-        split_type="Line",
+    outputs = [
+        ProcessingOutput(
+            source="/opt/ml/processing/test",
+            destination=execution_input["OutputPathURL"],
+            output_name="test_data",
+        ),
+    ]
+
+    inference_step = ProcessingStep(
+        "SageMaker inference step",
+        processor=sklearn_processor2,
+        job_name=execution_input["InferenceJobName"],
+        inputs=inputs,
+        outputs=outputs,
+        container_entrypoint=["python3", "/opt/ml/processing/input/code/inference.py",],
     )
 
     # Create Fail state to mark the workflow failed in case any of the steps fail.
@@ -195,14 +158,11 @@ def define_inference_pipeline(
         next_step=failed_state_sagemaker_processing_failure,
     )
 
-    # proc_model_step.add_catch(catch_state_processing)
-    # process_transformer_step.add_catch(catch_state_processing)
     processing_step.add_catch(catch_state_processing)
-    model_step.add_catch(catch_state_processing)
-    infer_transformer_step.add_catch(catch_state_processing)
+    inference_step.add_catch(catch_state_processing)
 
     # Create the Workflow
-    workflow_graph = Chain([processing_step, model_step, infer_transformer_step])
+    workflow_graph = Chain([processing_step, inference_step])
     inference_pipeline = Workflow(
         name=inference_pipeline_name,
         definition=workflow_graph,

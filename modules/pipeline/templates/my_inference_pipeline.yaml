@@ -53,7 +53,7 @@ Resources:
                   {
                     "InputName": "proc_model",
                     "S3Input": {
-                      "S3Uri.$": "$$.Execution.Input['PreprocessedModelURL']",
+                      "S3Uri.$": "$$.Execution.Input['ProcModelS3']",
                       "LocalPath": "/opt/ml/processing/model",
                       "S3DataType": "S3Prefix",
                       "S3InputMode": "File",
@@ -98,7 +98,7 @@ Resources:
                 }
               },
               "Type": "Task",
-              "Next": "SageMaker Inference Model Creating step",
+              "Next": "SageMaker inference step",
               "Catch": [
                 {
                   "ErrorEquals": [
@@ -108,56 +108,75 @@ Resources:
                 }
               ]
             },
-            "SageMaker Inference Model Creating step": {
+            "SageMaker inference step": {
+              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
               "Parameters": {
-                "ModelName.$": "$$.Execution.Input['ModelName']",
-                "PrimaryContainer": {
-                  "Image": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
-                  "Environment": {
-                    "SAGEMAKER_PROGRAM": "inference.py",
-                    "SAGEMAKER_SUBMIT_DIRECTORY.$": "$$.Execution.Input['SmSubmitDirUrl']",
-                    "SAGEMAKER_ENABLE_CLOUDWATCH_METRICS": "false",
-                    "SAGEMAKER_CONTAINER_LOG_LEVEL": "20",
-                    "SAGEMAKER_REGION": "us-east-1"
-                  },
-                  "ModelDataUrl.$": "$$.Execution.Input['ModelS3']"
-                },
-                "ExecutionRoleArn": "${SagerMakerRoleArn}"
-              },
-              "Resource": "arn:aws:states:::sagemaker:createModel",
-              "Type": "Task",
-              "Next": "SageMaker Inference BatchTransform step",
-              "Catch": [
-                {
-                  "ErrorEquals": [
-                    "States.TaskFailed"
-                  ],
-                  "Next": "ML Workflow failed"
-                }
-              ]
-            },
-            "SageMaker Inference BatchTransform step": {
-              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
-              "Parameters": {
-                "TransformJobName.$": "$$.Execution.Input['BatchTransformJobName']",
-                "ModelName.$": "$$.Execution.Input['ModelName']",
-                "TransformInput": {
-                  "DataSource": {
-                    "S3DataSource": {
+                "ProcessingJobName.$": "$$.Execution.Input['InferenceJobName']",
+                "ProcessingInputs": [
+                  {
+                    "InputName": "input-1",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']",
+                      "LocalPath": "/opt/ml/processing/input",
                       "S3DataType": "S3Prefix",
-                      "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']"
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
                     }
                   },
-                  "SplitType": "Line"
+                  {
+                    "InputName": "code",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['InferenceCodeURL']",
+                      "LocalPath": "/opt/ml/processing/input/code",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  },
+                  {
+                    "InputName": "model",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['ModelS3']",
+                      "LocalPath": "/opt/ml/processing/model",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  }
+                ],
+                "ProcessingOutputConfig": {
+                  "Outputs": [
+                    {
+                      "OutputName": "test_data",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['OutputPathURL']",
+                        "LocalPath": "/opt/ml/processing/test",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    }
+                  ]
                 },
-                "TransformOutput": {
-                  "S3OutputPath.$": "$$.Execution.Input['OutputPathURL']"
+                "AppSpecification": {
+                  "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "ContainerEntrypoint": [
+                    "python3",
+                    "/opt/ml/processing/input/code/inference.py"
+                  ]
                 },
-                "TransformResources": {
-                  "InstanceCount": 1,
-                  "InstanceType": "ml.c5.xlarge"
+                "RoleArn": "${SagerMakerRoleArn}",
+                "ProcessingResources": {
+                  "ClusterConfig": {
+                    "InstanceCount": 1,
+                    "InstanceType": "ml.m5.xlarge",
+                    "VolumeSizeInGB": 30
+                  }
                 },
-                "BatchStrategy": "MultiRecord"
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 1200
+                }
               },
               "Type": "Task",
               "End": true,
