@@ -91,23 +91,6 @@ def example_run_inference_pipeline(workflow_arn, region):
         bucket=sagemaker_session.default_bucket(),
         key_prefix="data/sklearn_processing/code",
     )
-    # sm_proc_submit_dir_url = (
-    #     f"{s3_bucket_base_uri}/{preprocessing_job_name}/source/sourcedir.tar.gz"
-    # )
-
-    # upload inference script
-    # sm_submit_dir_url = (
-    #     f"{s3_bucket_base_uri}/{inference_job_name}/source/sourcedir.tar.gz"
-    # )
-    # tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
-    # # TODO need to add directory if source_dir is specified.
-    # tar.add(MODELINFERENCE_SCRIPT_LOCATION)
-    # tar.close()
-    # sagemaker_session.upload_data(
-    #     "/tmp/sourcedir.tar.gz",
-    #     bucket=sagemaker_session.default_bucket(),
-    #     key_prefix=f"{inference_job_name}/source",
-    # )
 
     # Step 3 - Get the lastest preprocessing and ml models
     proc_model_s3, model_s3 = get_latest_models()
@@ -145,25 +128,6 @@ def example_run_inference_pipeline(workflow_arn, region):
     )
     execution.get_output(wait=True)
     execution.render_progress()
-
-    """
-    # Step 6 - Inspect the output of the Workflow execution
-    workflow_execution_output_json = execution.get_output(wait=True)
-    from sagemaker.s3 import S3Downloader
-    import json
-
-    evaluation_output_config = workflow_execution_output_json["ProcessingOutputConfig"]
-    for output in evaluation_output_config["Outputs"]:
-       if output["OutputName"] == "evaluation":
-           evaluation_s3_uri = "{}/{}".format(
-               output["S3Output"]["S3Uri"], "evaluation.json"
-           )
-           break
-
-    evaluation_output = S3Downloader.read_file(evaluation_s3_uri)
-    evaluation_output_dict = json.loads(evaluation_output)
-    print(json.dumps(evaluation_output_dict, sort_keys=True, indent=4))
-    """
 
 
 if __name__ == "__main__":
