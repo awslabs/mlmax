@@ -43,8 +43,8 @@ if __name__ == "__main__":
     report_dict["accuracy"] = accuracy_score(y_test, predictions)
     report_dict["roc_auc"] = roc_auc_score(y_test, predictions)
 
-    print("Classification report:\n{}".format(report_dict))
+    print(f"Classification report:\n{report_dict}")
 
     model_output_directory = os.path.join(args.model_dir, "model.joblib")
-    print("Saving model to {}".format(model_output_directory))
+    print(f"Saving model to {model_output_directory}")
     joblib.dump(model, model_output_directory)
