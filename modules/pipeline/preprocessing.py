@@ -59,7 +59,8 @@ def transform(df, args, preprocess=None):
         with tarfile.open(
             os.path.join(model_directory, "proc_model.tar.gz"), mode="r:gz"
         ) as archive:
-            archive.extractall(model_directory)
+            print(f"Exctracting tarfile to {model_directory}")
+            archive.extractall(path=model_directory)
         preprocess = joblib.load(os.path.join(model_directory, "model.joblib"))
     features = preprocess.transform(df)
     print(f"Data shape after preprocessing: {features.shape}")
@@ -104,7 +105,7 @@ def fit(df, args):
     model_output_directory = os.path.join(args.data_dir, "model/proc_model.tar.gz")
     print(f"Saving model to {model_output_directory}")
     with tarfile.open(model_output_directory, mode="w:gz") as archive:
-        archive.add(model_output_directory, recursive=True)
+        archive.add("./model.joblib", recursive=True)
     return preprocess
 
 

@@ -83,7 +83,9 @@ Resources:
                   "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
                   "ContainerArguments": [
                     "--train-test-split-ratio",
-                    "0.2"
+                    "0.2",
+                    "--mode",
+                    "train"
                   ],
                   "ContainerEntrypoint": [
                     "python3",

@@ -21,59 +21,81 @@ Resources:
       # Replaced by script
       DefinitionString: !Sub |-
         {
-          "StartAt": "SageMaker Preprocess Model Creating step",
+          "StartAt": "SageMaker pre-processing step",
           "States": {
-            "SageMaker Preprocess Model Creating step": {
+            "SageMaker pre-processing step": {
+              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
               "Parameters": {
-                "ModelName.$": "$$.Execution.Input['ProcModelName']",
-                "PrimaryContainer": {
-                  "Image": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
-                  "Environment": {
-                    "SAGEMAKER_PROGRAM": "preprocessing.py",
-                    "SAGEMAKER_SUBMIT_DIRECTORY.$": "$$.Execution.Input['SmProcSubmitDirUrl']",
-                    "SAGEMAKER_ENABLE_CLOUDWATCH_METRICS": "false",
-                    "SAGEMAKER_CONTAINER_LOG_LEVEL": "20",
-                    "SAGEMAKER_REGION": "us-east-1"
-                  },
-                  "ModelDataUrl.$": "$$.Execution.Input['ProcModelS3']"
-                },
-                "ExecutionRoleArn": "${SagerMakerRoleArn}"
-              },
-              "Resource": "arn:aws:states:::sagemaker:createModel",
-              "Type": "Task",
-              "Next": "SageMaker Preprocess BatchTransform step",
-              "Catch": [
-                {
-                  "ErrorEquals": [
-                    "States.TaskFailed"
-                  ],
-                  "Next": "ML Workflow failed"
-                }
-              ]
-            },
-            "SageMaker Preprocess BatchTransform step": {
-              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
-              "Parameters": {
-                "TransformJobName.$": "$$.Execution.Input['PreprocessingJobName']",
-                "ModelName.$": "$$.Execution.Input['ProcModelName']",
-                "TransformInput": {
-                  "DataSource": {
-                    "S3DataSource": {
+                "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
+                "ProcessingInputs": [
+                  {
+                    "InputName": "input-1",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['InputDataURL']",
+                      "LocalPath": "/opt/ml/processing/input",
                       "S3DataType": "S3Prefix",
-                      "S3Uri.$": "$$.Execution.Input['InputDataURL']"
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
                     }
                   },
-                  "SplitType": "Line"
+                  {
+                    "InputName": "code",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['PreprocessingCodeURL']",
+                      "LocalPath": "/opt/ml/processing/input/code",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  },
+                  {
+                    "InputName": "proc_model",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['PreprocessedModelURL']",
+                      "LocalPath": "/opt/ml/processing/model",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  }
+                ],
+                "ProcessingOutputConfig": {
+                  "Outputs": [
+                    {
+                      "OutputName": "test_data",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedTestDataURL']",
+                        "LocalPath": "/opt/ml/processing/test",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    }
+                  ]
                 },
-                "TransformOutput": {
-                  "S3OutputPath.$": "$$.Execution.Input['PreprocessedTestDataURL']"
+                "AppSpecification": {
+                  "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "ContainerArguments": [
+                    "--mode",
+                    "infer"
+                  ],
+                  "ContainerEntrypoint": [
+                    "python3",
+                    "/opt/ml/processing/input/code/preprocessing.py"
+                  ]
                 },
-                "TransformResources": {
-                  "InstanceCount": 1,
-                  "InstanceType": "ml.c5.xlarge"
+                "RoleArn": "${SagerMakerRoleArn}",
+                "ProcessingResources": {
+                  "ClusterConfig": {
+                    "InstanceCount": 1,
+                    "InstanceType": "ml.m5.xlarge",
+                    "VolumeSizeInGB": 30
+                  }
                 },
-                "BatchStrategy": "MultiRecord",
-                "MaxPayloadInMB": 100
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 1200
+                }
               },
               "Type": "Task",
               "Next": "SageMaker Inference Model Creating step",
