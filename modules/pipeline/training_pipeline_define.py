@@ -106,7 +106,7 @@ def define_training_pipeline(
         job_name=execution_input["PreprocessingJobName"],
         inputs=inputs,
         outputs=outputs,
-        container_arguments=["--train-test-split-ratio", "0.2"],
+        container_arguments=["--train-test-split-ratio", "0.2", "--mode", "train"],
         container_entrypoint=[
             "python3",
             "/opt/ml/processing/input/code/preprocessing.py",
