@@ -1,5 +1,4 @@
 import uuid
-import tarfile
 import argparse
 import configparser
 
@@ -70,12 +69,11 @@ def example_run_inference_pipeline(workflow_arn, region):
     # (Batch Transform)
     preprocessing_job_name = f"sklearn-sm-preprocessing-bt-{uuid.uuid1().hex}"
     inference_job_name = f"sklearn-sm-inference-bt-{uuid.uuid1().hex}"
-    proc_model_name = f"sklearn-sm-preprocessing-model-{uuid.uuid1().hex}"
     model_name = f"sklearn-sm-inference-model-{uuid.uuid1().hex}"
 
     # Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
     PREPROCESSING_SCRIPT_LOCATION = "preprocessing.py"
-    MODELINFERENCE_SCRIPT_LOCATION = "inference.py"
+    INFERENCE_SCRIPT_LOCATION = "inference.py"
 
     sagemaker_session = sagemaker.Session()
     s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
@@ -86,23 +84,30 @@ def example_run_inference_pipeline(workflow_arn, region):
         key_prefix="data/sklearn_processing/code",
     )
     print(f"Using preprocessing script from {input_preprocessing_code}")
-    sm_proc_submit_dir_url = (
-        f"{s3_bucket_base_uri}/{preprocessing_job_name}/source/sourcedir.tar.gz"
+    # upload inference script
+
+    input_inference_code = sagemaker_session.upload_data(
+        INFERENCE_SCRIPT_LOCATION,
+        bucket=sagemaker_session.default_bucket(),
+        key_prefix="data/sklearn_processing/code",
     )
+    # sm_proc_submit_dir_url = (
+    #     f"{s3_bucket_base_uri}/{preprocessing_job_name}/source/sourcedir.tar.gz"
+    # )
 
     # upload inference script
-    sm_submit_dir_url = (
-        f"{s3_bucket_base_uri}/{inference_job_name}/source/sourcedir.tar.gz"
-    )
-    tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
-    # TODO need to add directory if source_dir is specified.
-    tar.add(MODELINFERENCE_SCRIPT_LOCATION)
-    tar.close()
-    sagemaker_session.upload_data(
-        "/tmp/sourcedir.tar.gz",
-        bucket=sagemaker_session.default_bucket(),
-        key_prefix=f"{inference_job_name}/source",
-    )
+    # sm_submit_dir_url = (
+    #     f"{s3_bucket_base_uri}/{inference_job_name}/source/sourcedir.tar.gz"
+    # )
+    # tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
+    # # TODO need to add directory if source_dir is specified.
+    # tar.add(MODELINFERENCE_SCRIPT_LOCATION)
+    # tar.close()
+    # sagemaker_session.upload_data(
+    #     "/tmp/sourcedir.tar.gz",
+    #     bucket=sagemaker_session.default_bucket(),
+    #     key_prefix=f"{inference_job_name}/source",
+    # )
 
     # Step 3 - Get the lastest preprocessing and ml models
     proc_model_s3, model_s3 = get_latest_models()
@@ -122,22 +127,17 @@ def example_run_inference_pipeline(workflow_arn, region):
     preprocessed_test_data = f"{output_data}/test_data"
 
     # Step 5 - Execute workflow
-    print(f"Preprocessing Batch Transform Job Name is {preprocessing_job_name}")
-    print(f"Inference Batch Transform Job Name is {inference_job_name}")
+    print(f"Preprocessing Job Name is {preprocessing_job_name}")
+    print(f"Inference Job Name is {inference_job_name}")
     execution = inference_pipeline.execute(
         inputs={
             "InputDataURL": input_data,
             "PreprocessingJobName": preprocessing_job_name,
-            # Each pre processing job (SageMaker processing job) requires a unique name,
-            "BatchTransformJobName": inference_job_name,
-            "ModelName": model_name,
-            "ProcModelName": proc_model_name,
+            "InferenceJobName": inference_job_name,
             "ProcModelS3": proc_model_s3,
             "PreprocessingCodeURL": input_preprocessing_code,
-            "PreprocessedModelURL": proc_model_s3,
+            "InferenceCodeURL": input_inference_code,
             "ModelS3": model_s3,
-            "SmProcSubmitDirUrl": sm_proc_submit_dir_url,
-            "SmSubmitDirUrl": sm_submit_dir_url,
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
             "OutputPathURL": f"{s3_bucket_base_uri}/{model_name}",

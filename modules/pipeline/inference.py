@@ -1,6 +1,7 @@
 import os
+import argparse
+import tarfile
 import numpy as np
-import json
 import pandas as pd
 from io import StringIO
 
@@ -122,9 +123,6 @@ def _pre_processing(lines):
         return np.stack(arrs)
 
 
-# please check "default" implementation of the following functions, and change as necessary
-# https://github.com/aws/sagemaker-scikit-learn-container/blob/master/src/sagemaker_sklearn_container/serving.py
-
 # from sagemaker_containers.beta.framework import content_types, encoders
 
 # TODO try to comment out the "input_fn" function below, see what happens?
@@ -168,3 +166,24 @@ def output_fn(prediction, response_content_type):
     print("strio = StringIO()")
     pd.DataFrame(prediction).to_csv(strio, header=False, index=False)
     return strio.getvalue()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", type=str, default="opt/ml/processing")
+    args, _ = parser.parse_known_args()
+    print(f"Received arguments {args}")
+    model_path = os.path.join(args.data_dir, "model/model.tar.gz")
+    print(f"Extracting model from path: {model_path}")
+    with tarfile.open(model_path) as tar:
+        tar.extractall(path=".")
+    print("Loading model")
+    model = joblib.load("model.joblib")
+
+    print("Loading test input data")
+    test_features_data = os.path.join(args.data_dir, "input/test_features.csv")
+    X_test = pd.read_csv(test_features_data, header=None)
+    predictions = model.predict(X_test)
+    output_path = os.path.join(args.data_dir, "test/predictions.csv")
+    print(f"Saving data to {output_path}")
+    pd.DataFrame(predictions).to_csv(output_path, header=False, index=False)
