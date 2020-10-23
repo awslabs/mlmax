@@ -37,6 +37,7 @@ def example_run_training_pipeline(workflow_arn, region):
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
     unique_id = uuid.uuid1().hex
+    # pipeline_job_name = f"pipeline-job-{unique_id}"
     training_job_name = f"scikit-learn-training-{unique_id}"
     preprocessing_job_name = f"scikit-learn-sm-preprocessing-{unique_id}"
     evaluation_job_name = f"scikit-learn-sm-evaluation-{unique_id}"
@@ -50,12 +51,12 @@ def example_run_training_pipeline(workflow_arn, region):
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
-        key_prefix="data/sklearn_processing/code",
+        key_prefix=f"{preprocessing_job_name}/source",
     )
     input_evaluation_code = sagemaker_session.upload_data(
         EVALUATION_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
-        key_prefix="data/sklearn_processing/code",
+        key_prefix=f"{evaluation_job_name}/source",
     )
     s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
     sm_submit_dir_url = (
@@ -76,7 +77,7 @@ def example_run_training_pipeline(workflow_arn, region):
     input_data = (
         f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
     )
-    output_data = f"{s3_bucket_base_uri}/data/sklearn_processing/output"
+    output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output"
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
     preprocessed_model_url = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output"

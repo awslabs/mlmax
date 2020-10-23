@@ -72,7 +72,6 @@ def example_run_inference_pipeline(workflow_arn, region):
     unique_id = uuid.uuid1().hex
     preprocessing_job_name = f"sklearn-sm-preprocessing-{unique_id}"
     inference_job_name = f"sklearn-sm-inference-{unique_id}"
-    model_name = f"sklearn-sm-inference-model-{unique_id}"
 
     # Step 2 - Upload source code (pre-processing, inference) to S3
     PREPROCESSING_SCRIPT_LOCATION = "../../src/mlmax/preprocessing.py"
@@ -84,21 +83,21 @@ def example_run_inference_pipeline(workflow_arn, region):
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
-        key_prefix="data/sklearn_processing/code",
+        key_prefix=f"{preprocessing_job_name}/source",
     )
     print(f"Using preprocessing script from {input_preprocessing_code}")
     # upload inference script
-
     input_inference_code = sagemaker_session.upload_data(
         INFERENCE_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
-        key_prefix="data/sklearn_processing/code",
+        key_prefix=f"{inference_job_name}/source",
     )
 
     # Step 3 - Get the lastest preprocessing and ml models
     # TODO: allow user to pass this as optional input
     proc_model_s3, model_s3 = get_latest_models()
     print(f"Using proc_model_s3: {proc_model_s3}")
+    print(f"Using model_s3: {model_s3}")
 
     # Step 4 - Define data URLs, preprocessed data URLs can
     # be made specifically to this training job
@@ -109,7 +108,7 @@ def example_run_inference_pipeline(workflow_arn, region):
     )
 
     s3_bucket_base_uri = "{}{}".format("s3://", sagemaker_session.default_bucket())
-    output_data = "{}/{}".format(s3_bucket_base_uri, "data/sklearn_processing/output")
+    output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output"
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
 
@@ -127,7 +126,7 @@ def example_run_inference_pipeline(workflow_arn, region):
             "ModelS3": model_s3,
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
-            "OutputPathURL": f"{s3_bucket_base_uri}/{model_name}",
+            "OutputPathURL": f"{s3_bucket_base_uri}/{inference_job_name}/output",
         }
     )
     execution.get_output(wait=True)
