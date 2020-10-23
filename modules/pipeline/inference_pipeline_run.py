@@ -11,7 +11,9 @@ import sagemaker
 
 def get_existing_inference_pipeline(workflow_arn):
     """
-    Create a dummpy implementation of get existing training pipeline
+    Create a dummy implementation to get existing training pipeline
+
+    TODO: This could be a good PR for the SDK.
     """
     inference_pipeline = Workflow(
         name="inference_pipeline_name",
@@ -71,9 +73,9 @@ def example_run_inference_pipeline(workflow_arn, region):
     inference_job_name = f"sklearn-sm-inference-bt-{uuid.uuid1().hex}"
     model_name = f"sklearn-sm-inference-model-{uuid.uuid1().hex}"
 
-    # Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
-    PREPROCESSING_SCRIPT_LOCATION = "preprocessing.py"
-    INFERENCE_SCRIPT_LOCATION = "inference.py"
+    # Step 2 - Upload source code (pre-processing, inference) to S3
+    PREPROCESSING_SCRIPT_LOCATION = "../../src/mlmax/preprocessing.py"
+    INFERENCE_SCRIPT_LOCATION = "../../src/mlmax/inference.py"
 
     sagemaker_session = sagemaker.Session()
     s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
@@ -93,6 +95,7 @@ def example_run_inference_pipeline(workflow_arn, region):
     )
 
     # Step 3 - Get the lastest preprocessing and ml models
+    # TODO: allow user to pass this as optional input
     proc_model_s3, model_s3 = get_latest_models()
     print(f"Using proc_model_s3: {proc_model_s3}")
 

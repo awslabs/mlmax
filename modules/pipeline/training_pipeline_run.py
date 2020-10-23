@@ -41,9 +41,9 @@ def example_run_training_pipeline(workflow_arn, region):
     evaluation_job_name = f"scikit-learn-sm-evaluation-{uuid.uuid1().hex}"
 
     # Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
-    PREPROCESSING_SCRIPT_LOCATION = "preprocessing.py"
-    MODELEVALUATION_SCRIPT_LOCATION = "evaluation.py"
-    MODELTRAINING_SCRIPT_LOCATION = "train.py"
+    PREPROCESSING_SCRIPT_LOCATION = "../../src/mlmax/preprocessing.py"
+    EVALUATION_SCRIPT_LOCATION = "../../src/mlmax/evaluation.py"
+    TRAINING_SCRIPT_LOCATION = "../../src/mlmax/train.py"
 
     sagemaker_session = sagemaker.Session()
     input_preprocessing_code = sagemaker_session.upload_data(
@@ -52,7 +52,7 @@ def example_run_training_pipeline(workflow_arn, region):
         key_prefix="data/sklearn_processing/code",
     )
     input_evaluation_code = sagemaker_session.upload_data(
-        MODELEVALUATION_SCRIPT_LOCATION,
+        EVALUATION_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
         key_prefix="data/sklearn_processing/code",
     )
@@ -62,7 +62,7 @@ def example_run_training_pipeline(workflow_arn, region):
     )
     tar = tarfile.open("/tmp/sourcedir.tar.gz", "w:gz")
     # TODO need to add directory if source_dir is specified.
-    tar.add(MODELTRAINING_SCRIPT_LOCATION)
+    tar.add(TRAINING_SCRIPT_LOCATION, arcname="train.py")
     tar.close()
     sagemaker_session.upload_data(
         "/tmp/sourcedir.tar.gz",
@@ -78,7 +78,7 @@ def example_run_training_pipeline(workflow_arn, region):
     output_data = f"{s3_bucket_base_uri}/data/sklearn_processing/output"
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
-
+    preprocessed_model_url = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output"
     # Step 4 - Execute workflow
     print(f"Training Job Name is {training_job_name}")
     execution = training_pipeline.execute(
@@ -99,7 +99,7 @@ def example_run_training_pipeline(workflow_arn, region):
             ),
             "PreprocessedTrainDataURL": preprocessed_training_data,
             "PreprocessedTestDataURL": preprocessed_test_data,
-            "PreprocessedModelURL": f"{s3_bucket_base_uri}/{preprocessing_job_name}/output",
+            "PreprocessedModelURL": preprocessed_model_url,
             "SMOutputDataURL": f"{s3_bucket_base_uri}/",
             "SMDebugOutputURL": f"{s3_bucket_base_uri}/",
         }
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     with open(f"config/deploy-{region}-{args.target_env}.ini") as f:
         config.read_string("[default]\n" + f.read())
-    training_pipeline_name = config["default"]["PipelineName"] + '-Training'
+    training_pipeline_name = config["default"]["PipelineName"] + "-Training"
     target_env = config["default"]["TargetEnv"]
     workflow_arn = (
         f"arn:aws:states:{region}:{account}:"
