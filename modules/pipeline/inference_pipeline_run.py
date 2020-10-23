@@ -69,9 +69,10 @@ def example_run_inference_pipeline(workflow_arn, region):
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job
     # (Batch Transform)
-    preprocessing_job_name = f"sklearn-sm-preprocessing-bt-{uuid.uuid1().hex}"
-    inference_job_name = f"sklearn-sm-inference-bt-{uuid.uuid1().hex}"
-    model_name = f"sklearn-sm-inference-model-{uuid.uuid1().hex}"
+    unique_id = uuid.uuid1().hex
+    preprocessing_job_name = f"sklearn-sm-preprocessing-{unique_id}"
+    inference_job_name = f"sklearn-sm-inference-{unique_id}"
+    model_name = f"sklearn-sm-inference-model-{unique_id}"
 
     # Step 2 - Upload source code (pre-processing, inference) to S3
     PREPROCESSING_SCRIPT_LOCATION = "../../src/mlmax/preprocessing.py"

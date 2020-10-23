@@ -36,9 +36,10 @@ def example_run_training_pipeline(workflow_arn, region):
     training_pipeline = get_existing_training_pipeline(workflow_arn)
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
-    training_job_name = f"scikit-learn-training-{uuid.uuid1().hex}"
-    preprocessing_job_name = f"scikit-learn-sm-preprocessing-{uuid.uuid1().hex}"
-    evaluation_job_name = f"scikit-learn-sm-evaluation-{uuid.uuid1().hex}"
+    unique_id = uuid.uuid1().hex
+    training_job_name = f"scikit-learn-training-{unique_id}"
+    preprocessing_job_name = f"scikit-learn-sm-preprocessing-{unique_id}"
+    evaluation_job_name = f"scikit-learn-sm-evaluation-{unique_id}"
 
     # Step 2 - Upload source code (pre-processing, evaluation, and train) to sagemaker
     PREPROCESSING_SCRIPT_LOCATION = "../../src/mlmax/preprocessing.py"
