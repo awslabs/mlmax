@@ -18,7 +18,7 @@ setup(
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     version=_version,
-    description="This package does x,y,z.",
+    description="This package provides a template for ML Inference and Training",
     long_description=read("README.md"),
     author="Firstname Lastname",
     author_email="first.last@email.com",
