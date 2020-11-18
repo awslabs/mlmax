@@ -117,7 +117,9 @@ def define_training_pipeline(
     Training using the pre-processed data
     """
     sklearn = SKLearn(
-        entry_point="train.py", train_instance_type="ml.m5.xlarge", role=sm_role
+        entry_point="../../src/mlmax/train.py",
+        train_instance_type="ml.m5.xlarge",
+        role=sm_role,
     )
 
     training_step = MLMaxTrainingStep(

@@ -15,29 +15,18 @@ achieve efficiency in delivery. There are nine independent yet coherent
 modules:
 
 ## Quick Start Guide
- 
-### 0. Prerequisites
-
-Install the [git code commit helper](https://github.com/aws/git-remote-codecommit).
-
-```
-pip3 install git-remote-codecommit 
-```
-
-Install the [isengard cli](https://w.amazon.com/bin/view/Isengard-cli/).
 
 ### 1. Clone repo
 ```
-isengard assume # select ml-proserve 
 conda create --name <name> python=3.7
 conda activate <name>
-git clone codecommit::us-east-1://mlmax
+git clone https://github.com/awslabs/mlmax.git
 ```
 
 ### 2. Instal dependencies
 ```
-cd mlmax
-pip3 install -r requirements.txt
+cd mlmax/modules/pipeline
+pip install -r requirements.txt
 ```
 
 ### 3. Create the CloudFormation
@@ -48,9 +37,12 @@ python inference_pipeline_create.py
 ```
 
 ### 4. Deploy the CloudFormation
+
+You will need an S3 bucket for this step.
+
 ```
 # ./deploy.sh <target_env> <s3_bucket>
-./deploy.sh dev sagemaker-us-east-1-671846148176
+# ./deploy.sh dev sagemaker-us-east-1-1234
 ```
 
 ### 5. Run the Training Pipeline

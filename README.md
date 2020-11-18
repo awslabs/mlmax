@@ -3,7 +3,11 @@
 Now ML Engineers and Data Scientists can quickly create and use
 production-ready ML solutions on AWS. mlmax provides example templates for the
 delivery of custom ML solutions to production so you can get started quickly
-without having to make too many design choices
+without having to make too many design choices.
+
+## Usage
+
+For instructions on how to use please see [modules/pipeline](modules/pipeline/README.md).
 
 ## FAQ
 
@@ -79,9 +83,6 @@ development, and debugging.
 including preprocessing, training, inference, and evaluation. Where there is
 overlap, components are reused.
 
-## Usage
-
-For instructions on how to use please see [instructions](modules/pipeline/README.md)
 
 ## Security
 
