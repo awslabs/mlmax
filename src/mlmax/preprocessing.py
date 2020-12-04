@@ -109,15 +109,19 @@ def fit(df, args):
     return preprocess
 
 
-if __name__ == "__main__":
+def parse_arg():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", type=str, default="infer")
     parser.add_argument("--train-test-split-ratio", type=float, default=0.3)
     parser.add_argument("--data-dir", type=str, default="opt/ml/processing")
+    parser.add_argument("--data-input", type=str, default="input/census-income.csv")
     args, _ = parser.parse_known_args()
     print(f"Received arguments {args}")
+    return args
 
-    input_data_path = os.path.join(args.data_dir, "input/census-income.csv")
+
+def main(args):
+    input_data_path = os.path.join(args.data_dir, args.data_input)
     df = read_data(input_data_path)
 
     if args.mode == "infer":
@@ -125,6 +129,7 @@ if __name__ == "__main__":
         write_data(test_features, args, "test/test_features.csv")
         if target_col in df.columns:
             write_data(df[target_col], args, "test/test_labels.csv")
+        return test_features
     elif args.mode == "train":
         X_train, X_test, y_train, y_test = split_data(df, args)
         preprocess = fit(X_train, args)
@@ -134,3 +139,9 @@ if __name__ == "__main__":
         write_data(y_train, args, "train/train_labels.csv")
         write_data(test_features, args, "test/test_features.csv")
         write_data(y_test, args, "test/test_labels.csv")
+        return train_features, test_features
+
+
+if __name__ == "__main__":
+    args = parse_arg()
+    main(args)
