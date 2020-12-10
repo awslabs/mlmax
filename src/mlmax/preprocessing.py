@@ -124,9 +124,8 @@ def main(args):
     """
     To run locally:
 
-    aws s3 cp \
-        s3://sagemaker-sample-data-us-east-1/processing/census/census-income.csv \
-        /tmp/input/
+    DATA=s3://sagemaker-sample-data-us-east-1/processing/census/census-income.csv
+    aws s3 cp $DATA /tmp/input/
     mkdir /tmp/{train,test,model}
     python preprocessing.py --mode "train" --data-dir /tmp
     """

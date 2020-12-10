@@ -54,11 +54,6 @@ def save_model(model, args):
 
 
 def parse_arg():
-    """
-    To run locally:
-
-    python train.py --train /tmp/train --test /tmp/test --model-dir /tmp/model
-    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", type=str, default=os.environ.get("SM_CHANNEL_TRAIN"))
     parser.add_argument("--test", type=str, default=os.environ.get("SM_CHANNEL_TEST"))
@@ -69,6 +64,11 @@ def parse_arg():
 
 
 def main(args):
+    """
+    To run locally:
+
+    python train.py --train /tmp/train --test /tmp/test --model-dir /tmp/model
+    """
     X_train, y_train, X_test, y_test = read_processed_data(args)
     model = train(X_train, y_train, args)
     evaluate(model, X_test, y_test, args)
