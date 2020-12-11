@@ -21,8 +21,9 @@ def args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", type=str, default="opt/ml/processing/train")
     parser.add_argument("--test", type=str, default="opt/ml/processing/test")
-    parser.add_argument("--model-dir", type=str, default="opt/ml/processing/model")
+    parser.add_argument("--model-dir", type=str, default="opt/ml/model")
     args, _ = parser.parse_known_args()
+    os.makedirs(args.model_dir, exist_ok=True)
     print(f"Received arguments {args}")
     return args
 
@@ -65,19 +66,32 @@ def test_read_processed_data(args):
 
 @dt.working_directory(__file__)
 def test_train(args):
-    print("Running the test_train testing function........")
     X_train, y_train, X_test, y_test = read_processed_data(args)
-    print(f"Data shape is {X_train.shape} and {X_test.shape}")
     model = train(X_train, y_train, args)
-    print(f"Making predictions on {X_test}")
     predictions = model.predict(X_test)
-    print(f"Predictions are {predictions}")
+    save_model(model, args)
     # todo: add an assert statement
+
+
+@dt.working_directory(__file__)
+def test_evaluate(load_model, args):
+    X_train, y_train, X_test, y_test = read_processed_data(args)
+    report_dict = evaluate(load_model, X_test, y_test, args)
+    assert "accuracy" in report_dict.keys()
+    assert "macro avg" in report_dict.keys()
+    assert "f1-score" in report_dict["macro avg"].keys()
+    assert isinstance(report_dict["accuracy"], float)
+    assert isinstance(report_dict["macro avg"]["f1-score"], float)
 
 
 @dt.working_directory(__file__)
 def test_save_model(load_model, args):
     save_model(load_model, args)
+
+
+@dt.working_directory(__file__)
+def test_main(args):
+    main(args)
 
 
 # @dt.working_directory(__file__)
