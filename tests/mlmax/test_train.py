@@ -1,4 +1,6 @@
+import os
 import pytest
+import argparse
 import pandas as pd
 import datatest as dt
 
@@ -11,6 +13,18 @@ from mlmax.train import (
     parse_arg,
     main,
 )
+
+
+@pytest.fixture()
+@dt.working_directory(__file__)
+def args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train", type=str, default="opt/ml/processing/train")
+    parser.add_argument("--test", type=str, default="opt/ml/processing/test")
+    parser.add_argument("--model-dir", type=str, default="opt/ml/processing/model")
+    args, _ = parser.parse_known_args()
+    print(f"Received arguments {args}")
+    return args
 
 
 @dt.working_directory(__file__)
@@ -38,19 +52,20 @@ def test_read_xy(test_train_data_path):
     dt.validate(y_test.iloc[:, 0], required_labels)
 
 
+@dt.working_directory(__file__)
+def test_read_processed_data(args):
+    """
+    Test the data preprocessing in the training.
+    """
+    X_train, y_train, X_test, y_test = read_processed_data(args)
+
+    # check number of features
+    assert X_train.shape[1] == X_test.shape[1]
+
+
 # @dt.working_directory(__file__)
-# def test_train_preprocessing(input_data_path, args_train):
-#     """
-#     Test the data preprocessing in the training.
-#     """
-#     train_features, test_features = main(args_train)
-
-#     # check number of features
-#     assert train_features.shape[1] == test_features.shape[1]
-
-
-# @dt.working_directory(__file__)
-# def test_infer_preprocessing(input_data_path, args_infer):
+# # def test_infer_preprocessing(input_data_path, args_infer):
+# def test_train(input_data_path, args_infer):
 #     """
 #     Test the data preprocessing in the inference.
 #     """
