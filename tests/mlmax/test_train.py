@@ -75,6 +75,11 @@ def test_train(args):
     # todo: add an assert statement
 
 
+@dt.working_directory(__file__)
+def test_save_model(load_model, args):
+    save_model(load_model, args)
+
+
 # @dt.working_directory(__file__)
 # # def test_infer_preprocessing(input_data_path, args_infer):
 # def test_train(input_data_path, args_infer):
@@ -91,7 +96,7 @@ def test_parse_arg():
     args = parse_arg()
     assert args.train == "/opt/ml/input/data/train"
     assert args.test == "/opt/ml/input/data/test"
-    assert args.model == "/opt/ml/model"
+    assert args.model_dir == "/opt/ml/model"
 
 
 # # To do: need to clean the folders created
