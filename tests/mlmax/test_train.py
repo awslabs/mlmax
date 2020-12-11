@@ -63,6 +63,18 @@ def test_read_processed_data(args):
     assert X_train.shape[1] == X_test.shape[1]
 
 
+@dt.working_directory(__file__)
+def test_train(args):
+    print("Running the test_train testing function........")
+    X_train, y_train, X_test, y_test = read_processed_data(args)
+    print(f"Data shape is {X_train.shape} and {X_test.shape}")
+    model = train(X_train, y_train, args)
+    print(f"Making predictions on {X_test}")
+    predictions = model.predict(X_test)
+    print(f"Predictions are {predictions}")
+    # todo: add an assert statement
+
+
 # @dt.working_directory(__file__)
 # # def test_infer_preprocessing(input_data_path, args_infer):
 # def test_train(input_data_path, args_infer):
@@ -74,13 +86,12 @@ def test_read_processed_data(args):
 #     # To do: add assertion
 
 
-# @dt.working_directory(__file__)
-# def test_parse_arg():
-#     args = parse_arg()
-#     assert args.mode == "infer"
-#     assert args.train_test_split_ratio == 0.3
-#     assert args.data_dir == "opt/ml/processing"
-#     assert args.data_input == "input/census-income.csv"
+@dt.working_directory(__file__)
+def test_parse_arg():
+    args = parse_arg()
+    assert args.train == "/opt/ml/input/data/train"
+    assert args.test == "/opt/ml/input/data/test"
+    assert args.model == "/opt/ml/model"
 
 
 # # To do: need to clean the folders created
