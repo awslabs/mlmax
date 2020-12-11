@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
 
 try:
     from sklearn.externals import joblib
-except:
+except ImportError:
     import joblib
 
 
@@ -72,7 +72,7 @@ def main(args):
     """
     X_train, y_train, X_test, y_test = read_processed_data(args)
     model = train(X_train, y_train, args)
-    evaluate(model, X_test, y_test, args)
+    report_dict = evaluate(model, X_test, y_test, args)
     save_model(model, args)
 
 
