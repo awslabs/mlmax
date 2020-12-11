@@ -5,6 +5,10 @@ import pandas as pd
 import datatest as dt
 import shutil
 
+try:
+    from sklearn.externals import joblib
+except:
+    import joblib
 
 # Define a few fixtures
 @pytest.fixture(scope="module")
@@ -51,3 +55,11 @@ def test_train_data_path():
     train_data_path = "opt/ml/processing/train"
     test_data_path = "opt/ml/processing/test"
     return train_data_path, test_data_path
+
+
+@pytest.fixture(scope="module")
+@dt.working_directory(__file__)
+def load_model():
+    # model_path = "opt/ml/processing"
+    model = joblib.load("model.joblib")
+    return model
