@@ -44,6 +44,7 @@ def evaluate(model, X_test, y_test, args):
     report_dict["accuracy"] = accuracy_score(y_test, predictions)
     report_dict["roc_auc"] = roc_auc_score(y_test, predictions)
     print(f"Classification report:\n{report_dict}")
+    return report_dict
 
 
 def save_model(model, args):
