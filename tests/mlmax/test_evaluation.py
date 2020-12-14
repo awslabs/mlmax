@@ -40,7 +40,7 @@ def tar_model(args):
     print(f"TAR_MODEL: Saving model to {model_output_directory}")
     model_unzipped = "opt/ml/model/model.joblib"
     with tarfile.open(model_output_directory, mode="w:gz") as archive:
-        archive.add(model_unzipped, recursive=False)
+        archive.add(model_unzipped, arcname="model.joblib")
     return model_output_directory
 
 
@@ -55,15 +55,15 @@ def test_read_features(args):
     assert X_test.shape[0] == y_test.shape[0]
 
 
-# @dt.working_directory(__file__)
-# def test_load_model(args, tar_model):
-#     model = load_model(args)
+@dt.working_directory(__file__)
+def test_load_model(tar_model, args):
+    model = load_model(args)
 
 
 @dt.working_directory(__file__)
-def test_evaluate(load_model, args):
+def test_evaluate(load_joblib_model, args):
     X_test, y_test = read_features(args)
-    report_dict = evaluate(load_model, X_test, y_test, args)
+    report_dict = evaluate(load_joblib_model, X_test, y_test, args)
     assert "accuracy" in report_dict.keys()
     assert "macro avg" in report_dict.keys()
     assert "f1-score" in report_dict["macro avg"].keys()
@@ -71,9 +71,9 @@ def test_evaluate(load_model, args):
     assert isinstance(report_dict["macro avg"]["f1-score"], float)
 
 
-# @dt.working_directory(__file__)
-# def test_main(args):
-#     main(args)
+@dt.working_directory(__file__)
+def test_main(tar_model, args):
+    main(args)
 
 
 @dt.working_directory(__file__)
