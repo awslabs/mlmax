@@ -30,15 +30,6 @@ def load_model(args):
     print("Loading model")
     return joblib.load("model.joblib")
 
-    # model_directory = os.path.join(args.data_dir, "model")
-    # print(f"Reading model from {model_directory}")
-    # with tarfile.open(
-    #     os.path.join(model_directory, "proc_model.tar.gz"), mode="r:gz"
-    # ) as archive:
-    #     print(f"Exctracting tarfile to {model_directory}")
-    #     archive.extractall(path=model_directory)
-    # preprocess = joblib.load(os.path.join(model_directory, "model.joblib"))
-
 
 def evaluate(model, X_test, y_test, args):
     print("Validating LR model")
