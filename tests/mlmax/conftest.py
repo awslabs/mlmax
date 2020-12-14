@@ -59,7 +59,7 @@ def test_train_data_path():
 
 @pytest.fixture(scope="module")
 @dt.working_directory(__file__)
-def load_model():
+def load_joblib_model():
     model_path = "opt/ml/model/model.joblib"
     model = joblib.load(model_path)
     return model

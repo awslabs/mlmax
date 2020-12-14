@@ -74,9 +74,9 @@ def test_train(args):
 
 
 @dt.working_directory(__file__)
-def test_evaluate(load_model, args):
+def test_evaluate(load_joblib_model, args):
     X_train, y_train, X_test, y_test = read_processed_data(args)
-    report_dict = evaluate(load_model, X_test, y_test, args)
+    report_dict = evaluate(load_joblib_model, X_test, y_test, args)
     assert "accuracy" in report_dict.keys()
     assert "macro avg" in report_dict.keys()
     assert "f1-score" in report_dict["macro avg"].keys()
@@ -85,24 +85,13 @@ def test_evaluate(load_model, args):
 
 
 @dt.working_directory(__file__)
-def test_save_model(load_model, args):
-    save_model(load_model, args)
+def test_save_model(load_joblib_model, args):
+    save_model(load_joblib_model, args)
 
 
 @dt.working_directory(__file__)
 def test_main(args):
     main(args)
-
-
-# @dt.working_directory(__file__)
-# # def test_infer_preprocessing(input_data_path, args_infer):
-# def test_train(input_data_path, args_infer):
-#     """
-#     Test the data preprocessing in the inference.
-#     """
-#     test_featues = main(args_infer)
-
-#     # To do: add assertion
 
 
 @dt.working_directory(__file__)
