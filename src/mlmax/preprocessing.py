@@ -121,6 +121,14 @@ def parse_arg():
 
 
 def main(args):
+    """
+    To run locally:
+
+    DATA=s3://sagemaker-sample-data-us-east-1/processing/census/census-income.csv
+    aws s3 cp $DATA /tmp/input/
+    mkdir /tmp/{train,test,model}
+    python preprocessing.py --mode "train" --data-dir /tmp
+    """
     input_data_path = os.path.join(args.data_dir, args.data_input)
     df = read_data(input_data_path)
 
