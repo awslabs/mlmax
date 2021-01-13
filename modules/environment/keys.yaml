@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  KeyAlias:
+    Type: String
+
+Resources:
+  CustomerKey:
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: "2012-10-17"
+        Id: key1
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  - ""
+                  - - "arn:aws:iam::"
+                    - Ref: AWS::AccountId
+                    - :root
+            Action: kms:*
+            Resource: "*"
+
+  CustomerKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Ref KeyAlias
+      TargetKeyId:
+        Ref: CustomerKey
+
+Outputs:
+  CustomerKey:
+    Value: !Ref CustomerKey
+    Export:
+      Name: ExpCustomerKey
