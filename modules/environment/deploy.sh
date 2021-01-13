@@ -32,14 +32,14 @@ package () {
     # Package the aws cloud formation templates
     aws cloudformation package \
         --region ${REGION} \
-        --template-file templates/stacks.yaml \
+        --template-file stacks.yaml \
         --s3-bucket ${PACKAGE_BUCKET} \
         --s3-prefix clouformation-packaged \
-        --output-template-file templates/stacks_packaged.yaml
+        --output-template-file stacks_packaged.yaml
 
     # Validate the AWS cloud formation template
     aws cloudformation validate-template \
-        --template-body file://./templates/stacks_packaged.yaml
+        --template-body file://./stacks_packaged.yaml
 }
 
 deploy () {
@@ -47,11 +47,11 @@ deploy () {
     aws cloudformation deploy \
       --region=${REGION} \
       --stack-name ${STACK_NAME} \
-      --template-file ./templates/stacks_packaged.yaml \
+      --template-file ./stacks_packaged.yaml \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
       # --parameter-overrides $(cat config/deploy-${REGION}-${TARGET_ENV}.ini) \
 
-    rm -f ./templates/stacks_packaged.yaml
+    rm -f ./stacks_packaged.yaml
 }
 
 
