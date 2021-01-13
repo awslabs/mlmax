@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Create s3 buckets"
+Description: "Create S3 buckets that enforce encryption at rest and transit"
 
 Parameters:
   S3BucketName:
