@@ -1,6 +1,6 @@
 # Regulated Industry SageMaker Environment Setup
 
-The purpose of this guide is to setup a data science development environment in a regulated industry. This template will setup the minimum service such as SageMaker Notebook and S3 bucket for Data Scientist to start working on customer engagement.
+The purpose of this guide is to setup a data science development environment in a regulated industry. This template will setup the minimum service such as SageMaker Notebook and S3 bucket for Data Scientist to start working on customer engagement. There is also a EC2 instance with SSM agent that you can SSH in without bastian host using your existing key pair.
 
 # Use Case
 
@@ -51,3 +51,7 @@ The following endpoints have been added by default:
 ## VPC
 
 - Two Private subnets only across different avaiability zones
+
+## EC2
+
+- SSM Agent to support remote SSH using exisitng key pair
