@@ -1,12 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: "AWS::EC2::KeyPair::KeyName"
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
   S3BucketName:
     Type: String
-    Default: regulated-bucket1
+    Default: custom-regulated-bucket1
   Username:
     Type: String
-    Default: test1
+    Default: user1
   Internet:
     Type: String
     Default: Disabled
@@ -52,3 +56,14 @@ Resources:
         S3BucketName: !Ref S3BucketName
         Username: !Ref Username
         Internet: !Ref Internet
+
+  EC2:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - Storage
+      - Vpc
+    Properties:
+      TemplateURL: ./ec2.yaml
+      Parameters:
+        S3BucketName: !Ref S3BucketName
+        KeyName: !Ref KeyName
