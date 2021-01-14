@@ -85,7 +85,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security Group to allow use of VPC Endpoints.
-      GroupName: VPC-Endpoint
+      # GroupName: VPC-Endpoint
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp

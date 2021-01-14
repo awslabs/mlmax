@@ -32,7 +32,6 @@ Resources:
       DirectInternetAccess: !Ref Internet
       KmsKeyId: !ImportValue ExpCustomerKey
       SecurityGroupIds:
-        #- !Ref SecurityGroupdId
         - !ImportValue ExpVPCEndpointSecurityGroup
       SubnetId: !ImportValue ExpPrivateSubnet1
       Tags:
