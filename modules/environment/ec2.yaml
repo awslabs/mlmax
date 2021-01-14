@@ -2,46 +2,42 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
   InstanceType:
-    Description: WebServer EC2 instance type
+    Description: EC2 instance type
     Type: String
     Default: m5.xlarge
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: "AWS::EC2::KeyPair::KeyName"
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
-  SSHLocation:
-    Description: The IP address range that can be used to SSH to the EC2 instances
-    Type: String
-    MinLength: "9"
-    MaxLength: "18"
-    Default: 0.0.0.0/0
-    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+
   S3BucketName:
     Type: String
 
 Mappings:
   AWSRegion2AMI:
     ap-southeast-1:
-      AMZN2: ami-08f9c79187d4e4401
+      AMZN2: ami-0187d3074098799c4
     ap-southeast-2:
-      AMZN2: ami-0f86cfc4495d1ef9f
+      AMZN2: ami-0d10b7763a48a4bf0
+    us-east-1:
+      AMZN2: ami-00f44084952227ef0
+    us-east-2:
+      AMZN2: ami-0a48b929b40736cc3
 
 Resources:
   EC2Instance:
     Type: "AWS::EC2::Instance"
     Properties:
-      UserData: !Base64
-      #  Set variable name
-        "Fn::Join":
-          - ""
-          - - IPAddress=
-            - !Ref IPAddress
+      Tags:
+        - Key: "Name"
+          Value: "regulated-env"
       # Start ssm agent
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          # sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          sudo systemctl enable amazon-ssm-agent
+          sudo systemctl start amazon-ssm-agent
 
       InstanceType: !Ref InstanceType
       SecurityGroups:
@@ -58,21 +54,10 @@ Resources:
       GroupDescription: Enable SSH access
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: "22"
-          ToPort: "22"
-          CidrIp: !Ref SSHLocation
-        - IpProtocol: tcp
           Description: HTTPS
           FromPort: 443
           ToPort: 443
           CidrIp: 10.0.0.0/0
-  IPAddress:
-    Type: "AWS::EC2::EIP"
-  IPAssoc:
-    Type: "AWS::EC2::EIPAssociation"
-    Properties:
-      InstanceId: !Ref EC2Instance
-      EIP: !Ref IPAddress
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -116,6 +101,3 @@ Outputs:
   InstanceId:
     Description: InstanceId of the newly created EC2 instance
     Value: !Ref EC2Instance
-  InstanceIPAddress:
-    Description: IP address of the newly created EC2 instance
-    Value: !Ref IPAddress
