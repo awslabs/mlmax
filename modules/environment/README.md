@@ -15,11 +15,9 @@ Very often in a regulated industry such as Financial Service and Healthcase wher
 
 # Setup Guide
 
-Execute the following command to bring up the environment using cloudformation template. If `rain` command is not available, you can run `make install_rain` (for OXS) on  project directory.
+1) Execute `rain deploy stacks.yaml <stack-name>` to deploy environment using cloudformation template. If `rain` command is not available, you can run `brew install rain` (for OXS).
 
-```
-rain deploy stacks.yaml <stack_name>
-```
+2) Alternatively, you can deploy using `deploy.sh [stack-name] [cloudformatin-bucket]`, which will use the keyname in `config/config.ini`.
 
 # Services
 
