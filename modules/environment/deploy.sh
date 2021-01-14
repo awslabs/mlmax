@@ -2,7 +2,7 @@
 
 # example command: ./deploy.sh mlmax-env-stack sagemaker-us-east-1234
 STACK_NAME=$1
-PACKAGE_BUCKET=${2:-sagemaker-us-east-1-671846148176}
+PACKAGE_BUCKET=${2:-sagemaker-ap-southeast-1-342474125894}
 
 get_region() {
   REGION=$(aws configure get region)
@@ -16,16 +16,15 @@ get_region() {
 
 
 get_config() {
-  # if [ ! -f config/deploy-${REGION}-${TARGET_ENV}.ini ]; then
-  #   echo "Config file does not exist for ${REGION}, ${TARGET_ENV}";
-  #   exit 1;
-  # else
-  #   echo "Config file exists";
-  #   . config/deploy-${REGION}-${TARGET_ENV}.ini
-  #   STACK_NAME="$PipelineName-$TargetEnv"
-  #   echo $STACK_NAME
-  # fi
-  echo $STACK_NAME
+  if [ ! -f config/config.ini ]; then
+    echo "Config file does not exist";
+    exit 1;
+  else
+    echo "Config file exists";
+    . config/config.ini
+    echo "STACK_NAME: ${STACK_NAME}"
+    echo "KeyName: ${KeyName}"
+  fi
 }
 
 package () {
@@ -48,8 +47,8 @@ deploy () {
       --region=${REGION} \
       --stack-name ${STACK_NAME} \
       --template-file ./stacks_packaged.yaml \
-      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-      # --parameter-overrides $(cat config/deploy-${REGION}-${TARGET_ENV}.ini) \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+      --parameter-overrides $(cat config/config.ini)
 
     rm -f ./stacks_packaged.yaml
 }
