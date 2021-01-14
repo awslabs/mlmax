@@ -9,9 +9,11 @@ Parameters:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: "AWS::EC2::KeyPair::KeyName"
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
-
   S3BucketName:
     Type: String
+  EnvironmentName:
+    Type: String
+    Default: regulated-env
 
 Mappings:
   AWSRegion2AMI:
@@ -29,41 +31,48 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       Tags:
-        - Key: "Name"
-          Value: "regulated-env"
+        - Key: Name
+          Value: !Ref EnvironmentName
       # Start ssm agent
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          # sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
           sudo systemctl enable amazon-ssm-agent
           sudo systemctl start amazon-ssm-agent
 
       InstanceType: !Ref InstanceType
-      SecurityGroups:
-        - !Ref InstanceSecurityGroup
+      SecurityGroupIds:
+        - !ImportValue ExpVPCEndpointSecurityGroupId
+        # - sg-07f09c8f58aceeb91
+      SubnetId: !ImportValue ExpPrivateSubnet1
+      # SubnetId: subnet-0087fdfd243fc119f
       KeyName: !Ref KeyName
       ImageId: !FindInMap
         - AWSRegion2AMI
         - !Ref "AWS::Region"
         - AMZN2
       IamInstanceProfile: !Ref InstanceProfile
-  InstanceSecurityGroup:
-    Type: "AWS::EC2::SecurityGroup"
-    Properties:
-      GroupDescription: Enable SSH access
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          Description: HTTPS
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 10.0.0.0/0
+      # SecurityGroups:
+      #   - !Ref InstanceSecurityGroup
+
+  # InstanceSecurityGroup:
+  #   Type: "AWS::EC2::SecurityGroup"
+  #   Properties:
+  #     GroupDescription: Security group
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         Description: HTTPS
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 10.0.0.0/0
+
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       Path: /
       Roles:
         - !Ref InstanceRole
+
   InstanceRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -82,6 +91,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
   # Custom inline policy
   S3PolicyIL:
     Type: AWS::IAM::ManagedPolicy
@@ -97,6 +107,9 @@ Resources:
             Resource:
               - !Sub "arn:aws:s3:::${S3BucketName}"
               - !Sub "arn:aws:s3:::${S3BucketName}/*"
+              - arn:aws:s3:::patch-baseline-snapshot-region/*
+              - arn:aws:s3:::aws-ssm-region/*
+
 Outputs:
   InstanceId:
     Description: InstanceId of the newly created EC2 instance

@@ -53,7 +53,8 @@ The following endpoints have been added by default:
 ## EC2
 
 - SSM Agent to support remote SSH using exisitng key pair.
-- First verify that Session Manager Plugin is installed on your local workstation by running the command below:
+- First verify that Session Manager Plugin is installed on your local workstation by running the command below
+- Or follow the instruction [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify) to install SSM agent
 
 ```
 aws ssm start-session --target <ec2-instance-id>
