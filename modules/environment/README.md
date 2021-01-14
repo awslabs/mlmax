@@ -46,12 +46,30 @@ The following endpoints have been added by default:
 
 ## KMS
 
-- Generate customer managed key
+- Generate a customer managed key
 
 ## VPC
 
-- Two Private subnets only across different avaiability zones
+- Two Private Subnets only across different avaiability zones
 
 ## EC2
 
-- SSM Agent to support remote SSH using exisitng key pair
+- SSM Agent to support remote SSH using exisitng key pair.
+- First verify that Session Manager Plugin is installed on your local workstation by running the command below:
+
+```
+aws ssm start-session --target <ec2-instance-id>
+```
+
+- Update SSH config to be able to SSH to EC2 using command `ssh ec2-ssm`.
+
+```
+# Add the following in your SSH config
+
+Host ec2-ssm
+    HostName <ec2-instance-id>
+    User ec2-user
+    IdentityFile /path/to/keypair/pemfile
+    ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
+
+```
