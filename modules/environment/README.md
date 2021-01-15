@@ -1,6 +1,6 @@
 # Regulated Industry SageMaker Environment Setup
 
-The purpose of this guide is to setup a data science development environment in a regulated industry. This template will setup the minimum service such as SageMaker Notebook and S3 bucket for Data Scientist to start working on customer engagement. There is also a EC2 instance with SSM agent that you can SSH in without bastian host using your existing key pair.
+The purpose of this guide is to setup a data science development environment in a regulated industry. This template will setup the minimum service such as bastianless EC2 instance, SageMaker Notebook and S3 bucket for Data Scientist to start working on customer engagement.
 
 # Use Case
 
@@ -15,9 +15,13 @@ Very often in a regulated industry such as Financial Service and Healthcase wher
 
 # Setup Guide
 
-1) Execute `rain deploy stacks.yaml <stack-name>` to deploy environment using cloudformation template. If `rain` command is not available, you can run `brew install rain` (for OXS).
+1) Update the following config in `config/config.ini`
+    - KeyName: Existing EC2 key pair name that you have access to the private file
+    - S3BucketName: Unique S3 bucket name for project
 
-2) Alternatively, you can deploy using `deploy.sh [stack-name] [cloudformatin-bucket]`, which will use the keyname in `config/config.ini`.
+2) Get ready a S3 bucket name in the same region to store cloudformation intermediate metedata
+
+3) To deploy, run the command `deploy.sh [stack-name] [cloudformatin-bucket]`
 
 # Services
 
@@ -33,7 +37,7 @@ Very often in a regulated industry such as Financial Service and Healthcase wher
 
 ## VPC Endpoint
 
-The following endpoints have been added by default:
+The following endpoints have been added by default, additional endpoint can be added as necessary.
 
 - s3
 - git-codecommit, codecommit
@@ -41,6 +45,7 @@ The following endpoints have been added by default:
 - ecr.api, ec.dkr
 - sts
 - logs
+- ssm
 
 ## KMS
 
@@ -52,7 +57,7 @@ The following endpoints have been added by default:
 
 ## EC2
 
-- SSM Agent to support remote SSH using exisitng key pair.
+- SSM Agent to support remote SSH using exisitng key pair
 - First verify that Session Manager Plugin is installed on your local workstation by running the command below
 - Or follow the instruction [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify) to install SSM agent
 

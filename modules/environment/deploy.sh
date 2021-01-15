@@ -2,7 +2,7 @@
 
 # example command: ./deploy.sh mlmax-env-stack sagemaker-us-east-1234
 STACK_NAME=$1
-PACKAGE_BUCKET=${2:-sagemaker-ap-southeast-1-342474125894}
+PACKAGE_BUCKET=$2
 
 if [ "$#" -ne 2 ]; then
     echo "Missing argument"
