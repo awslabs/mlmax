@@ -33,38 +33,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref EnvironmentName
-      # Start ssm agent
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          sudo systemctl enable amazon-ssm-agent
-          sudo systemctl start amazon-ssm-agent
 
       InstanceType: !Ref InstanceType
       SecurityGroupIds:
         - !ImportValue ExpVPCEndpointSecurityGroupId
-        # - sg-07f09c8f58aceeb91
       SubnetId: !ImportValue ExpPrivateSubnet1
-      # SubnetId: subnet-0087fdfd243fc119f
       KeyName: !Ref KeyName
       ImageId: !FindInMap
         - AWSRegion2AMI
         - !Ref "AWS::Region"
         - AMZN2
       IamInstanceProfile: !Ref InstanceProfile
-      # SecurityGroups:
-      #   - !Ref InstanceSecurityGroup
-
-  # InstanceSecurityGroup:
-  #   Type: "AWS::EC2::SecurityGroup"
-  #   Properties:
-  #     GroupDescription: Security group
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         Description: HTTPS
-  #         FromPort: 443
-  #         ToPort: 443
-  #         CidrIp: 10.0.0.0/0
 
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
@@ -92,7 +71,6 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
 
-  # Custom inline policy
   S3PolicyIL:
     Type: AWS::IAM::ManagedPolicy
     Properties:

@@ -31,8 +31,6 @@ Resources:
 
   Vpc:
     Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - Keys
     Properties:
       TemplateURL: ./vpc.yaml
 
