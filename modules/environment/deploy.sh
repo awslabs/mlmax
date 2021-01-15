@@ -1,8 +1,16 @@
-#!/bin/bash -ex
+#!/bin/bash
 
 # example command: ./deploy.sh mlmax-env-stack sagemaker-us-east-1234
 STACK_NAME=$1
 PACKAGE_BUCKET=${2:-sagemaker-ap-southeast-1-342474125894}
+
+if [ "$#" -ne 2 ]; then
+    echo "Missing argument"
+    echo
+    echo "Usage: deploy.sh mlmax-env-stack sagemaker-us-east-1234"
+    echo
+    exit 1
+fi
 
 get_region() {
   REGION=$(aws configure get region)
@@ -24,6 +32,7 @@ get_config() {
     . config/config.ini
     echo "STACK_NAME: ${STACK_NAME}"
     echo "KeyName: ${KeyName}"
+    echo "S3BucketName: ${S3BucketName}"
   fi
 }
 
