@@ -22,7 +22,6 @@ get_region() {
   fi
 }
 
-
 get_config() {
   if [ ! -f config/config.ini ]; then
     echo "Config file does not exist";
@@ -35,6 +34,16 @@ get_config() {
     echo "S3BucketName: ${S3BucketName}"
   fi
 }
+
+check_bucket_exist() {
+    if aws s3api head-bucket --bucket ${S3BucketName} 2>/dev/null
+    then
+        echo
+        echo "S3 bucket name already exist, please use another name."
+        exit 1
+    fi
+}
+
 
 package () {
     # Package the aws cloud formation templates
@@ -65,5 +74,6 @@ deploy () {
 
 get_region
 get_config
-package
-deploy
+check_bucket_exist
+# package
+# deploy
