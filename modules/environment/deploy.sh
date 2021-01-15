@@ -75,5 +75,5 @@ deploy () {
 get_region
 get_config
 check_bucket_exist
-# package
-# deploy
+package
+deploy
