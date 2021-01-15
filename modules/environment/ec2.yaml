@@ -44,6 +44,15 @@ Resources:
         - !Ref "AWS::Region"
         - AMZN2
       IamInstanceProfile: !Ref InstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp3
+            Iops: 600
+            DeleteOnTermination: true
+            Encrypted: true
+            KmsKeyId: !ImportValue ExpCustomerKey
 
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
