@@ -19,9 +19,12 @@ Very often in a regulated industry such as Financial Service and Healthcase wher
     - KeyName: Existing EC2 key pair name that you have access to the private file
     - S3BucketName: Unique S3 bucket name for project
 
-2) Get ready a S3 bucket name in the same region to store cloudformation intermediate metedata
+2) Prepare a S3 bucket in the same region to store cloudformation
+intermediate metedata. This could be an existing bucket or a new bucket. You
+must be able to write to this bucket. This is a different bucket than the one 
+specified in Step 1.
 
-3) To deploy, run the command `deploy.sh [stack-name] [cloudformatin-bucket]`
+3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket]`
 
 # Services
 
