@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "SageMaker Notebook"
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: regulated-bucket
+  Username:
+    Type: String
+    Default: myname
+  SecurityGroupdId:
+    Type: String
+    Default: sg-013fbaaa3408316d0
+  SubnetId:
+    Type: String
+    Default: subnet-0cd9107f92c02ca23
+  Internet:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+      - Enabled
+      - Disabled
+
+Resources:
+  NotebookInstance:
+    Type: "AWS::SageMaker::NotebookInstance"
+    Properties:
+      NotebookInstanceName: !Ref Username
+      InstanceType: "ml.t2.medium"
+      RoleArn: !GetAtt SagemakerRole.Arn
+      VolumeSizeInGB: 20
+      DirectInternetAccess: !Ref Internet
+      KmsKeyId: !ImportValue ExpCustomerKey
+      SecurityGroupIds:
+        - !ImportValue ExpVPCEndpointSecurityGroup
+      SubnetId: !ImportValue ExpPrivateSubnet1
+      Tags:
+        - Key: Name
+          Value: !Ref Username
+
+  SagemakerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref S3Policy
+        - arn:aws:iam::aws:policy/AWSCodeCommitFullAccess
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+
+  S3Policy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: "/"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowRWAccessToBucket
+            Effect: Allow
+            Action:
+              - "s3:*"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketName}"
+              - !Sub "arn:aws:s3:::${S3BucketName}/*"
+
+Outputs:
+  BasicNotebookInstanceId:
+    Value: !Ref NotebookInstance

@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: "AWS::EC2::KeyPair::KeyName"
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  S3BucketName:
+    Type: String
+    Default: custom-regulated-bucket1
+  Username:
+    Type: String
+    Default: user1
+  Internet:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+      - Enabled
+      - Disabled
+  KeyAlias:
+    Type: String
+    Default: alias/regulated-key1
+
+Resources:
+  Keys:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./keys.yaml
+      Parameters:
+        KeyAlias: !Ref KeyAlias
+
+  Vpc:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./vpc.yaml
+
+  Storage:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - Keys
+    Properties:
+      TemplateURL: ./s3.yaml
+      Parameters:
+        S3BucketName: !Ref S3BucketName
+
+  Sagemaker:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - Storage
+      - Vpc
+    Properties:
+      TemplateURL: ./sagemaker_nb.yaml
+      Parameters:
+        S3BucketName: !Ref S3BucketName
+        Username: !Ref Username
+        Internet: !Ref Internet
+
+  EC2:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - Storage
+      - Vpc
+      - Keys
+    Properties:
+      TemplateURL: ./ec2.yaml
+      Parameters:
+        S3BucketName: !Ref S3BucketName
+        KeyName: !Ref KeyName

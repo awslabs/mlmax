@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Create S3 buckets that enforce encryption at rest and transit"
+
+Parameters:
+  S3BucketName:
+    Description: "Name of the S3 bucket to store the data."
+    Type: String
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              KMSMasterKeyID: !ImportValue ExpCustomerKey
+              SSEAlgorithm: aws:kms
+    DeletionPolicy: Retain
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: S3Bucket
+      PolicyDocument:
+        Statement:
+          - Sid: "DenyUnEncryptedObjectUploads"
+            Action:
+              - "s3:PutObject"
+            Effect: "Deny"
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:s3:::"
+                  - Ref: "S3Bucket"
+                  - "/*"
+            Principal: "*"
+            Condition:
+              StringNotEquals:
+                "s3:x-amz-server-side-encryption":
+                  - "aws:kms"
+          - Sid: "EnforceSSl"
+            Action:
+              - "s3:*"
+            Effect: "Deny"
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:s3:::"
+                  - Ref: "S3Bucket"
+                  - "/*"
+            Principal: "*"
+            Condition:
+              Bool:
+                "aws:SecureTransport":
+                  - "false"
+
+Outputs:
+  S3Bucket:
+    Value: !Ref S3Bucket
