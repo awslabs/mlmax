@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from setuptools import find_packages, setup
 
@@ -11,7 +12,7 @@ def read(fname):
 
 
 # Declare minimal set for installation
-required_packages = []
+required_packages: List[str] = []
 
 setup(
     name=_pkg,
@@ -20,17 +21,15 @@ setup(
     version=_version,
     description="This package provides a template for ML Inference and Training",
     long_description=read("README.md"),
-    author="Firstname Lastname",
-    author_email="first.last@email.com",
-    url=f"https://github.com/abcd/{_pkg}/",
-    download_url="",
+    author="Amazon Web Services",
+    url=f"https://github.com/awslabs/{_pkg}/",
     project_urls={
-        "Bug Tracker": f"https://github.com/abcd/{_pkg}/issues/",
+        "Bug Tracker": f"https://github.com/awslabs/{_pkg}/issues/",
         "Documentation": f"https://{_pkg}.readthedocs.io/en/stable/",
-        "Source Code": f"https://github.com/abcd/{_pkg}/",
+        "Source Code": f"https://github.com/awslabs/{_pkg}/",
     },
-    license="MIT",
-    keywords="word1 word2 word3",
+    license="Apache License 2.0",
+    keywords="ML Amazon AWS AI template",
     platforms=["any"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
