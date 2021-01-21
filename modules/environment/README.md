@@ -11,7 +11,7 @@ Very often in a regulated industry such as Financial Service and Healthcase wher
 
 # Architecture Diagram
 
-![Architecture](images/architecture.jpg)
+![Architecture](images/architecture.png)
 
 # Setup Guide
 
