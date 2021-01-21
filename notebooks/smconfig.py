@@ -8,6 +8,10 @@ Tag = Dict[str, str]
 Tags = List[Tag]
 VpcConfig = Dict[str, List[str]]
 
+s3_bucket = (
+    "s3://abcd"  # or os.environ['S3_BUCKET'], depending on your particular setup.
+)
+
 
 class SmKwargs:
     def __init__(
