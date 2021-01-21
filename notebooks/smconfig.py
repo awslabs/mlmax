@@ -124,6 +124,35 @@ class SmKwargs:
             )
         return self._processing
 
+class SmNoKwargs:
+    def __init__(self, role):
+        self.d = dict(role=role)
+
+    @property
+    def tags(self) -> None:
+        return None
+
+    @property
+    def train(self) -> Kwargs:
+        return self.d
+
+    @property
+    def model(self) -> Kwargs:
+        return self.d
+
+    @property
+    def bt(self) -> Kwargs:
+        return {}
+
+    @property
+    def processing(self) -> Kwargs:
+        return self.d
+
+
+def endslash(s: str) -> str:
+    if s[-1] != "/":
+        s += "/"
+    return s
 
 # Force every new project to review the above mandatory configurations.
 raise NotImplementedError("Please review this module, then disable this exception")
