@@ -8,6 +8,7 @@ Tag = Dict[str, str]
 Tags = List[Tag]
 VpcConfig = Dict[str, List[str]]
 
+# Change me!
 s3_bucket = (
     "s3://abcd"  # or os.environ['S3_BUCKET'], depending on your particular setup.
 )
@@ -15,6 +16,7 @@ s3_bucket = (
 
 class SmPrivateKwargs:
     """Change me!"""
+
     def __init__(
         self,
         role: str,
@@ -125,8 +127,10 @@ class SmPrivateKwargs:
             )
         return self._processing
 
+
 class SmNoKwargs:
     """Default kwargs to whatever in the SageMaker SDK."""
+
     def __init__(self, role):
         self.d = dict(role=role)
 
@@ -158,8 +162,11 @@ def endslash(s: str) -> str:
 
 
 # Change me!
-#SmKwargs = SmPrivateKwargs
-SmKwargs = SmNoKwargs
+# - SmNoKwargs: when using SageMaker default config.
+# - SmPrivateKwargs: when using specific settings (e.g., your private VPC).
+#   You need to review and make necessary changes to this class.
+SmKwargs = SmPrivateKwargs
+# SmKwargs = SmNoKwargs
 
 # Force every new project to review the above mandatory configurations.
 raise NotImplementedError("Please review this module, then disable this exception")
