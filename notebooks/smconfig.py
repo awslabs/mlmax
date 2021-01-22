@@ -13,7 +13,8 @@ s3_bucket = (
 )
 
 
-class SmKwargs:
+class SmPrivateKwargs:
+    """Change me!"""
     def __init__(
         self,
         role: str,
@@ -125,6 +126,7 @@ class SmKwargs:
         return self._processing
 
 class SmNoKwargs:
+    """Default kwargs to whatever in the SageMaker SDK."""
     def __init__(self, role):
         self.d = dict(role=role)
 
@@ -153,6 +155,11 @@ def endslash(s: str) -> str:
     if s[-1] != "/":
         s += "/"
     return s
+
+
+# Change me!
+#SmKwargs = SmPrivateKwargs
+SmKwargs = SmNoKwargs
 
 # Force every new project to review the above mandatory configurations.
 raise NotImplementedError("Please review this module, then disable this exception")
