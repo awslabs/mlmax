@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+## 🐛 Bug report
+
 - [ ] I have checked that this issue has not already been reported.
 
 ### Describe the bug

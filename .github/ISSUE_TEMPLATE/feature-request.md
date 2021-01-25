@@ -1,11 +1,14 @@
 ---
-name: Feature request
+name: '\U0001F680 Feature request'
 about: Suggest new functionality for this library
 title: ''
 labels: 'enhancement'
 assignees: ''
 
 ---
+
+## 🚀 Feature request
+
 <!--
 Thank you for suggesting an idea to improve the mlmax user experience.
 
