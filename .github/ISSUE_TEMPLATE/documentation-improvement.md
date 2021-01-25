@@ -1,5 +1,5 @@
 ---
-name: '\U0001F4DA Documentation request'
+name: '\U0001F4DA Documentation improvement'
 about: Request improved documentation
 title: ''
 labels: 'docs'
@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-## 📚 Documentation request
+## 📚 Documentation improvement
 
 ### What did you find confusing? Please describe.
 A clear and concise description of what you found confusing. Ex. I tried to
@@ -17,5 +17,5 @@ A clear and concise description of what you found confusing. Ex. I tried to
 A clear and concise description of where documentation was lacking and how it
 can be improved.
 
-### Additional context
-Add any other context or screenshots about the documentation request here.
+### Could you contribute? (Optional) 
+A description of how you can help, e.g. submitting a PR.
