@@ -53,6 +53,26 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
 
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private Routes
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet2
+
   VPCEndpointSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -75,6 +95,8 @@ Resources:
       VpcEndpointType: Gateway
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PrivateRouteTable
 
   CodeCommitVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -247,3 +269,6 @@ Outputs:
     Value: !GetAtt VPCEndpointSecurityGroup.GroupId
     Export:
       Name: ExpVPCEndpointSecurityGroupId
+
+  PrivateRouteTableId:
+    Value: !Ref PrivateRouteTable
