@@ -84,6 +84,8 @@ def get_pipeline(
     processing_instance_type = ParameterString(name="ProcessingInstanceType", default_value="ml.m5.xlarge")
     training_instance_type = ParameterString(name="TrainingInstanceType", default_value="ml.m5.xlarge")
     model_approval_status = ParameterString(name="ModelApprovalStatus", default_value="Approved")
+    # TODO: Bucket name to be configurable
+
     input_data = ParameterString(
         name="InputDataUrl",
         default_value="s3://wy-project-template/data/abalone-dataset.csv",
@@ -252,8 +254,9 @@ def get_pipeline(
 
 if __name__ == "__main__":
     region = boto3.Session().region_name
+    # TODO: Use generic retrieval method
     role = sagemaker.get_execution_role()
-    role = "arn:aws:iam::342474125894:role/service-role/AmazonSageMaker-ExecutionRole-20190405T234154"
+    role = "arn:aws:iam::476245144988:role/service-role/AmazonSageMaker-ExecutionRole-20191204T094674"
     default_bucket = sagemaker.session.Session().default_bucket()
 
     # Change these to reflect your project/business name or if you want to separate ModelPackageGroup/Pipeline from the rest of your team

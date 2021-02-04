@@ -5,11 +5,3 @@ pydocstyle
 pytest
 mypy
 isort>=5
-#rope
-tox
-sphinx
-pre-commit
-
-# CLean up dev env using "setup.py clean --all"
-setupext-janitor
-git-remote-codecommit
