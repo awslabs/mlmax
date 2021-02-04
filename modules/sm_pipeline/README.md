@@ -40,7 +40,7 @@ execution = pipeline.start(
 
 This section demonstrate the standard development approach depending on the maturity of the python script at different stages.
 
-### 1. Local standlone script development
+### Local Standlone script development
 
 Testing of standalone using normal python run or using VSCODE Debugger:
 
@@ -53,5 +53,3 @@ python src/train.py
 # Copy model binary gzip from S3 to local /opt/ml/processing/model/model.tar.gz
 python src/evaluate.py
 ```
-
-- To Debug using "preprocess" profile in `launch.json`.
