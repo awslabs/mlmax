@@ -21,10 +21,6 @@ Output dataset will be saved to:
     "{base_dir}/validation/validation.csv"
     "{base_dir}/test/test.csv"
 
-
-Tips:
-Refer to "/Users/yihyap/vscode/template_folders/sagemaker-custom-containers/processing-container" for more information
-
 """
 import argparse
 import logging

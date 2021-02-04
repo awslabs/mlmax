@@ -5,15 +5,15 @@ This is a quick start up guide on using sagemaker pipeline on your favourite IDE
 ## Prequisite
 
 - SSH to EC2 Deep Learning AMI
-- Git clone this repo
-- Make sure vscode terminal is at project root folder
+- git clone this repo
+- Make sure vscode shell terminal is at `mlmax/modules/sm_pipeline` directory
 
 ## Setup
 
 Run setup script to setup local directory to mirrow directory in sagemaker processing/training docker container. This will facilitate local testing to speed up testing iteration
 
 ```bash
-./setup.sh
+./setup/setup.sh
 
 ```
 
@@ -36,8 +36,7 @@ Testing of standalone using normal python run or using VSCODE Debugger:
 - To Run:
 
 ```bash
-python preprocess.py
-
+python src/preprocess.py
 ```
 
 - To Debug using "preprocess" profile in `launch.json`.
@@ -79,15 +78,3 @@ To trigger the pipeline, update project and configurable parameters, then execut
 ```bash
 python pipeline.py
 ```
-
-## Main Stages
-
-- Preprocessing (preprocess.py)
-- Training (model.py, train.py)
-- Evaluation (evaluate.py)
-
-## Development step
-
-1) Start by building python script like preprocess.py, then test python script `src/project/preprocess.py`
-2) Test python script on sagemaker framework/processor. Both local mode then sagemaker mode. `tests/test_sklearn_processor.py`
-3) Test on pipeline `src/project/pipeline.py`
