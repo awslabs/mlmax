@@ -22,10 +22,10 @@ Run setup script to setup local directory to mirrow directory in sagemaker proce
 This is a quick creation and execution of pipeline using default abalone dataset, which will preprocess, train, and evaluate the model.
 
 ```bash
-python pipeline.py
+python src/pipeline.py
 ```
 
-## Development - Processing
+## Development
 
 This section demonstrate the standard development approach depending on the maturity of the python script at different stages.
 
@@ -37,44 +37,8 @@ Testing of standalone using normal python run or using VSCODE Debugger:
 
 ```bash
 python src/preprocess.py
+python src/train.py
+python src/evaluate.py
 ```
 
 - To Debug using "preprocess" profile in `launch.json`.
-
-### 2. Local Test with SageMaker processors
-
-Update the instance type to switch between `local` and `sagemaker` modes.
-
-```bash
-python test_sklearn_processor.py
-```
-
-## Development - Model Training
-
-### 1. Local standlone training script development
-
-- To Run:
-
-```bash
-python model.py
-python train.py
-
-```
-
-- To Debug using "train" profile in `launch.json`.
-
-### 2. Local Test with SageMaker processors
-
-Update the instance type to switch between `local` and `sagemaker` modes. Set data channel to use either local file or download from S3.
-
-```bash
-python test_pytorch_training.py
-```
-
-## Development - Execute pipeline
-
-To trigger the pipeline, update project and configurable parameters, then execute:
-
-```bash
-python pipeline.py
-```
