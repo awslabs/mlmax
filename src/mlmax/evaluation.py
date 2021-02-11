@@ -59,6 +59,13 @@ def parse_arg():
 
 
 def main(args):
+    """
+    To run locally:
+
+    cd /tmp/model && tar -zcvf model.tar.gz ./model.joblib && cd -
+    mkdir /tmp/evaluation
+    python evaluation.py --data-dir /tmp --model-input /tmp/model/model.tar.gz
+    """
     X_test, y_test = read_features(args)
     model = load_model(args)
     report_dict = evaluate(model, X_test, y_test, args)
