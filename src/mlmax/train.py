@@ -20,12 +20,14 @@ def read_xy(data_dir, mode="train"):
 
 def read_processed_data(args):
     """
-    Note that the directories passed by SageMaker are:
+    Note that the directories where data is stored on SageMaker are:
         /opt/ml/input/data/train
         /opt/ml/input/data/test
     """
-    X_train, y_train = read_xy(args.train, "train")
-    X_test, y_test = read_xy(args.test, "test")
+    train_dir = os.path.join(args.data_dir, "train")
+    test_dir = os.path.join(args.data_dir, "test")
+    X_train, y_train = read_xy(train_dir, "train")
+    X_test, y_test = read_xy(test_dir, "test")
     return X_train, y_train, X_test, y_test
 
 
@@ -56,8 +58,7 @@ def save_model(model, args):
 
 def parse_arg():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train", type=str, default="/opt/ml/input/data/train")
-    parser.add_argument("--test", type=str, default="/opt/ml/input/data/test")
+    parser.add_argument("--data-dir", type=str, default="/opt/ml/input/data")
     parser.add_argument("--model-dir", type=str, default="/opt/ml/model")
     args, _ = parser.parse_known_args()
     print(f"Received arguments {args}")
@@ -68,7 +69,7 @@ def main(args):
     """
     To run locally:
 
-    python train.py --train /tmp/train --test /tmp/test --model-dir /tmp/model
+    python train.py --data-dir /tmp --model-dir /tmp/model
     """
     X_train, y_train, X_test, y_test = read_processed_data(args)
     model = train(X_train, y_train, args)
