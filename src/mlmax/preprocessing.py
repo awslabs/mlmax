@@ -128,6 +128,7 @@ def main(args):
     aws s3 cp $DATA /tmp/input/
     mkdir /tmp/{train,test,model}
     python preprocessing.py --mode "train" --data-dir /tmp
+    rm model.joblib
     """
     input_data_path = os.path.join(args.data_dir, args.data_input)
     df = read_data(input_data_path)
