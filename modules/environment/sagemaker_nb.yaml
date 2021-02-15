@@ -8,12 +8,6 @@ Parameters:
   Username:
     Type: String
     Default: myname
-  SecurityGroupdId:
-    Type: String
-    Default: sg-013fbaaa3408316d0
-  SubnetId:
-    Type: String
-    Default: subnet-0cd9107f92c02ca23
   Internet:
     Type: String
     Default: Enabled
@@ -66,10 +60,22 @@ Resources:
           - Sid: AllowRWAccessToBucket
             Effect: Allow
             Action:
-              - "s3:*"
+              - "s3:GetObject*"
+              - "s3:PutObject*"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketName}/*"
+          - Sid: AllowListBucket
+            Effect: Allow
+            Action:
+              - "s3:ListBucket"
             Resource:
               - !Sub "arn:aws:s3:::${S3BucketName}"
-              - !Sub "arn:aws:s3:::${S3BucketName}/*"
+          - Sid: AllowKMS
+            Effect: Allow
+            Action:
+              - "kms:Decrypt"
+              - "kms:GenerateDataKey"
+            Resource: "*"
 
 Outputs:
   BasicNotebookInstanceId:

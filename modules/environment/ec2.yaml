@@ -90,13 +90,24 @@ Resources:
           - Sid: AllowRWAccessToBucket
             Effect: Allow
             Action:
-              - "s3:*"
+              - "s3:GetObject*"
+              - "s3:PutObject*"
             Resource:
-              - !Sub "arn:aws:s3:::${S3BucketName}"
               - !Sub "arn:aws:s3:::${S3BucketName}/*"
               - arn:aws:s3:::patch-baseline-snapshot-region/*
               - arn:aws:s3:::aws-ssm-region/*
-
+          - Sid: AllowListBucket
+            Effect: Allow
+            Action:
+              - "s3:ListBucket"
+            Resource:
+              - !Sub "arn:aws:s3:::${S3BucketName}"
+          - Sid: AllowKMS
+            Effect: Allow
+            Action:
+              - "kms:Decrypt"
+              - "kms:GenerateDataKey"
+            Resource: "*"
 Outputs:
   InstanceId:
     Description: InstanceId of the newly created EC2 instance
