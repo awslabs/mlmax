@@ -11,6 +11,9 @@ Welcome to mlmax's documentation!
    :caption: Contents:
 
    README.md
+   TRAINING.md
+   INFERENCE.md
+   ENVIRONMENT.md
    PRFAQ.md
 
 

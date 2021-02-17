@@ -1,4 +1,4 @@
-# What is ML Max?
+# ML Max
 Delivering ML solutions to production is hard. It is difficult to know where to
 start, what tools to use, and whether you are doing it right. Often each
 individual professional does it a different way based on their individual
@@ -15,16 +15,20 @@ design choices.
 
 ## Quick Start Usage
 
-1. [**ML Training Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline): This is the process to set up standard training
-   pipelines for machine learning models enabling both immediate
-experimentation, as well as tracking and retraining models over time.
-2. [**ML Inference Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline): Deploys a model to be used by the business in
-html_theme = "alabaster"
-   production. Currently this is coupled quite closely to the ML training pipeline
-as there is a lot of overlap.
-3. [**Development environment**](https://github.com/awslabs/mlmax/blob/main/modules/environment): This module manages the provisioning of
-   resources and manages networking and security, providing the environment for data
-scientists and engineers to develop solutions.
+1. [**ML Training
+   Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/):
+This is the process to set up standard training pipelines for machine learning
+models enabling both immediate experimentation, as well as tracking and
+retraining models over time.
+2. [**ML Inference
+   Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/):
+Deploys a model to be used by the business in production. Currently this is
+coupled quite closely to the ML training pipeline as there is a lot of overlap.
+3. [**Development
+   environment**](https://github.com/awslabs/mlmax/blob/main/modules/environment/):
+This module manages the provisioning of resources and manages networking and
+security, providing the environment for data scientists and engineers to
+develop solutions.
 
 ## Training and Inference Pipeline
 
