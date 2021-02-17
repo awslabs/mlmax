@@ -58,7 +58,7 @@ that can be run locally as well as within SageMaker.
 Functions. All meta-data will be saved to S3 including the scripts, metrics,
 model, and preprocessing model.
 
-See [modules/pipeline](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/README.md) for quick start documentation.
+See [modules/pipeline](https://github.com/awslabs/mlmax/blob/main/modules/pipeline) for quick start documentation.
 
 **Q: What are the design principles that the Training and Inference pipeline was
 created with?**

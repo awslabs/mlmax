@@ -15,14 +15,14 @@ design choices.
 
 ## Quick Start Usage
 
-1. [**ML Training Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/README.md): This is the process to set up standard training
+1. [**ML Training Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline): This is the process to set up standard training
    pipelines for machine learning models enabling both immediate
 experimentation, as well as tracking and retraining models over time.
-2. [**ML Inference Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/README.md): Deploys a model to be used by the business in
+2. [**ML Inference Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline): Deploys a model to be used by the business in
 html_theme = "alabaster"
    production. Currently this is coupled quite closely to the ML training pipeline
 as there is a lot of overlap.
-3. [**Development environment**](https://github.com/awslabs/mlmax/blob/main/modules/environment/README.md): This module manages the provisioning of
+3. [**Development environment**](https://github.com/awslabs/mlmax/blob/main/modules/environment): This module manages the provisioning of
    resources and manages networking and security, providing the environment for data
 scientists and engineers to develop solutions.
 
@@ -33,7 +33,7 @@ Step Functions, and Amazon SageMaker.
 
 ![arch](https://github.com/awslabs/mlmax/raw/main/reports/figures/training-inference.png)
 
-See [quick start documentation](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/README.md) for details.
+See [quick start documentation](https://github.com/awslabs/mlmax/blob/main/modules/pipeline) for details.
 
 ## Environment
 
@@ -41,12 +41,12 @@ Get started with a working environment with encryption and network isolation.
 
 ![arch](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
 
-See [quick start documentation](https://github.com/awslabs/mlmax/blob/main/modules/environment/README.md) for details.
+See [quick start documentation](https://github.com/awslabs/mlmax/blob/main/modules/environment) for details.
 
 ## Links
 
-* [Creating a Training and Inference Pipeline](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/README.md)
-* [Setting up an Environment](https://github.com/awslabs/mlmax/blob/main/modules/environment/README.md)
+* [Creating a Training and Inference Pipeline](https://github.com/awslabs/mlmax/blob/main/modules/pipeline)
+* [Setting up an Environment](https://github.com/awslabs/mlmax/blob/main/modules/environment)
 * [PR FAQ](PRFAQ.md)
 * [Configuring your Jupyter Notebook](https://github.com/awslabs/mlmax/blob/main/notebooks/example_notebook.ipynb)
 * [Best Practices](https://github.com/awslabs/mlmax/blob/main/BEST_PRACTICES.md)
