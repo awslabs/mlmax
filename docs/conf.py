@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from recommonmark.parser import CommonMarkParser
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -36,6 +37,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
 ]
+
+# Markdown support
+source_suffix = [".rst", ".md"]
+
+source_parsers = {
+    ".md": CommonMarkParser,
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

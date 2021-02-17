@@ -1,11 +1,9 @@
-## Press Release
+## PRFAQ
 
 Now ML Engineers and Data Scientists can quickly create and use
 production-ready ML solutions on AWS. mlmax provides example templates for the
 delivery of custom ML solutions to production so you can get started quickly
 without having to make too many design choices.
-
-## FAQ
 
 **Q: What is the motivation for mlmax?**
 
@@ -60,7 +58,7 @@ that can be run locally as well as within SageMaker.
 Functions. All meta-data will be saved to S3 including the scripts, metrics,
 model, and preprocessing model.
 
-See [modules/pipeline](modules/pipeline/README.md) for quick start documentation.
+See [modules/pipeline](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/README.md) for quick start documentation.
 
 **Q: What are the design principles that the Training and Inference pipeline was
 created with?**
