@@ -1,20 +1,17 @@
-# ML technology best practices
+# ML Training and Inference Pipeline
 
-Delivering ML solutions to production is hard. It is difficult to know where to
-start, what tools to use, and whether you are doing it right. Often each
-individual professional does it a different way based on their individual
-experience or they use prescribed tools developed within their company. Either
-way this requires a lot of investment of time to firstly decide what to do and
-secondly to implement and maintain the infrastructure. There are many existing
-tools that make parts of the process faster but many months of work is still
-required to tie these together to deliver robust production infrastructure.
+## Design Principles
 
-This project provides an example so you can get started quickly without having
-to make many design choices. The aim is to standardize the approach and hence
-achieve efficiency in delivery. There are nine independent yet coherent
-modules:
+| Principle                                                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Separate definition and runtime for training/inference pipelines.              | One anti-pattern we have observed is that of the unicorn data scientist. This person is asked to do everything, from seeking business value, to developing models, to provisioning infrastructure. Creating a seperation of concerns between the individuals responsible for engineering the pipeline and individuals responsible for building the model recognizes the unique value that Data Scientist and ML Engineer provides while creating a work environment that stimulates collaboration.                                                                                          |
+| Use the same code for pre-processing in training and inference                 | The majority of time in most ML projects is allocated to data collection, data engineering, label and feature engineering. It is vital to ensure that the same code/logic is used by both the training and inference pipeline so that there are no opportunities for human errors and inconsistencies.                                                                                                                                                                                                                                                                                      |
+| Traceability between components of the training and inference pipelines.       | A well-governed machine learning pipelines provide clear lineage for all components of the training and inference pipeline definition and runtime. For the runtime traceability training pipeline and inference pipelines. Which data sources were used for training? What modelling techniques were used? What type of preprocessing was used? Where are the artifact’s stored? From the perspective of the pipeline definition, changes applied to pipelines should be tracked using versioning.                                                                                          |
+| Code should provide consistent results wherever it is run.                     | Data Scientists are used to programming in an environment that allows them interactively explore the data and get rapid results. Data engineers are used to submitting jobs that run end-to-end, anticipating what might happen and including appropriate measures for ensuring that the process is robust. It is important to keep both of these divergent approaches in mind when considering how to design a training and inference pipeline. A well designed Training and Inference pipeline will make it relatively easy to run the code and get consistent results in both scenarios. |
+| Promote modularity in the development of Training and Inference solutions.     | Training and inference pipelines can be broken down into several components such as data validation, data preprocessing, data combination, etc.... When designing training and inference pipelines it is important that these components are created such that they can be developed, tested, and maintained independently from one another.                                                                                                                                                                                                                                                |
+| Use on-demand compute, only paying for it when you need it for a specific job. | One of the anti-patterns we have observed is the attempt to treat the cloud as the same as an on-premise cluster of compute resources. But the cloud allows for fine-grained security and cost-control measures to decentralize the utilization of cloud resources. This enable cost-savings resulting from a pay-as-you-go model and empowers a growing Data Science organization to harness the power of cloud computing.                                                                                                                                                                 |
 
-## Quick Start Guide
+## Quick Start 
 
 ### 1. Clone repo
 ```
