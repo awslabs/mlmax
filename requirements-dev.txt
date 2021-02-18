@@ -4,3 +4,6 @@ flake8
 pre-commit
 pydocstyle
 sphinx
+sphinx-rtd-theme
+recommonmark
+sphinx-markdown-tables
