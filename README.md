@@ -12,7 +12,7 @@ ML Max is a set of example templates to accelerate the delivery of custom ML sol
 production so you can get started quickly without having to make too many
 design choices.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![Documentation Status](https://readthedocs.org/projects/mlmax/badge/?version=latest)](https://mlmax.readthedocs.io/en/latest/?badge=latest)
+[![](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![](https://readthedocs.org/projects/mlmax/badge/?version=latest)](https://mlmax.readthedocs.io/en/latest/?badge=latest)
 
 
 ## Quick Start

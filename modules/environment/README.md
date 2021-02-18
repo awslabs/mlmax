@@ -35,7 +35,7 @@ to be compliant for data science work. This template will setup the
 minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
 bucket for Data Scientist to start working on customer engagement.
 
-![Architecture](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
 
 **S3**
 
