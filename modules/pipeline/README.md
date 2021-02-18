@@ -1,5 +1,8 @@
 # ML Training and Inference Pipeline
 
+Create a semi-automated Training and Inference Pipeline using CloudFormation,
+Step Functions, and Amazon SageMaker. 
+
 ## Design Principles
 
 | Principle                                                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -13,27 +16,27 @@
 
 ## Quick Start
 
-### 1. Clone repo
+**1. Clone repo**
 ```
 conda create --name <name> python=3.7
 conda activate <name>
 git clone https://github.com/awslabs/mlmax.git
 ```
 
-### 2. Instal dependencies
+**2. Install dependencies**
 ```
 cd mlmax/modules/pipeline
 pip install -r requirements.txt
 ```
 
-### 3. Create the CloudFormation
+**3. Create the CloudFormation**
 ```
 cd modules/pipeline
 python training_pipeline_create.py
 python inference_pipeline_create.py
 ```
 
-### 4. Deploy the CloudFormation
+**4. Deploy the CloudFormation**
 
 You will need an S3 bucket for this step.
 
@@ -42,15 +45,24 @@ You will need an S3 bucket for this step.
 # ./deploy.sh dev sagemaker-us-east-1-1234
 ```
 
-### 5. Run the Training Pipeline
+**5. Run the Training Pipeline**
 ```
 # python training_pipeline_run -e <target_env>
 python training_pipeline_run.py dev
 ```
 
-### 6. Run the Inference Pipeline
+**6. Run the Inference Pipeline**
 ```
 # python inference_pipeline_run -e <target_env>
 python inference_pipeline_run.py dev
 ```
 
+## Architecture
+
+The ML training and inference pipeline consists of Sakemaker running within
+Step Functions. The code included in this module: 
+- Generates the cloudformation for the training and inference pipeline
+- Packages and deploys the cloudformation, (creating the State Machines)
+- Runs the traning and inference pipeline (executing the State Machines)
+
+![arch](https://github.com/awslabs/mlmax/raw/main/reports/figures/training-inference.png)

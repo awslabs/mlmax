@@ -15,7 +15,6 @@ Welcome to mlmax's documentation!
    ENVIRONMENT.md
    DATA.md
    UTILITIES.md
-   CONTRIBUTING.md
    PRFAQ.md
 
 

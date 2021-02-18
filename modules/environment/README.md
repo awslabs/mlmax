@@ -27,7 +27,7 @@ specified in Step 1.
 
 3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket]`
 
-## Services Used
+## Architecture
 
 Very often in a regulated industry such as Financial Service and Healthcase
 where data security is critical, the customer will have the following minimal requirement
@@ -35,17 +35,17 @@ to be compliant for data science work.
 
 ![Architecture](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
 
-### S3
+**S3**
 
 - Enforce service side encryption with customer managed key
 - Data Scientist or developer is responsible to specify kmsid for AWSCLI, SDK or BOTO3 for any data upload to S3
 
-### SageMaker
+**SageMaker**
 
 - Encrypted EBS volume with customer manged key
 - Restricted access to default encrypted S3 bucket
 
-### VPC Endpoint
+**VPC Endpoint**
 
 The following endpoints have been added by default, additional endpoint can be added as necessary.
 
@@ -57,15 +57,15 @@ The following endpoints have been added by default, additional endpoint can be a
 - logs
 - ssm
 
-### KMS
+**KMS**
 
 - Generate a customer managed key
 
-### VPC
+**VPC**
 
 - Two Private Subnets only across different avaiability zones
 
-### EC2
+**EC2**
 
 - SSM Agent to support remote SSH using exisitng key pair
 - First verify that Session Manager Plugin is installed on your local workstation by running the command below
