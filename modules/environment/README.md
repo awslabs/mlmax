@@ -1,9 +1,9 @@
 # Development Environment
 
-The purpose of this guide is to setup a data science development environment in
-a regulated industry. This template will setup the minimum service such as
-bastianless EC2 instance, SageMaker Notebook and S3 bucket for Data Scientist
-to start working on customer engagement.
+The Environment module manages the provisioning of resources and manages access
+controls, providing the environment for data scientists and engineers to
+develop solutions.
+
 
 ## Design Principles
 
@@ -30,8 +30,10 @@ specified in Step 1.
 ## Architecture
 
 Very often in a regulated industry such as Financial Service and Healthcase
-where data security is critical, the customer will have the following minimal requirement
-to be compliant for data science work.
+where data security is critical, the customer will have stringent requirements
+to be compliant for data science work. This template will setup the
+minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
+bucket for Data Scientist to start working on customer engagement.
 
 ![Architecture](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
 

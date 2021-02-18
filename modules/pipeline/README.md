@@ -1,7 +1,11 @@
 # ML Training and Inference Pipeline
 
-Create a semi-automated Training and Inference Pipeline using CloudFormation,
-Step Functions, and Amazon SageMaker. 
+The Training module manages the process to set up standard training pipelines
+for machine learning models enabling both immediate experimentation, as well as
+tracking and retraining models over time.The Inference module deploys a model
+to be used by the business in production. Often this is coupled quite closely
+to the ML training pipeline as there is a lot of overlap.
+
 
 ## Design Principles
 
@@ -59,10 +63,11 @@ python inference_pipeline_run.py dev
 
 ## Architecture
 
-The ML training and inference pipeline consists of Sakemaker running within
-Step Functions. The code included in this module: 
-- Generates the cloudformation for the training and inference pipeline
-- Packages and deploys the cloudformation, (creating the State Machines)
-- Runs the traning and inference pipeline (executing the State Machines)
+The ML training and inference pipeline consists of Amazon Sakemaker running
+within Step Functions. The code included in this module: 
+- Generates the Cloudformation for the training and inference pipeline using
+  the Data Science Step Functions SDK.
+- Packages and deploys the Cloudformation, (creating the State Machines).
+- Runs the traning and inference pipeline (executing the State Machines).
 
-![arch](https://github.com/awslabs/mlmax/raw/main/reports/figures/training-inference.png)
+![](https://github.com/awslabs/mlmax/raw/main/reports/figures/training-inference.png)
