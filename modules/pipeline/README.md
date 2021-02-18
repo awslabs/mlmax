@@ -70,4 +70,4 @@ within Step Functions. The code included in this module:
 - Packages and deploys the Cloudformation, (creating the State Machines).
 - Runs the traning and inference pipeline (executing the State Machines).
 
-![](https://github.com/awslabs/mlmax/raw/main/reports/figures/training-inference.png)
+![](https://github.com/awslabs/mlmax/raw/main/modules/pipeline/images/training-inference.png)
