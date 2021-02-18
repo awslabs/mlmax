@@ -36,6 +36,7 @@ extensions = [
     "recommonmark",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinx_markdown_tables",
 ]
 
 # Markdown support
