@@ -11,7 +11,7 @@
 | Promote modularity in the development of Training and Inference solutions.     | Training and inference pipelines can be broken down into several components such as data validation, data preprocessing, data combination, etc.... When designing training and inference pipelines it is important that these components are created such that they can be developed, tested, and maintained independently from one another.                                                                                                                                                                                                                                                |
 | Use on-demand compute, only paying for it when you need it for a specific job. | One of the anti-patterns we have observed is the attempt to treat the cloud as the same as an on-premise cluster of compute resources. But the cloud allows for fine-grained security and cost-control measures to decentralize the utilization of cloud resources. This enable cost-savings resulting from a pay-as-you-go model and empowers a growing Data Science organization to harness the power of cloud computing.                                                                                                                                                                 |
 
-## Quick Start 
+## Quick Start
 
 ### 1. Clone repo
 ```
@@ -53,3 +53,4 @@ python training_pipeline_run.py dev
 # python inference_pipeline_run -e <target_env>
 python inference_pipeline_run.py dev
 ```
+
