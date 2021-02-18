@@ -1,3 +1,1 @@
-# Data Management and ETL
-
-Coming Soon!
+../modules/data/README.md
