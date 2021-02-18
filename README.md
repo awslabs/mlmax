@@ -15,7 +15,7 @@ design choices.
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![Documentation Status](https://readthedocs.org/projects/mlmax/badge/?version=latest)](https://mlmax.readthedocs.io/en/latest/?badge=latest)
 
 
-## Quick Start Usage
+## Quick Start
 
 1. [**ML Training
    Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/pipeline/):
@@ -32,35 +32,9 @@ This module manages the provisioning of resources and manages networking and
 security, providing the environment for data scientists and engineers to
 develop solutions.
 
-## Training and Inference Pipeline
+## Contributing
 
-Create a semi-automated Training and Inference Pipeline using CloudFormation,
-Step Functions, and Amazon SageMaker. 
-
-![arch](https://github.com/awslabs/mlmax/raw/main/reports/figures/training-inference.png)
-
-See [quick start documentation](https://github.com/awslabs/mlmax/blob/main/modules/pipeline) for details.
-
-## Environment
-
-Get started with a working environment with encryption and network isolation.
-
-![arch](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
-
-See [quick start documentation](https://github.com/awslabs/mlmax/blob/main/modules/environment) for details.
-
-## Links
-
-* [Creating a Training and Inference Pipeline](https://github.com/awslabs/mlmax/blob/main/modules/pipeline)
-* [Setting up an Environment](https://github.com/awslabs/mlmax/blob/main/modules/environment)
-* [PR FAQ](PRFAQ.md)
-* [Configuring your Jupyter Notebook](https://github.com/awslabs/mlmax/blob/main/notebooks/example_notebook.ipynb)
-* [Best Practices](https://github.com/awslabs/mlmax/blob/main/BEST_PRACTICES.md)
-* [Contributing](https://github.com/awslabs/mlmax/blob/main/CONTRIBUTING.md)
-
-## Security
-
-See [CONTRIBUTING](https://github.com/awslabs/mlmax/blob/main/CONTRIBUTING.md#security-issue-notifications) for more information.
+Please see [CONTRIBUTING](https://github.com/awslabs/mlmax/blob/main/CONTRIBUTING.md) for more information.
 
 ## License
 
