@@ -62,6 +62,7 @@ def main(args):
     X_test, y_test = read_features(args)
     model = load_model(args)
     report_dict = evaluate(model, X_test, y_test, args)
+    print(report_dict)
 
 
 if __name__ == "__main__":

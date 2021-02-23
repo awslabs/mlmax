@@ -73,6 +73,7 @@ def main(args):
     X_train, y_train, X_test, y_test = read_processed_data(args)
     model = train(X_train, y_train, args)
     report_dict = evaluate(model, X_test, y_test, args)
+    print(report_dict)
     save_model(model, args)
 
 
