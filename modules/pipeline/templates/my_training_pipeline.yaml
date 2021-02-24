@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation template for AWS Step Functions - State Machine
 
-# Added by script
 Parameters:
   PipelineName:
     Type: String
@@ -16,9 +15,7 @@ Resources:
   StateMachineComponent:
     Type: AWS::StepFunctions::StateMachine
     Properties:
-      # Replaced by script
       StateMachineName: !Sub "${PipelineName}-Training-${TargetEnv}"
-      # Replaced by script
       DefinitionString: !Sub |-
         {
           "StartAt": "SageMaker pre-processing step",
@@ -267,5 +264,4 @@ Resources:
             }
           }
         }
-      # Replaced by script
       RoleArn: !Sub "${WorkflowExecutionRoleArn}"

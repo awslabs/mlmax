@@ -144,7 +144,10 @@ def define_inference_pipeline(
         job_name=execution_input["InferenceJobName"],
         inputs=inputs,
         outputs=outputs,
-        container_entrypoint=["python3", "/opt/ml/processing/input/code/inference.py",],
+        container_entrypoint=[
+            "python3",
+            "/opt/ml/processing/input/code/inference.py",
+        ],
     )
 
     # Create Fail state to mark the workflow failed in case any of the steps fail.
