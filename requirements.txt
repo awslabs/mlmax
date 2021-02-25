@@ -10,3 +10,4 @@ pandas
 pytest
 datatest
 pytest-cov
+numpy
