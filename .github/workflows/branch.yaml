@@ -19,5 +19,3 @@ jobs:
         run: tox -e flake8
       - name: Black Check
         run: tox -e black-check
-      - name: Pydocstyle
-        run: tox -e pydocstyle
