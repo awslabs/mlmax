@@ -64,7 +64,7 @@ python inference_pipeline_run.py dev
 ## Architecture
 
 The ML training and inference pipeline consists of Amazon Sakemaker running
-within Step Functions. The code included in this module: 
+within Step Functions. The code included in this module:
 - Generates the Cloudformation for the training and inference pipeline using
   the Data Science Step Functions SDK.
 - Packages and deploys the Cloudformation, (creating the State Machines).
