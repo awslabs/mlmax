@@ -4,6 +4,8 @@ repos:
   hooks:
   - id: detect-aws-credentials
     args: [--allow-missing-credentials]
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
 - repo: https://github.com/psf/black
   rev: 19.10b0
   hooks:
