@@ -13,3 +13,7 @@ repos:
   hooks:
   - id: flake8
     args: ["--max-complexity=20", "--ignore=E231, W503, E722"]
+- repo: https://github.com/timothycrosley/isort
+  rev: 5.7.0
+  hooks: 
+  - id: isort
