@@ -1,10 +1,9 @@
+from sagemaker.model import FrameworkModel, Model
+from sagemaker.workflow.airflow import model_config, training_config, transform_config
 from stepfunctions.inputs import ExecutionInput, StepInput
-from stepfunctions.steps.states import Task
 from stepfunctions.steps.fields import Field
+from stepfunctions.steps.states import Task
 from stepfunctions.steps.utils import tags_dict_to_kv_list
-
-from sagemaker.workflow.airflow import training_config, transform_config, model_config
-from sagemaker.model import Model, FrameworkModel
 
 
 class MLMaxBatchTransformStep(Task):

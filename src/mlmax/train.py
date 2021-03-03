@@ -1,9 +1,9 @@
-import os
 import argparse
+import os
 
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 
 try:
     from sklearn.externals import joblib

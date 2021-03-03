@@ -1,7 +1,8 @@
+import argparse
 import json
 import os
 import tarfile
-import argparse
+
 import pandas as pd
 
 try:
@@ -9,7 +10,7 @@ try:
 except ImportError:
     import joblib
 
-from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 
 
 def read_features(args):

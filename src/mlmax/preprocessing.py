@@ -1,19 +1,14 @@
 import argparse
 import os
+import tarfile
 import warnings
+
 import numpy as np
 import pandas as pd
-import tarfile
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import (
-    StandardScaler,
-    OneHotEncoder,
-    KBinsDiscretizer,
-)
 from sklearn.compose import make_column_transformer
-
 from sklearn.exceptions import DataConversionWarning
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import KBinsDiscretizer, OneHotEncoder, StandardScaler
 
 warnings.filterwarnings(action="ignore", category=DataConversionWarning)
 try:

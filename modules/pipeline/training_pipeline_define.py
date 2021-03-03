@@ -1,15 +1,11 @@
 import stepfunctions
-from stepfunctions.inputs import ExecutionInput
-from stepfunctions.steps import (
-    Chain,
-    ProcessingStep,
-)
 from custom_steps import MLMaxTrainingStep
-from stepfunctions.workflow import Workflow
 from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.sklearn.processing import SKLearnProcessor
-
 from sagemaker.sklearn.estimator import SKLearn
+from sagemaker.sklearn.processing import SKLearnProcessor
+from stepfunctions.inputs import ExecutionInput
+from stepfunctions.steps import Chain, ProcessingStep
+from stepfunctions.workflow import Workflow
 
 
 def define_training_pipeline(

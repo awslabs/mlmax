@@ -1,12 +1,11 @@
-import uuid
 import argparse
 import configparser
+import uuid
 
 import boto3
+import sagemaker
 from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
-
-import sagemaker
 
 
 def get_existing_inference_pipeline(workflow_arn):

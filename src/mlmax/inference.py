@@ -1,6 +1,7 @@
-import os
 import argparse
+import os
 import tarfile
+
 import pandas as pd
 
 try:
