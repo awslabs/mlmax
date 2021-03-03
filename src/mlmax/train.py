@@ -1,9 +1,9 @@
-import os
 import argparse
+import os
 
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 
 try:
     from sklearn.externals import joblib
@@ -73,6 +73,7 @@ def main(args):
     X_train, y_train, X_test, y_test = read_processed_data(args)
     model = train(X_train, y_train, args)
     report_dict = evaluate(model, X_test, y_test, args)
+    print(report_dict)
     save_model(model, args)
 
 

@@ -1,0 +1,36 @@
+name: main
+on: 
+  pull_request:
+    branches:
+      - main
+  push:
+    paths:
+    - 'src/**'
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python
+        uses: actions/setup-python@v1
+      - name: Install Dependencies
+        run: pip install tox
+      - name: Flake8
+        run: tox -e flake8
+      - name: Black Check
+        run: tox -e black-check
+      - name: Isort Check
+        run: tox -e isort-check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python 
+        uses: actions/setup-python@v1
+        with: 
+          python-version: 3.7
+      - name: Install Dependencies
+        run: pip install tox
+      - name: Unit Tests
+        run: tox -e pytest

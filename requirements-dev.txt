@@ -1,5 +1,5 @@
 tox
-black
+black==19.10b0
 flake8
 pre-commit
 pydocstyle

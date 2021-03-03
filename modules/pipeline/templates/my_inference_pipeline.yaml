@@ -16,9 +16,7 @@ Resources:
   StateMachineComponent:
     Type: AWS::StepFunctions::StateMachine
     Properties:
-      # Replaced by script
       StateMachineName: !Sub "${PipelineName}-Inference-${TargetEnv}"
-      # Replaced by script
       DefinitionString: !Sub |-
         {
           "StartAt": "SageMaker pre-processing step",
@@ -75,7 +73,7 @@ Resources:
                   ]
                 },
                 "AppSpecification": {
-                  "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "ImageUri": "121021644041.dkr.ecr.ap-southeast-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
                   "ContainerArguments": [
                     "--mode",
                     "infer"
@@ -160,7 +158,7 @@ Resources:
                   ]
                 },
                 "AppSpecification": {
-                  "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                  "ImageUri": "121021644041.dkr.ecr.ap-southeast-1.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
                   "ContainerEntrypoint": [
                     "python3",
                     "/opt/ml/processing/input/code/inference.py"
@@ -195,5 +193,4 @@ Resources:
             }
           }
         }
-      # Replaced by script
       RoleArn: !Sub "${WorkflowExecutionRoleArn}"

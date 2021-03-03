@@ -1,12 +1,12 @@
-import uuid
-import tarfile
 import argparse
+import configparser
+import tarfile
+import uuid
+
+import boto3
+import sagemaker
 from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
-
-import sagemaker
-import configparser
-import boto3
 
 
 def get_existing_training_pipeline(workflow_arn):
@@ -111,8 +111,9 @@ def example_run_training_pipeline(workflow_arn, region):
 
     # Step 5 - Inspect the output of the Workflow execution
     workflow_execution_output_json = execution.get_output(wait=True)
-    from sagemaker.s3 import S3Downloader
     import json
+
+    from sagemaker.s3 import S3Downloader
 
     evaluation_output_config = workflow_execution_output_json["ProcessingOutputConfig"]
     for output in evaluation_output_config["Outputs"]:
