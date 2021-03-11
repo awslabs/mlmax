@@ -5,6 +5,7 @@ solutions to production so you can get started quickly without having to make
 too many design choices.
 
 [![](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![](https://readthedocs.org/projects/mlmax/badge/?version=latest)](https://mlmax.readthedocs.io/en/latest/?badge=latest)
+![](https://img.shields.io/github/workflow/status/awslabs/mlmax/main/main)
 
 ## Quick Start
 
