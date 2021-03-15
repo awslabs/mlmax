@@ -17,7 +17,7 @@ except KeyError:
 processor = PySparkProcessor(
     framework_version="2.4",
     role=role,
-    instance_count=8,
+    instance_count=16,
     instance_type="ml.m5.2xlarge",
     max_runtime_in_seconds=3600,
     sagemaker_session=sm_session,
