@@ -4,15 +4,14 @@ The Environment module manages the provisioning of resources and manages access
 controls, providing the environment for data scientists and engineers to
 develop solutions.
 
-
 ## Design Principles
 
-| Principle                                                                     | Description                                                                                                                                                                                                                                                          |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Promote basic software development best practices.                            | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development. | 
-| Provide a flexible set of baseline services.                                  | Data Scientists should be enabled to develop code in any environment capable to run remote python interpreter including modern IDEs (e.g., VS Code,), traditional IDEs (e.g., vim) or jupyter notebooks. There should not be a single, "one-size-fits-all" approach. |
-| Operate in an isolated environment                                            | This means resources will have to reside in a private VPC and VPC endpoints will need to be created. |
-| Data encryption in transit and at rest                                        | One aspect to enforce here is S3 encryption for all content at rest and requirement for data upload encryption header to be specified. |
+| Principle                                          | Description                                                                                                                                                                                                                                                          |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Promote basic software development best practices. | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development.                                                                                                                  |
+| Provide a flexible set of baseline services.       | Data Scientists should be enabled to develop code in any environment capable to run remote python interpreter including modern IDEs (e.g., VS Code,), traditional IDEs (e.g., vim) or jupyter notebooks. There should not be a single, "one-size-fits-all" approach. |
+| Operate in an isolated environment                 | This means resources will have to reside in a private VPC and VPC endpoints will need to be created.                                                                                                                                                                 |
+| Data encryption in transit and at rest             | One aspect to enforce here is S3 encryption for all content at rest and requirement for data upload encryption header to be specified.                                                                                                                               |
 
 ## Quick Start
 
@@ -72,8 +71,8 @@ The following endpoints have been added by default, additional endpoint can be a
 **EC2**
 
 - SSM Agent to support remote SSH using exisitng key pair
-- First verify that Session Manager Plugin is installed on your local workstation by running the command below
-- Or follow the instruction [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify) to install SSM agent
+- First verify that Session Manager Plugin is installed on your local workstation by running the command below or follow the instruction [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify) to install SSM agent
+- Your current activate aws configuration region should be the same as the deployment region.
 
 ```
 aws ssm start-session --target <ec2-instance-id>
