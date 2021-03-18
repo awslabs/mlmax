@@ -25,7 +25,7 @@ must be able to write to this bucket. This is a different bucket than the one
 specified in Step 1.
 
 3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket] [region]`
-   - Cloundformation bucket bucket be in the same region specified by 'region' argument.
+   - Cloundformation bucket be in the same region specified by `region` argument.
    - If no 'region' argument is provided, default region in .aws/config will be used.
 
 # Services

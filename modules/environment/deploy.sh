@@ -77,7 +77,7 @@ REGION=$3
 if [ "$#" -lt 2 ]; then
     echo "Missing argument"
     echo
-    echo "Usage: deploy.sh <STACK_NAME> <CFN_S3BUCKET>"
+    echo "Usage: deploy.sh <STACK_NAME> <CFN_S3BUCKET> [REGION]"
     echo
     exit 1
 fi
