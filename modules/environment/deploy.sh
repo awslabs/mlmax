@@ -1,16 +1,12 @@
-#!/bin/bash
+#!/bin/bash -e
 
-# example command: ./deploy.sh mlmax-env-stack sagemaker-us-east-1234
-STACK_NAME=$1
-PACKAGE_BUCKET=$2
+# USAGE:
+# example command: ./deploy.sh mlmax-env-stack sagemaker-us-east-1234 ap-southeast-2
+#
+# NOTES:
+# - Your (1) EC2 Keypair, (2) CFN bucket must be in the same region specified in 'REGION' argument.
+# - If no region argument is given, default region will be retrieve from .aws/config file.
 
-if [ "$#" -ne 2 ]; then
-    echo "Missing argument"
-    echo
-    echo "Usage: deploy.sh mlmax-env-stack sagemaker-us-east-1234"
-    echo
-    exit 1
-fi
 
 get_region() {
   REGION=$(aws configure get region)
@@ -18,7 +14,7 @@ get_region() {
     echo "REGION is unset in your AWS configuration";
     exit 1;
   else
-    echo "REGION is set to ${REGION}";
+    echo "Override REGION to ${REGION}";
   fi
 }
 
@@ -29,7 +25,6 @@ get_config() {
   else
     echo "Config file exists";
     . config/config.ini
-    echo "STACK_NAME: ${STACK_NAME}"
     echo "KeyName: ${KeyName}"
     echo "S3BucketName: ${S3BucketName}"
   fi
@@ -71,8 +66,33 @@ deploy () {
     rm -f ./stacks_packaged.yaml
 }
 
+#########################
+# Main
+#########################
 
-get_region
+STACK_NAME=$1
+PACKAGE_BUCKET=$2
+REGION=$3
+
+if [ "$#" -lt 2 ]; then
+    echo "Missing argument"
+    echo
+    echo "Usage: deploy.sh <STACK_NAME> <CFN_S3BUCKET>"
+    echo
+    exit 1
+fi
+
+echo "Input arguments:"
+echo "STACK_NAME: ${STACK_NAME}"
+echo "PACKAGE_BUCKET: ${PACKAGE_BUCKET}"
+echo "REGION: ${REGION}"
+
+
+if [[ -z "${REGION}" ]];then
+    echo "Retrieving default region..."
+    get_region
+fi
+
 get_config
 check_bucket_exist
 package

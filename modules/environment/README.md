@@ -21,10 +21,12 @@ Very often in a regulated industry such as Financial Service and Healthcase wher
 
 2) Prepare a S3 bucket in the same region to store cloudformation
 intermediate metedata. This could be an existing bucket or a new bucket. You
-must be able to write to this bucket. This is a different bucket than the one 
+must be able to write to this bucket. This is a different bucket than the one
 specified in Step 1.
 
-3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket]`
+3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket] [region]`
+   - Cloundformation bucket bucket be in the same region specified by 'region' argument.
+   - If no 'region' argument is provided, default region in .aws/config will be used.
 
 # Services
 
