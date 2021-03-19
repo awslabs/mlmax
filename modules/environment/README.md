@@ -90,3 +90,15 @@ Host ec2-ssm
     ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
 
 ```
+
+## Security Patching
+
+It is recommended that you patch the EC2 instance regularly whenever there is security updates. Run the following commands in EC2 for patching.
+
+```
+sudo yum-config-manager --disable libnvidia-container
+sudo yum-config-manager --disable neuron
+sudo yum-config-manager --disable nvidia-container-runtime
+sudo yum-config-manager --disable nvidia-docker
+sudo yum update-minimal --sec-severity=critical,important --bugfix
+```
