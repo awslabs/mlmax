@@ -29,6 +29,7 @@ specified in Step 1.
 3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket] [region]`
    - Cloundformation bucket be in the same region specified by `region` argument.
    - If no `region` argument is provided, default region in `.aws/config` will be used.
+   - E.g. `deploy.sh my-stack my-cfn-s3bucket ap-southeast-1`
 
 ## Architecture
 
