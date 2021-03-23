@@ -62,7 +62,7 @@ def define_training_pipeline(
     # processor = PySparkProcessor(
     region = "ap-southeast-1"
     image = "sagemaker-spark-processing"
-    img_uri = (f"759080221371.dkr.ecr.{region}.amazonaws.com/{image}:2.4-cpu",)
+    img_uri = f"759080221371.dkr.ecr.{region}.amazonaws.com/{image}:2.4-cpu"
     processor = ScriptProcessor(
         image_uri=img_uri,
         # framework_version="2.4",
@@ -85,13 +85,13 @@ def define_training_pipeline(
     # Create ProcessingInputs and ProcessingOutputs objects for Inputs and
     # Outputs respectively for the SageMaker Processing Job
     inputs = [
-        ProcessingInput(
-            source=execution_input["InputDataURL"],
-            destination="/opt/ml/processing/input",
-            input_name="input-1",
-            s3_data_type="ManifestFile",
-            s3_input_mode="Pipe",
-        ),
+        #ProcessingInput(
+        #    source=execution_input["InputDataURL"],
+        #    destination="/opt/ml/processing/input",
+        #    input_name="input-1",
+        #    s3_data_type="ManifestFile",
+        #    s3_input_mode="Pipe",
+        #),
         ProcessingInput(
             source=execution_input["PreprocessingCodeURL"],
             destination="/opt/ml/processing/input/code",
