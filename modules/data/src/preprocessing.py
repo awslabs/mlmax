@@ -25,7 +25,11 @@ def main():
     s3_output_prefix = args.s3_output_prefix.rstrip("/").lstrip("s3://")
 
     # Build the spark session
-    spark = SparkSession.builder.appName("SparkProcessor").getOrCreate()
+    spark = (
+        SparkSession.builder.appName("SparkProcessor")
+        .config("spark.executor.memory", "4g")
+        .getOrCreate()
+    )
 
     # Read the raw input csv from S3
     sdf_fhv = spark.read.csv(
