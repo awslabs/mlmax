@@ -263,6 +263,7 @@ Resources:
       RouteTableIds:
         - !Ref PrivateRouteTable1
 
+  # With internet
   S3VPCEndpoint2:
     Type: AWS::EC2::VPCEndpoint
     Condition: CreateInternet
