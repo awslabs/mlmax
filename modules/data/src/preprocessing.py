@@ -14,11 +14,6 @@ def main():
         default="s3://ml-proserve-nyc-taxi-data/parquet/",
         type=str,
     )
-    # parser.add_argument("--mode", type=str, default="infer")
-    # parser.add_argument("--train-test-split-ratio", type=float, default=0.3)
-    # parser.add_argument("--data-dir", type=str, default="opt/ml/processing")
-    # parser.add_argument("--data-input", type=str, default="input/census-income.csv")
-    # args, _ = parser.parse_known_args()
     args = parser.parse_args()
 
     s3_input_prefix = args.s3_input_prefix.rstrip("/").lstrip("s3://")

@@ -1,15 +1,10 @@
 import stepfunctions
 
-# from sagemaker.sklearn.processing import SKLearnProcessor
-# from sagemaker.spark.processing import PySparkProcessor
-# from custom_steps import MLMaxTrainingStep
 # Newer versions of sdk >2.8.0 have PySparkProcessor
 from sagemaker.processing import ProcessingInput, ProcessingOutput, ScriptProcessor
 from stepfunctions.inputs import ExecutionInput
 from stepfunctions.steps import Chain, ProcessingStep
 from stepfunctions.workflow import Workflow
-
-# from sagemaker.sklearn.estimator import SKLearn
 
 
 def define_training_pipeline(
@@ -39,20 +34,7 @@ def define_training_pipeline(
             "InputDataURL": str,
             "PreprocessingJobName": str,
             "PreprocessingCodeURL": str,
-            # "TrainingJobName": str,
-            # Prevent sagemaker config hardcode sagemaker_submit_directory in
-            # workflow definition
-            # "SMSubmitDirURL": str,
-            # Prevent sagemaker config hardcode sagemaker_region in workflow definition
-            # "SMRegion": str,
-            # "EvaluationProcessingJobName": str,
-            # "EvaluationCodeURL": str,
-            # "EvaluationResultURL": str,
             "PreprocessedTrainDataURL": str,
-            # "PreprocessedTestDataURL": str,
-            # "PreprocessedModelURL": str,
-            # "SMOutputDataURL": str,
-            # "SMDebugOutputURL": str,
         }
     )
 
@@ -85,13 +67,13 @@ def define_training_pipeline(
     # Create ProcessingInputs and ProcessingOutputs objects for Inputs and
     # Outputs respectively for the SageMaker Processing Job
     inputs = [
-        #ProcessingInput(
+        # ProcessingInput(
         #    source=execution_input["InputDataURL"],
         #    destination="/opt/ml/processing/input",
         #    input_name="input-1",
         #    s3_data_type="ManifestFile",
         #    s3_input_mode="Pipe",
-        #),
+        # ),
         ProcessingInput(
             source=execution_input["PreprocessingCodeURL"],
             destination="/opt/ml/processing/input/code",
