@@ -15,7 +15,7 @@ Resources:
   StateMachineComponent:
     Type: AWS::StepFunctions::StateMachine
     Properties:
-      StateMachineName: !Sub "${PipelineName}-Training-${TargetEnv}"
+      StateMachineName: !Sub "${PipelineName}-Data-${TargetEnv}"
       DefinitionString: !Sub |-
         {
           "StartAt": "SageMaker pre-processing step",
@@ -40,10 +40,10 @@ Resources:
                 "ProcessingOutputConfig": {
                   "Outputs": [
                     {
-                      "OutputName": "train_data",
+                      "OutputName": "processed_data",
                       "S3Output": {
-                        "S3Uri.$": "$$.Execution.Input['PreprocessedTrainDataURL']",
-                        "LocalPath": "/opt/ml/processing/train",
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedOutputDataURL']",
+                        "LocalPath": "/opt/ml/processing/output",
                         "S3UploadMode": "EndOfJob"
                       }
                     }

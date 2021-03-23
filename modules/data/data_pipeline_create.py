@@ -1,8 +1,8 @@
-from data_pipeline_define import define_training_pipeline
+from data_pipeline_define import define_data_pipeline
 
 
 def format_template_str():
-    with open("/tmp/my_training_pipeline.yaml", "r") as file:
+    with open("/tmp/my_data_pipeline.yaml", "r") as file:
         data = file.read()
 
     # add the parameters
@@ -28,8 +28,8 @@ Parameters:
 
     # replace StateMachineName
     data = data.replace(
-        "StateMachineName: ${TrainingPipelineName}",
-        'StateMachineName: !Sub "${PipelineName}-Training-${TargetEnv}"',
+        "StateMachineName: ${DataPipelineName}",
+        'StateMachineName: !Sub "${PipelineName}-Data-${TargetEnv}"',
     )
 
     # replace DefinitionString
@@ -41,19 +41,19 @@ Parameters:
         'RoleArn: !Sub "${WorkflowExecutionRoleArn}"',
     )
 
-    with open("./templates/my_training_pipeline.yaml", "w") as file:
+    with open("./templates/my_data_pipeline.yaml", "w") as file:
         file.write(data)
 
 
-def create_training_pipeline(
+def create_data_pipeline(
     sm_role,
     workflow_execution_role,
-    training_pipeline_name,
+    data_pipeline_name,
     return_yaml=True,
-    dump_yaml_file="templates/sagemaker_training_pipeline.yaml",
+    dump_yaml_file="templates/sagemaker_data_pipeline.yaml",
 ):
     """
-    Return YAML definition of the training pipeline, which consists of multiple
+    Return YAML definition of the data pipeline, which consists of multiple
     Amazon StepFunction steps
 
     sm_role:                    ARN of the SageMaker execution role
@@ -65,15 +65,15 @@ def create_training_pipeline(
 
     """
 
-    training_pipeline = define_training_pipeline(
+    data_pipeline = define_data_pipeline(
         sm_role,
         workflow_execution_role,
-        training_pipeline_name,
+        data_pipeline_name,
         return_yaml,
         dump_yaml_file,
     )
     # dump YAML cloud formation template
-    yml = training_pipeline.get_cloudformation_template()
+    yml = data_pipeline.get_cloudformation_template()
 
     if dump_yaml_file is not None:
         with open(dump_yaml_file, "w") as fout:
@@ -82,26 +82,26 @@ def create_training_pipeline(
     if return_yaml:
         return yml
     else:
-        return training_pipeline
+        return data_pipeline
 
 
-def example_create_training_pipeline():
+def example_create_data_pipeline():
     """
-    An example on obtaining YAML CF template from the training pipeline definition
+    An example on obtaining YAML CF template from the data pipeline definition
     """
     sm_role = "${SagerMakerRoleArn}"
     workflow_execution_role = "${WorkflowExecutionRoleArn}"
-    training_pipeline_name = "${TrainingPipelineName}"
-    yaml_rep = create_training_pipeline(
+    data_pipeline_name = "${DataPipelineName}"
+    yaml_rep = create_data_pipeline(
         sm_role=sm_role,
         workflow_execution_role=workflow_execution_role,
-        training_pipeline_name=training_pipeline_name,
+        data_pipeline_name=data_pipeline_name,
         dump_yaml_file=None,
     )
-    with open("/tmp/my_training_pipeline.yaml", "w") as fout:
+    with open("/tmp/my_data_pipeline.yaml", "w") as fout:
         fout.write(yaml_rep)
 
 
 if __name__ == "__main__":
-    example_create_training_pipeline()
+    example_create_data_pipeline()
     format_template_str()

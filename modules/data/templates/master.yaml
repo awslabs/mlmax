@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   PipelineName:
     Type: String
-    Default: "MlMax-Pipeline-Demo"
+    Default: "MlMax-Data-Pipeline-Demo"
   TargetEnv:
     Type: String
     Default: "dev"
@@ -17,11 +17,11 @@ Resources:
       Parameters:
         TargetEnv: !Ref TargetEnv
   # Training Pipeline Step Function
-  StepFunctionTrainingPipeline:
+  StepFunctionDataPipeline:
     Type: AWS::CloudFormation::Stack
     Properties:
       # The Template URL is relative path to this template file.
-      TemplateURL: ./my_training_pipeline.yaml
+      TemplateURL: ./my_data_pipeline.yaml
       Parameters:
         PipelineName: !Ref PipelineName
         SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
