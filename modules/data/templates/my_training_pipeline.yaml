@@ -26,17 +26,6 @@ Resources:
                 "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
                 "ProcessingInputs": [
                   {
-                    "InputName": "input-1",
-                    "S3Input": {
-                      "S3Uri.$": "$$.Execution.Input['InputDataURL']",
-                      "LocalPath": "/opt/ml/processing/input",
-                      "S3DataType": "ManifestFile",
-                      "S3InputMode": "Pipe",
-                      "S3DataDistributionType": "FullyReplicated",
-                      "S3CompressionType": "None"
-                    }
-                  },
-                  {
                     "InputName": "code",
                     "S3Input": {
                       "S3Uri.$": "$$.Execution.Input['PreprocessingCodeURL']",
