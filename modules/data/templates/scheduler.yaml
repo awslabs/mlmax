@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A CloudWatch-based scheduler for the Step Functions state machine.
+
+Parameters:
+  PipelineName:
+    Type: String
+  TargetEnv:
+    Type: String
+  StateMachineComponentArn:   
+    Type: String
+  ScheduleRoleArn:
+    Type: String
+
+Resources:
+  ScheduleRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
+      ScheduleExpression: cron(36 6 * * ? *)
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: !Ref StateMachineComponentArn
+          Id: !Sub "${PipelineName}-ScheduleRuleTargets-${TargetEnv}"
+          RoleArn: !Ref ScheduleRoleArn
+          InputTransformer:
+            InputPathsMap:
+              "id": "$.id"
+            InputTemplate: !Sub |- 
+              {
+                "PreprocessingJobName": "pyspark-sm-preprocessing-<id>",
+                "PreprocessingCodeURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing/source/preprocessing.py",
+                "PreprocessedOutputDataURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing-<id>/output"
+              } 
