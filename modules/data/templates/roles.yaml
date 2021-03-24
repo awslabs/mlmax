@@ -119,11 +119,40 @@ Resources:
   #          Resource:
   #            - !Sub "arn:aws:s3:::${Bucket}"
   #            - !Sub "arn:aws:s3:::${Bucket}/*"
-
+  # Define the CloudWatch schedule Role.
+  ScheduleRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "AllowCWEServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "ExecuteStateMachine"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "states:StartExecution"
+                Resource: "*"
 Outputs:
   WorkflowExecutionRoleArn:
-    Description: Training Pipeline Step Function Execution Role ARN
+    Description: Data Pipeline Step Function Execution Role ARN
     Value: !GetAtt WorkflowExecutionRole.Arn
   SagerMakerRoleArn:
     Description: SageMaker ExecutionRole ARN
     Value: !GetAtt SagerMakerRole.Arn
+  ScheduleRoleArn:
+    Description: CloudWatch Scheduler Role ARN
+    Value: !GetAtt ScheduleRole.Arn
