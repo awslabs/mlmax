@@ -16,7 +16,7 @@ Resources:
       TemplateURL: ./roles.yaml
       Parameters:
         TargetEnv: !Ref TargetEnv
-  # Training Pipeline Step Function
+  # Data Pipeline Step Function
   StepFunctionDataPipeline:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -28,3 +28,17 @@ Resources:
         WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
         TargetEnv: !Ref TargetEnv
     DependsOn: IAMRoles
+  # Scheduler of the data Pipeline Step Function
+  Scheduler:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./scheduler.yaml
+      Parameters:
+        PipelineName: !Ref PipelineName
+        TargetEnv: !Ref TargetEnv
+        StateMachineComponentArn: !GetAtt StepFunctionDataPipeline.Outputs.StateMachineComponentArn  
+        ScheduleRoleArn: !GetAtt IAMRoles.Outputs.ScheduleRoleArn
+    DependsOn:
+      - IAMRoles
+      - StepFunctionDataPipeline
