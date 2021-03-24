@@ -78,12 +78,12 @@ def define_data_pipeline(
         job_name=execution_input["PreprocessingJobName"],
         inputs=inputs,
         outputs=outputs,
-        container_arguments=[
-            "--s3_input_prefix",
-            "s3://ml-proserve-nyc-taxi-data/csv",
-            "--s3_output_prefix",
-            "s3://ml-proserve-nyc-taxi-data/parquet",
-        ],
+        #container_arguments=[
+        #    "--s3_input_prefix",
+        #    "s3://ml-proserve-nyc-taxi-data/csv",
+        #    "--s3_output_prefix",
+        #    "s3://ml-proserve-nyc-taxi-data/parquet",
+        #],
         container_entrypoint=[
             "smspark-submit",
             "/opt/ml/processing/input/code/preprocessing.py",

@@ -51,12 +51,6 @@ Resources:
                 },
                 "AppSpecification": {
                   "ImageUri": "759080221371.dkr.ecr.ap-southeast-1.amazonaws.com/sagemaker-spark-processing:2.4-cpu",
-                  "ContainerArguments": [
-                    "--s3_input_prefix",
-                    "s3://ml-proserve-nyc-taxi-data/csv",
-                    "--s3_output_prefix",
-                    "s3://ml-proserve-nyc-taxi-data/parquet"
-                  ],
                   "ContainerEntrypoint": [
                     "smspark-submit",
                     "/opt/ml/processing/input/code/preprocessing.py"
