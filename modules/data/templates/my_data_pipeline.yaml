@@ -95,3 +95,8 @@ Resources:
           }
         }
       RoleArn: !Sub "${WorkflowExecutionRoleArn}"
+
+Outputs:
+  StateMachineComponentArn:
+    Description: The step function ARN
+    Value: !GetAtt StateMachineComponent.Arn
