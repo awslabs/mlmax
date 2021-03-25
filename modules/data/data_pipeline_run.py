@@ -49,12 +49,16 @@ def example_run_data_pipeline(workflow_arn, region):
 
     # Step 3 - Define data URLs, preprocessed data URLs can be made
     # input_data = "s3://ml-proserve-nyc-taxi-data/manifest/taxi.manifest"
+    s3_input_prefix = "s3://ml-proserve-nyc-taxi-data/csv"
+    s3_output_prefix = "s3://ml-proserve-nyc-taxi-data/parquet"
     output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output"
     execution = data_pipeline.execute(
         inputs={
             "PreprocessingJobName": preprocessing_job_name,
             "PreprocessingCodeURL": input_preprocessing_code,
             "PreprocessedOutputDataURL": output_data,
+            "S3InputPrefix": s3_input_prefix,
+            "S3OutputPrefix": s3_output_prefix,
         }
     )
     execution.get_output(wait=True)
