@@ -1,6 +1,7 @@
 import stepfunctions
 
 # Newer versions of sdk >2.8.0 have PySparkProcessor
+from custom_steps import MLMAXProcessingStep
 from sagemaker.processing import ProcessingInput, ProcessingOutput, ScriptProcessor
 from stepfunctions.inputs import ExecutionInput
 from stepfunctions.steps import Chain, ProcessingStep
@@ -34,6 +35,8 @@ def define_data_pipeline(
             "PreprocessingJobName": str,
             "PreprocessingCodeURL": str,
             "PreprocessedOutputDataURL": str,
+            "S3InputPrefix": str,
+            "S3OutputPrefix": str,
         }
     )
 
@@ -72,18 +75,16 @@ def define_data_pipeline(
         ),
     ]
 
-    processing_step = ProcessingStep(
+    processing_step = MLMAXProcessingStep(
         "SageMaker pre-processing step",
         processor=processor,
         job_name=execution_input["PreprocessingJobName"],
         inputs=inputs,
         outputs=outputs,
-        #container_arguments=[
-        #    "--s3_input_prefix",
-        #    "s3://ml-proserve-nyc-taxi-data/csv",
-        #    "--s3_output_prefix",
-        #    "s3://ml-proserve-nyc-taxi-data/parquet",
-        #],
+        environment={
+            "S3InputPrefix": execution_input["S3InputPrefix"],
+            "S3OutputPrefix": execution_input["S3OutputPrefix"],
+        },
         container_entrypoint=[
             "smspark-submit",
             "/opt/ml/processing/input/code/preprocessing.py",
