@@ -26,7 +26,7 @@ Resources:
     Type: "AWS::Events::Rule"
     Properties:
       Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
-      ScheduleExpression: cron(40 01 * * ? *)
+      ScheduleExpression: cron(45 02 * * ? *)
       State: "ENABLED"
       Targets: 
         - 
@@ -41,6 +41,6 @@ Resources:
                 "PreprocessingJobName": "${PipelineName}-pyspark-<id>",
                 "PreprocessingCodeURL": "${CodeDesnt}", 
                 "PreprocessedOutputDataURL": "s3://${S3OutputBucket}/${PipelineName}-pyspark-<id>/output",
-                "S3InputPath": "s3://${S3InputBucket}/${S3OutputPrefix}",
+                "S3InputPath": "s3://${S3InputBucket}/${S3InputPrefix}",
                 "S3OutputPath": "s3://${S3OutputBucket}/${S3OutputPrefix}"
               } 
