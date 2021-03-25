@@ -58,7 +58,8 @@ Resources:
                 },
                 "RoleArn": "${SagerMakerRoleArn}",
                 "Environment": {
-                  "mode": "python"
+                  "S3InputPrefix.$": "$$.Execution.Input['S3InputPrefix']",
+                  "S3OutputPrefix.$": "$$.Execution.Input['S3OutputPrefix']"
                 },
                 "ProcessingResources": {
                   "ClusterConfig": {
