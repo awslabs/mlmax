@@ -43,7 +43,7 @@ package () {
 }
 
 upload_code () {
-    aws s3 cp ${CODE_SRC} ${CODE_DESNT} 
+    aws s3 cp ${CODE_SRC} ${CODE_DESNT}
 }
 
 deploy () {

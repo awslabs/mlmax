@@ -1,5 +1,10 @@
 from sagemaker.model import FrameworkModel, Model
-from sagemaker.workflow.airflow import model_config, training_config, transform_config, processing_config
+from sagemaker.workflow.airflow import (
+    model_config,
+    processing_config,
+    training_config,
+    transform_config,
+)
 from stepfunctions.inputs import ExecutionInput, StepInput
 from stepfunctions.steps.fields import Field
 from stepfunctions.steps.states import Task
@@ -12,7 +17,22 @@ class MLMAXProcessingStep(Task):
     Creates a Task State to execute a SageMaker Processing Job.
     """
 
-    def __init__(self, state_id, processor, job_name, inputs=None, outputs=None, experiment_config=None, container_arguments=None, container_entrypoint=None, kms_key_id=None, wait_for_completion=True, tags=None, environment=None, **kwargs):
+    def __init__(
+        self,
+        state_id,
+        processor,
+        job_name,
+        inputs=None,
+        outputs=None,
+        experiment_config=None,
+        container_arguments=None,
+        container_entrypoint=None,
+        kms_key_id=None,
+        wait_for_completion=True,
+        tags=None,
+        environment=None,
+        **kwargs
+    ):
         """
         Args:
             state_id (str): State name whose length **must be** less than or equal to 128 unicode characters. State names **must be** unique within the scope of the whole state machine.
@@ -35,31 +55,50 @@ class MLMAXProcessingStep(Task):
             tags (list[dict], optional): `List to tags <https://docs.aws.amazon.com/sagemaker/latest/dg/API_Tag.html>`_ to associate with the resource.
         """
         if wait_for_completion:
-            kwargs[Field.Resource.value] = 'arn:aws:states:::sagemaker:createProcessingJob.sync'
+            kwargs[
+                Field.Resource.value
+            ] = "arn:aws:states:::sagemaker:createProcessingJob.sync"
         else:
-            kwargs[Field.Resource.value] = 'arn:aws:states:::sagemaker:createProcessingJob'
-        
-        if isinstance(job_name, str):
-            parameters = processing_config(processor=processor, inputs=inputs, outputs=outputs, container_arguments=container_arguments, container_entrypoint=container_entrypoint, kms_key_id=kms_key_id, job_name=job_name)
-        else:
-            parameters = processing_config(processor=processor, inputs=inputs, outputs=outputs, container_arguments=container_arguments, container_entrypoint=container_entrypoint, kms_key_id=kms_key_id)
+            kwargs[
+                Field.Resource.value
+            ] = "arn:aws:states:::sagemaker:createProcessingJob"
 
-        # placeholder (change at run time) or str for the Container Environment Variables 
+        if isinstance(job_name, str):
+            parameters = processing_config(
+                processor=processor,
+                inputs=inputs,
+                outputs=outputs,
+                container_arguments=container_arguments,
+                container_entrypoint=container_entrypoint,
+                kms_key_id=kms_key_id,
+                job_name=job_name,
+            )
+        else:
+            parameters = processing_config(
+                processor=processor,
+                inputs=inputs,
+                outputs=outputs,
+                container_arguments=container_arguments,
+                container_entrypoint=container_entrypoint,
+                kms_key_id=kms_key_id,
+            )
+
+        # placeholder (change at run time) or str for the Container Environment Variables
         if environment is not None:
-            parameters['Environment'] = environment 
+            parameters["Environment"] = environment
 
         if isinstance(job_name, (ExecutionInput, StepInput)):
-            parameters['ProcessingJobName'] = job_name
-        
+            parameters["ProcessingJobName"] = job_name
+
         if experiment_config is not None:
-            parameters['ExperimentConfig'] = experiment_config
-        
+            parameters["ExperimentConfig"] = experiment_config
+
         if tags:
-            parameters['Tags'] = tags_dict_to_kv_list(tags)
-        
-        if 'S3Operations' in parameters:
-            del parameters['S3Operations']
-        
+            parameters["Tags"] = tags_dict_to_kv_list(tags)
+
+        if "S3Operations" in parameters:
+            del parameters["S3Operations"]
+
         kwargs[Field.Parameters.value] = parameters
 
         super(MLMAXProcessingStep, self).__init__(state_id, **kwargs)
