@@ -16,7 +16,7 @@ Resources:
     Type: "AWS::Events::Rule"
     Properties:
       Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
-      ScheduleExpression: cron(36 6 * * ? *)
+      ScheduleExpression: cron(25 23 * * ? *)
       State: "ENABLED"
       Targets: 
         - 
@@ -30,5 +30,7 @@ Resources:
               {
                 "PreprocessingJobName": "pyspark-sm-preprocessing-<id>",
                 "PreprocessingCodeURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing/source/preprocessing.py",
-                "PreprocessedOutputDataURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing-<id>/output"
+                "PreprocessedOutputDataURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing-<id>/output",
+                "S3InputPrefix": "s3://ml-proserve-nyc-taxi-data/csv",
+                "S3OutputPrefix": "s3://ml-proserve-nyc-taxi-data/parquet"
               } 
