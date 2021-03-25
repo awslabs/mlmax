@@ -10,13 +10,23 @@ Parameters:
     Type: String
   ScheduleRoleArn:
     Type: String
+  CodeDesnt:
+    Type: String
+  S3InputBucket:
+    Type: String
+  S3OutputBucket:
+    Type: String
+  S3InputPrefix:
+    Type: String
+  S3OutputPrefix:
+    Type: String
 
 Resources:
   ScheduleRule:
     Type: "AWS::Events::Rule"
     Properties:
       Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
-      ScheduleExpression: cron(25 23 * * ? *)
+      ScheduleExpression: cron(40 01 * * ? *)
       State: "ENABLED"
       Targets: 
         - 
@@ -28,9 +38,9 @@ Resources:
               "id": "$.id"
             InputTemplate: !Sub |- 
               {
-                "PreprocessingJobName": "pyspark-sm-preprocessing-<id>",
-                "PreprocessingCodeURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing/source/preprocessing.py",
-                "PreprocessedOutputDataURL": "s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing-<id>/output",
-                "S3InputPrefix": "s3://ml-proserve-nyc-taxi-data/csv",
-                "S3OutputPrefix": "s3://ml-proserve-nyc-taxi-data/parquet"
+                "PreprocessingJobName": "${PipelineName}-pyspark-<id>",
+                "PreprocessingCodeURL": "${CodeDesnt}", 
+                "PreprocessedOutputDataURL": "s3://${S3OutputBucket}/${PipelineName}-pyspark-<id>/output",
+                "S3InputPath": "s3://${S3InputBucket}/${S3OutputPrefix}",
+                "S3OutputPath": "s3://${S3OutputBucket}/${S3OutputPrefix}"
               } 

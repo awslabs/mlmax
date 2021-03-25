@@ -6,6 +6,16 @@ Parameters:
   TargetEnv:
     Type: String
     Default: "dev"
+  CodeDesnt:
+    Type: String
+  S3InputBucket:
+    Type: String
+  S3OutputBucket:
+    Type: String
+  S3InputPrefix:
+    Type: String
+  S3OutputPrefix:
+    Type: String
 
 Resources:
   # Define Roles
@@ -39,6 +49,11 @@ Resources:
         TargetEnv: !Ref TargetEnv
         StateMachineComponentArn: !GetAtt StepFunctionDataPipeline.Outputs.StateMachineComponentArn  
         ScheduleRoleArn: !GetAtt IAMRoles.Outputs.ScheduleRoleArn
+        CodeDesnt: !Ref CodeDesnt
+        S3InputBucket: !Ref S3InputBucket
+        S3OutputBucket: !Ref S3OutputBucket
+        S3InputPrefix: !Ref S3InputPrefix
+        S3OutputPrefix: !Ref S3OutputPrefix
     DependsOn:
       - IAMRoles
       - StepFunctionDataPipeline
