@@ -35,8 +35,8 @@ def define_data_pipeline(
             "PreprocessingJobName": str,
             "PreprocessingCodeURL": str,
             "PreprocessedOutputDataURL": str,
-            "S3InputPrefix": str,
-            "S3OutputPrefix": str,
+            "S3InputPath": str,
+            "S3OutputPath": str,
         }
     )
 
@@ -82,8 +82,8 @@ def define_data_pipeline(
         inputs=inputs,
         outputs=outputs,
         environment={
-            "S3InputPrefix": execution_input["S3InputPrefix"],
-            "S3OutputPrefix": execution_input["S3OutputPrefix"],
+            "S3InputPath": execution_input["S3InputPath"],
+            "S3OutputPath": execution_input["S3OutputPath"],
         },
         container_entrypoint=[
             "smspark-submit",

@@ -2,8 +2,6 @@
 # example command: ./deploy.sh dev sagemaker-us-east-1234
 TARGET_ENV=$1
 PACKAGE_BUCKET=${2:-sagemaker-ap-southeast-1-671846148176}
-CODE_DESNT=${3:-s3://sagemaker-ap-southeast-1-671846148176/pyspark-sm-preprocessing/source/preprocessing.py}
-CODE_SRC=${4:-src/preprocessing.py}
 
 get_region() {
   REGION=$(aws configure get region)
@@ -43,7 +41,7 @@ package () {
 }
 
 upload_code () {
-    aws s3 cp ${CODE_SRC} ${CODE_DESNT}
+    aws s3 cp ${CodeSrc} ${CodeDesnt}
 }
 
 deploy () {
