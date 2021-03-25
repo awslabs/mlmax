@@ -8,17 +8,17 @@ from pyspark.sql import SparkSession
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--s3_input_prefix", default=os.getenv("S3InputPrefix"), type=str
+        "--s3_input_path", default=os.getenv("S3InputPath"), type=str
     )
     parser.add_argument(
-        "--s3_output_prefix",
-        default=os.getenv("S3OutputPrefix"),
+        "--s3_output_path",
+        default=os.getenv("S3OutputPath"),
         type=str,
     )
     args = parser.parse_args()
 
-    s3_input_prefix = args.s3_input_prefix.rstrip("/").lstrip("s3://")
-    s3_output_prefix = args.s3_output_prefix.rstrip("/").lstrip("s3://")
+    s3_input_path = args.s3_input_path.rstrip("/").lstrip("s3://")
+    s3_output_path = args.s3_output_path.rstrip("/").lstrip("s3://")
 
     # Build the spark session
     spark = (
@@ -29,16 +29,16 @@ def main():
 
     # Read the raw input csv from S3
     sdf_fhv = spark.read.csv(
-        f"s3://{s3_input_prefix}/fhv_tripdata_*.csv", header=True, inferSchema=True
+        f"s3://{s3_input_path}/fhv_tripdata_*.csv", header=True, inferSchema=True
     )
     sdf_fhvhv = spark.read.csv(
-        f"s3://{s3_input_prefix}/fhvhv_tripdata_*.csv", header=True, inferSchema=True
+        f"s3://{s3_input_path}/fhvhv_tripdata_*.csv", header=True, inferSchema=True
     )
     sdf_green = spark.read.csv(
-        f"s3://{s3_input_prefix}/green_tripdata_*.csv", header=True, inferSchema=True
+        f"s3://{s3_input_path}/green_tripdata_*.csv", header=True, inferSchema=True
     )
     sdf_yellow = spark.read.csv(
-        f"s3://{s3_input_prefix}/yellow_tripdata_*.csv", header=True, inferSchema=True
+        f"s3://{s3_input_path}/yellow_tripdata_*.csv", header=True, inferSchema=True
     )
 
     sdf0 = (
@@ -67,7 +67,7 @@ def main():
 
     # Write features to parquet
     sdf2.write.option("header", "true").parquet(
-        f"s3://{s3_output_prefix}/X.parquet", mode="overwrite"
+        f"s3://{s3_output_path}/X.parquet", mode="overwrite"
     )
 
     return
