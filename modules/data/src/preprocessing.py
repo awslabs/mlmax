@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import pyspark.sql.functions as F
 from pyspark.sql import SparkSession
@@ -7,11 +8,11 @@ from pyspark.sql import SparkSession
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--s3_input_prefix", default="s3://ml-proserve-nyc-taxi-data/csv/", type=str
+        "--s3_input_prefix", default=os.getenv("S3InputPrefix"), type=str
     )
     parser.add_argument(
         "--s3_output_prefix",
-        default="s3://ml-proserve-nyc-taxi-data/parquet/",
+        default=os.getenv("S3OutputPrefix"),
         type=str,
     )
     args = parser.parse_args()
