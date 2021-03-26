@@ -41,7 +41,7 @@ package () {
 }
 
 upload_code () {
-    aws s3 cp ${CodeSrc} ${CodeDesnt}
+    aws s3 cp ${CodeSrc} ${CodeDestination}
 }
 
 deploy () {

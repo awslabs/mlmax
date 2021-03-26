@@ -6,7 +6,7 @@ Parameters:
   TargetEnv:
     Type: String
     Default: "dev"
-  CodeDesnt:
+  CodeDestination:
     Type: String
   S3InputBucket:
     Type: String
@@ -47,9 +47,9 @@ Resources:
       Parameters:
         PipelineName: !Ref PipelineName
         TargetEnv: !Ref TargetEnv
-        StateMachineComponentArn: !GetAtt StepFunctionDataPipeline.Outputs.StateMachineComponentArn  
+        StateMachineComponentArn: !GetAtt StepFunctionDataPipeline.Outputs.StateMachineComponentArn
         ScheduleRoleArn: !GetAtt IAMRoles.Outputs.ScheduleRoleArn
-        CodeDesnt: !Ref CodeDesnt
+        CodeDestination: !Ref CodeDestination
         S3InputBucket: !Ref S3InputBucket
         S3OutputBucket: !Ref S3OutputBucket
         S3InputPrefix: !Ref S3InputPrefix

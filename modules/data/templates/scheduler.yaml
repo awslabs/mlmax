@@ -6,11 +6,11 @@ Parameters:
     Type: String
   TargetEnv:
     Type: String
-  StateMachineComponentArn:   
+  StateMachineComponentArn:
     Type: String
   ScheduleRoleArn:
     Type: String
-  CodeDesnt:
+  CodeDestination:
     Type: String
   S3InputBucket:
     Type: String
@@ -28,19 +28,19 @@ Resources:
       Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
       ScheduleExpression: cron(45 02 * * ? *)
       State: "ENABLED"
-      Targets: 
-        - 
+      Targets:
+        -
           Arn: !Ref StateMachineComponentArn
           Id: !Sub "${PipelineName}-ScheduleRuleTargets-${TargetEnv}"
           RoleArn: !Ref ScheduleRoleArn
           InputTransformer:
             InputPathsMap:
               "id": "$.id"
-            InputTemplate: !Sub |- 
+            InputTemplate: !Sub |-
               {
                 "PreprocessingJobName": "${PipelineName}-pyspark-<id>",
-                "PreprocessingCodeURL": "${CodeDesnt}", 
+                "PreprocessingCodeURL": "${CodeDestination}",
                 "PreprocessedOutputDataURL": "s3://${S3OutputBucket}/${PipelineName}-pyspark-<id>/output",
                 "S3InputPath": "s3://${S3InputBucket}/${S3InputPrefix}",
                 "S3OutputPath": "s3://${S3OutputBucket}/${S3OutputPrefix}"
-              } 
+              }
