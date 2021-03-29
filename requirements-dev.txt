@@ -7,3 +7,4 @@ sphinx
 sphinx-rtd-theme
 recommonmark
 sphinx-markdown-tables
+isort==5.7.0

@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A CloudWatch-based scheduler for the Step Functions state machine.
+
+Parameters:
+  PipelineName:
+    Type: String
+  TargetEnv:
+    Type: String
+  StateMachineComponentArn:
+    Type: String
+  ScheduleRoleArn:
+    Type: String
+  CodeDestination:
+    Type: String
+  S3InputBucket:
+    Type: String
+  S3OutputBucket:
+    Type: String
+  S3InputPrefix:
+    Type: String
+  S3OutputPrefix:
+    Type: String
+
+Resources:
+  ScheduleRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
+      ScheduleExpression: cron(45 02 * * ? *)
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !Ref StateMachineComponentArn
+          Id: !Sub "${PipelineName}-ScheduleRuleTargets-${TargetEnv}"
+          RoleArn: !Ref ScheduleRoleArn
+          InputTransformer:
+            InputPathsMap:
+              "id": "$.id"
+            InputTemplate: !Sub |-
+              {
+                "PreprocessingJobName": "${PipelineName}-pyspark-<id>",
+                "PreprocessingCodeURL": "${CodeDestination}",
+                "PreprocessedOutputDataURL": "s3://${S3OutputBucket}/${PipelineName}-pyspark-<id>/output",
+                "S3InputPath": "s3://${S3InputBucket}/${S3InputPrefix}",
+                "S3OutputPath": "s3://${S3OutputBucket}/${S3OutputPrefix}"
+              }

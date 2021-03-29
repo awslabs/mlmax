@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  PipelineName:
+    Type: String
+    Default: "MlMax-Data-Pipeline-Demo"
+  TargetEnv:
+    Type: String
+    Default: "dev"
+  CodeDestination:
+    Type: String
+  S3InputBucket:
+    Type: String
+  S3OutputBucket:
+    Type: String
+  S3InputPrefix:
+    Type: String
+  S3OutputPrefix:
+    Type: String
+
+Resources:
+  # Define Roles
+  IAMRoles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./roles.yaml
+      Parameters:
+        TargetEnv: !Ref TargetEnv
+  # Data Pipeline Step Function
+  StepFunctionDataPipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./my_data_pipeline.yaml
+      Parameters:
+        PipelineName: !Ref PipelineName
+        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
+        TargetEnv: !Ref TargetEnv
+    DependsOn: IAMRoles
+  # Scheduler of the data Pipeline Step Function
+  Scheduler:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./scheduler.yaml
+      Parameters:
+        PipelineName: !Ref PipelineName
+        TargetEnv: !Ref TargetEnv
+        StateMachineComponentArn: !GetAtt StepFunctionDataPipeline.Outputs.StateMachineComponentArn
+        ScheduleRoleArn: !GetAtt IAMRoles.Outputs.ScheduleRoleArn
+        CodeDestination: !Ref CodeDestination
+        S3InputBucket: !Ref S3InputBucket
+        S3OutputBucket: !Ref S3OutputBucket
+        S3InputPrefix: !Ref S3InputPrefix
+        S3OutputPrefix: !Ref S3OutputPrefix
+    DependsOn:
+      - IAMRoles
+      - StepFunctionDataPipeline

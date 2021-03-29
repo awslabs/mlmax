@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for AWS Step Functions - State Machine
+
+Parameters:
+  PipelineName:
+    Type: String
+  SagerMakerRoleArn:
+    Type: String
+  WorkflowExecutionRoleArn:
+    Type: String
+  TargetEnv:
+    Type: String
+
+Resources:
+  StateMachineComponent:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub "${PipelineName}-Data-${TargetEnv}"
+      DefinitionString: !Sub |-
+        {
+          "StartAt": "SageMaker pre-processing step",
+          "States": {
+            "SageMaker pre-processing step": {
+              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
+              "Parameters": {
+                "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
+                "ProcessingInputs": [
+                  {
+                    "InputName": "code",
+                    "S3Input": {
+                      "S3Uri.$": "$$.Execution.Input['PreprocessingCodeURL']",
+                      "LocalPath": "/opt/ml/processing/input/code",
+                      "S3DataType": "S3Prefix",
+                      "S3InputMode": "File",
+                      "S3DataDistributionType": "FullyReplicated",
+                      "S3CompressionType": "None"
+                    }
+                  }
+                ],
+                "ProcessingOutputConfig": {
+                  "Outputs": [
+                    {
+                      "OutputName": "processed_data",
+                      "S3Output": {
+                        "S3Uri.$": "$$.Execution.Input['PreprocessedOutputDataURL']",
+                        "LocalPath": "/opt/ml/processing/output",
+                        "S3UploadMode": "EndOfJob"
+                      }
+                    }
+                  ]
+                },
+                "AppSpecification": {
+                  "ImageUri": "759080221371.dkr.ecr.ap-southeast-1.amazonaws.com/sagemaker-spark-processing:2.4-cpu",
+                  "ContainerEntrypoint": [
+                    "smspark-submit",
+                    "/opt/ml/processing/input/code/preprocessing.py"
+                  ]
+                },
+                "RoleArn": "${SagerMakerRoleArn}",
+                "Environment": {
+                  "S3InputPath.$": "$$.Execution.Input['S3InputPath']",
+                  "S3OutputPath.$": "$$.Execution.Input['S3OutputPath']"
+                },
+                "ProcessingResources": {
+                  "ClusterConfig": {
+                    "InstanceCount": 16,
+                    "InstanceType": "ml.m5.2xlarge",
+                    "VolumeSizeInGB": 30
+                  }
+                },
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 3600
+                }
+              },
+              "Type": "Task",
+              "End": true,
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "Next": "ML Workflow failed"
+                }
+              ]
+            },
+            "ML Workflow failed": {
+              "Cause": "SageMakerProcessingJobFailed",
+              "Type": "Fail"
+            }
+          }
+        }
+      RoleArn: !Sub "${WorkflowExecutionRoleArn}"
+
+Outputs:
+  StateMachineComponentArn:
+    Description: The step function ARN
+    Value: !GetAtt StateMachineComponent.Arn
