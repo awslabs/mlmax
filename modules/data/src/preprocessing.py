@@ -7,13 +7,9 @@ from pyspark.sql import SparkSession
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--s3_input_path", default=os.getenv("S3InputPath"), type=str)
     parser.add_argument(
-        "--s3_input_path", default=os.getenv("S3InputPath"), type=str
-    )
-    parser.add_argument(
-        "--s3_output_path",
-        default=os.getenv("S3OutputPath"),
-        type=str,
+        "--s3_output_path", default=os.getenv("S3OutputPath"), type=str,
     )
     args = parser.parse_args()
 

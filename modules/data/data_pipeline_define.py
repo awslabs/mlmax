@@ -4,7 +4,7 @@ import stepfunctions
 from custom_steps import MLMAXProcessingStep
 from sagemaker.processing import ProcessingInput, ProcessingOutput, ScriptProcessor
 from stepfunctions.inputs import ExecutionInput
-from stepfunctions.steps import Chain, ProcessingStep
+from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
 
 
