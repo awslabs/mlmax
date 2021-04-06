@@ -108,6 +108,9 @@ Resources:
             Action:
               - "kms:Decrypt"
               - "kms:GenerateDataKey"
+              - "kms:GenerateDataKeyWithoutPlaintext"
+              - "kms:ReEncrypt*"
+              - "kms:CreateGrant"
             Resource: "*"
 Outputs:
   InstanceId:
