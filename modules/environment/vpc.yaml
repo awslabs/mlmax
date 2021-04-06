@@ -20,6 +20,28 @@ Parameters:
     Type: String
     Default: 10.192.21.0/24
 
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.22.0/24
+
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.23.0/24
+
+  EnableInternet:
+    Type: String
+    Default: false
+
+Conditions:
+  CreateInternet: !Equals
+    - !Ref EnableInternet
+    - true
+  NoInternet: !Equals
+    - !Ref EnableInternet
+    - false
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -53,25 +75,167 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
 
-  PrivateRouteTable:
+  PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName} Private Routes
+          Value: !Sub ${EnvironmentName} Private RT 1
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private RT 2
 
   PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable1
       SubnetId: !Ref PrivateSubnet1
 
   PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
+
+  ############################
+  # Internet access - Start
+  ############################
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Condition: CreateInternet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Condition: CreateInternet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Condition: CreateInternet
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}
+
+  GatewayToInternet:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Condition: CreateInternet
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId:
+        Ref: InternetGateway
+
+  ElasticIP1:
+    Type: "AWS::EC2::EIP"
+    Condition: CreateInternet
+    Properties:
+      Domain: vpc
+
+  ElasticIP2:
+    Type: "AWS::EC2::EIP"
+    Condition: CreateInternet
+    Properties:
+      Domain: vpc
+
+  NATGateway1:
+    Type: AWS::EC2::NatGateway
+    Condition: CreateInternet
+    Properties:
+      AllocationId: !GetAtt ElasticIP1.AllocationId
+      SubnetId:
+        Ref: PublicSubnet1
+
+  NATGateway2:
+    Type: AWS::EC2::NatGateway
+    Condition: CreateInternet
+    Properties:
+      AllocationId: !GetAtt ElasticIP2.AllocationId
+      SubnetId:
+        Ref: PublicSubnet2
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateInternet
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Routes
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Condition: CreateInternet
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId:
+        Ref: InternetGateway
+
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateInternet
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: PublicRouteTable
+
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateInternet
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet2
+      RouteTableId:
+        Ref: PublicRouteTable
+
+  PrivateRouteToInternet1:
+    Type: AWS::EC2::Route
+    Condition: CreateInternet
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable1
+      DestinationCidrBlock: "0.0.0.0/0"
+      NatGatewayId:
+        Ref: NATGateway1
+
+  PrivateRouteToInternet2:
+    Type: AWS::EC2::Route
+    Condition: CreateInternet
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable2
+      DestinationCidrBlock: "0.0.0.0/0"
+      NatGatewayId:
+        Ref: NATGateway2
+
+  ############################
+  # Internet access - End
+  ############################
 
   VPCEndpointSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -89,14 +253,27 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName}
 
-  S3VPCEndpoint:
+  S3VPCEndpoint1:
     Type: AWS::EC2::VPCEndpoint
+    Condition: NoInternet
     Properties:
       VpcEndpointType: Gateway
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcId: !Ref VPC
       RouteTableIds:
-        - !Ref PrivateRouteTable
+        - !Ref PrivateRouteTable1
+
+  # With internet
+  S3VPCEndpoint2:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: CreateInternet
+    Properties:
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PrivateRouteTable1
+        - !Ref PrivateRouteTable2
 
   CodeCommitVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -241,6 +418,19 @@ Resources:
       SecurityGroupIds:
         - !Ref VPCEndpointSecurityGroup
 
+  StatesVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.states
+      VpcId: !Ref VPC
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+
 Outputs:
   VPC:
     Description: A reference to the created VPC
@@ -269,6 +459,3 @@ Outputs:
     Value: !GetAtt VPCEndpointSecurityGroup.GroupId
     Export:
       Name: ExpVPCEndpointSecurityGroupId
-
-  PrivateRouteTableId:
-    Value: !Ref PrivateRouteTable

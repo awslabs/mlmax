@@ -19,7 +19,7 @@ Resources:
   NotebookInstance:
     Type: "AWS::SageMaker::NotebookInstance"
     Properties:
-      NotebookInstanceName: !Ref Username
+      # NotebookInstanceName: !Ref Username
       InstanceType: "ml.t2.medium"
       RoleArn: !GetAtt SagemakerRole.Arn
       VolumeSizeInGB: 20
@@ -75,6 +75,13 @@ Resources:
             Action:
               - "kms:Decrypt"
               - "kms:GenerateDataKey"
+              - "kms:Get*"
+              - "kms:List*"
+              - "kms:CreateGrant"
+              - "kms:PutKeyPolicy"
+              - "kms:RetireGrant"
+              - "kms:RevokeGrant"
+              - "kms:Verify"
             Resource: "*"
 
 Outputs:

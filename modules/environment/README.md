@@ -4,21 +4,22 @@ The Environment module manages the provisioning of resources and manages access
 controls, providing the environment for data scientists and engineers to
 develop solutions.
 
-
 ## Design Principles
 
-| Principle                                                                     | Description                                                                                                                                                                                                                                                          |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Promote basic software development best practices.                            | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development. | 
-| Provide a flexible set of baseline services.                                  | Data Scientists should be enabled to develop code in any environment capable to run remote python interpreter including modern IDEs (e.g., VS Code,), traditional IDEs (e.g., vim) or jupyter notebooks. There should not be a single, "one-size-fits-all" approach. |
-| Operate in an isolated environment                                            | This means resources will have to reside in a private VPC and VPC endpoints will need to be created. |
-| Data encryption in transit and at rest                                        | One aspect to enforce here is S3 encryption for all content at rest and requirement for data upload encryption header to be specified. |
+| Principle                                          | Description                                                                                                                                                                                                                                                          |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Promote basic software development best practices. | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development.                                                                                                                  |
+| Provide a flexible set of baseline services.       | Data Scientists should be enabled to develop code in any environment capable to run remote python interpreter including modern IDEs (e.g., VS Code,), traditional IDEs (e.g., vim) or jupyter notebooks. There should not be a single, "one-size-fits-all" approach. |
+| Operate in an isolated environment                 | This means resources will have to reside in a private VPC and VPC endpoints will need to be created.                                                                                                                                                                 |
+| Data encryption in transit and at rest             | One aspect to enforce here is S3 encryption for all content at rest and requirement for data upload encryption header to be specified.                                                                                                                               |
 
 ## Quick Start
 
 1) Update the following config in `config/config.ini`
     - KeyName: Existing EC2 key pair name that you have access to the private file
     - S3BucketName: Unique S3 bucket name for project
+    - EnableInternet: Allow public internet access in VPC by creating public subnets with internet gateway
+    - NotebookInternet: Enable public internet access in SageMaker notebook via SageMaker managed VPC
 
 2) Prepare a S3 bucket in the same region to store cloudformation
 intermediate metedata. This could be an existing bucket or a new bucket. You
@@ -28,6 +29,7 @@ specified in Step 1.
 3) To deploy, run the command `deploy.sh [stack-name] [cloudformation-bucket] [region]`
    - Cloundformation bucket be in the same region specified by `region` argument.
    - If no `region` argument is provided, default region in `.aws/config` will be used.
+   - E.g. `deploy.sh my-stack my-cfn-s3bucket ap-southeast-1`
 
 ## Architecture
 
@@ -37,7 +39,13 @@ to be compliant for data science work. This template will setup the
 minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
 bucket for Data Scientist to start working on customer engagement.
 
-![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/architecture.png)
+### Without Internet
+
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-without-internet.png)
+
+### With Internet
+
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-with-internet.png)
 
 **S3**
 
@@ -60,6 +68,7 @@ The following endpoints have been added by default, additional endpoint can be a
 - sts
 - logs
 - ssm
+- states
 
 **KMS**
 
@@ -72,8 +81,8 @@ The following endpoints have been added by default, additional endpoint can be a
 **EC2**
 
 - SSM Agent to support remote SSH using exisitng key pair
-- First verify that Session Manager Plugin is installed on your local workstation by running the command below
-- Or follow the instruction [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify) to install SSM agent
+- First verify that Session Manager Plugin is installed on your local workstation by running the command below or follow the instruction [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-verify) to install SSM agent
+- Your current active aws profile keypair should be the same as the deployment profile.
 
 ```
 aws ssm start-session --target <ec2-instance-id>
@@ -90,4 +99,16 @@ Host ec2-ssm
     IdentityFile /path/to/keypair/pemfile
     ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
 
+```
+
+## Security Patching
+
+It is recommended that you patch the EC2 instance regularly whenever there is security updates. Run the following commands in EC2 for patching.
+
+```
+sudo yum-config-manager --disable libnvidia-container
+sudo yum-config-manager --disable neuron
+sudo yum-config-manager --disable nvidia-container-runtime
+sudo yum-config-manager --disable nvidia-docker
+sudo yum update-minimal --sec-severity=critical,important --bugfix
 ```
