@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 from recommonmark.parser import CommonMarkParser
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -24,7 +25,7 @@ copyright = "2021, Amazon Web Services"
 author = "Amazon Web Services"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.2.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -69,5 +70,7 @@ html_static_path = ["_static"]
 
 # See here for context:
 # https://github.com/readthedocs/sphinx_rtd_theme/issues/117# See here for context:
+
+
 def setup(app):
     app.add_stylesheet("theme_overrides.css")

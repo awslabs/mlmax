@@ -4,7 +4,7 @@ from typing import List
 from setuptools import find_packages, setup
 
 _pkg: str = "mlmax"
-_version: str = "0.1.0"
+_version: str = "0.2.0"
 
 
 def read(fname):
