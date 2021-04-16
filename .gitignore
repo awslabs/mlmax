@@ -137,3 +137,8 @@ venv.bak/
 .project
 .pydevproject
 .settings
+
+# pyspark
+derby.log
+metastore_db
+spark-warehouse
