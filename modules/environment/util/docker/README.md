@@ -14,6 +14,7 @@ Create an interactive development environment with docker.
 - python version management with conda
 - mount your current directory
 - zsh shell
+- tmux configuration
 
 Once it's set up, the command prompt should look something such as this:
 

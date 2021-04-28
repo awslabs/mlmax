@@ -42,4 +42,7 @@ RUN ${CONDA_DIR}/miniconda/envs/${ENV_NAME}/bin/pip install -r /opt/requirements
 # RUN source "$CONDA_DIR/miniconda/bin/activate" \
 #         && conda activate $ENV_NAME \
 #         && conda install -y --file /opt/requirements.txt
+
+# Copy over tmux configuration
+COPY .tmux.conf /root/.tmux.conf
 WORKDIR /opt/app
