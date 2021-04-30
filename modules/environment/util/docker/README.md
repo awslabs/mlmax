@@ -13,6 +13,7 @@ Create an interactive development environment with docker.
 - amazon linux 2 base
 - python version management with conda
 - mount your current directory
+- AWS CDK installation
 - zsh shell
 - tmux configuration
 
