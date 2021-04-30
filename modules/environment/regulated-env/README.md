@@ -41,11 +41,11 @@ bucket for Data Scientist to start working on customer engagement.
 
 ### Without Internet
 
-![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-without-internet.png)
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/regulated-env/images/vpc-without-internet.png)
 
 ### With Internet
 
-![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-with-internet.png)
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/regulated-env/images/vpc-with-internet.png)
 
 **S3**
 
