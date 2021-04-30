@@ -16,6 +16,11 @@ RUN yum install -y \
         which \
         tmux
 
+# Install the AWS CDK
+RUN curl -sL https://rpm.nodesource.com/setup_10.x | bash - \
+    && yum install -y nodejs \
+    && npm install -g aws-cdk@1.97
+
 # Install Miniconda
 ENV CONDA_DIR=/opt
 ENV ENV_NAME=mlmax
