@@ -1,0 +1,15 @@
+aws-cdk.core==1.95.1
+aws-cdk.aws-lambda==1.95.1
+aws-cdk.aws_apigateway==1.95.1
+aws_cdk.aws_iam==1.95.1
+aws_cdk.aws_ec2==1.95.1
+aws_cdk.aws_elasticloadbalancingv2==1.95.1
+aws_cdk.custom_resources==1.95.1
+aws_cdk.aws_ssm==1.95.1
+aws_cdk.aws_secretsmanager==1.95.1
+aws_cdk.aws_logs==1.95.1
+aws_cdk.aws_cloudwatch==1.95.1
+aws-cdk.aws-sns==1.95.1
+aws-cdk.aws-events==1.95.1
+aws-cdk.aws-events-targets==1.95.1
+aws-cdk.aws-cloudwatch-actions==1.95.1
