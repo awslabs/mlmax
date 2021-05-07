@@ -1,0 +1,17 @@
+awswrangler
+boto3
+black
+flake8
+isort
+matplotlib
+mypy
+mysql-connector-python
+numpy
+pandas
+plit
+pre-commit
+pytest
+sagemaker
+seaborn
+sphinx
+scikit-learn

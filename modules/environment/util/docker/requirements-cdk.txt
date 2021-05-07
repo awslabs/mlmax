@@ -1,0 +1,15 @@
+aws-cdk.core
+aws-cdk.aws-lambda
+aws-cdk.aws_apigateway
+aws_cdk.aws_iam
+aws_cdk.aws_ec2
+aws_cdk.aws_elasticloadbalancingv2
+aws_cdk.custom_resources
+aws_cdk.aws_ssm
+aws_cdk.aws_secretsmanager
+aws_cdk.aws_logs
+aws_cdk.aws_cloudwatch
+aws-cdk.aws-sns
+aws-cdk.aws-events
+aws-cdk.aws-events-targets
+aws-cdk.aws-cloudwatch-actions
