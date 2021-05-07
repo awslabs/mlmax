@@ -12,10 +12,9 @@ Create an interactive development environment with docker.
 **Features:**
 - amazon linux 2 base
 - python version management with conda
-- mount your current directory
+- mount your current directory and aws credential directory
 - AWS CDK installation
 - zsh shell
-- tmux configuration
 
 Once it's set up, the command prompt should look something such as this:
 
