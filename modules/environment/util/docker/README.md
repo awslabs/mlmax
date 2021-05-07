@@ -18,4 +18,4 @@ Create an interactive development environment with docker.
 
 Once it's set up, the command prompt should look something such as this:
 
-![](https://github.com/awslabs/mlmax/raw/docker-development/modules/environment/util/docker/images/cli.png)
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/util/docker/images/cli.png)
