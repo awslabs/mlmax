@@ -14,7 +14,8 @@ RUN yum install -y \
         wget \
         zsh \
         which \
-        tmux
+        tmux \
+        tar
 
 # Install the AWS CDK
 # ---------------------
@@ -55,10 +56,5 @@ RUN ${CONDA_DIR}/miniconda/envs/${ENV_NAME}/bin/pip install -r /opt/requirements
 # Copy over configuration files
 # ---------------------
 COPY .tmux.conf /root/.tmux.conf
-COPY .vimrc /root/.vimrc
-
-# Copy over vim configuration
-
-# Install vim plugins
 
 WORKDIR /opt/app
