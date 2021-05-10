@@ -14,4 +14,4 @@ This notebook checks that you can perform *train* -> *register model* -> *batch 
 
 ### [Screen PySpark on SageMaker notebook](./screen-pyspark-smnb.ipynb)
 
-This notebook checks that you can run pyspark on a SageMaker notebook instance. This is NOT intended to screen a PySpark processing job.
+This notebook checks that you can run PySpark on a SageMaker notebook instance. This is NOT intended to screen a PySpark processing job.
