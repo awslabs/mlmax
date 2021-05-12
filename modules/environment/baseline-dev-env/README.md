@@ -9,7 +9,7 @@ develop solutions.
 
 | Principle                                                                        | Description                                                                                                                                                                                                                                                          |
 | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Promote basic software development best practices.                               | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development.                                                                                                                  | 
+| Promote basic software development best practices.                               | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development.                                                                                                                  |
 | Provide a flexible set of baseline services.                                     | Data Scientists should be enabled to develop code in any environment capable to run remote python interpreter including modern IDEs (e.g., VS Code,), traditional IDEs (e.g., vim) or jupyter notebooks. There should not be a single, "one-size-fits-all" approach. |
 | Operate in an isolated environment that still allows packages/libraries installs | This means resources will have to reside in a private VPC.                                                                                                                                                                                                           |
 
@@ -64,6 +64,7 @@ Host ec2-ssm
 
 To improve quality-of-life, additional scripts are provided:
 
-- `install-dcv.sh`: a bash script to install Nice DCV on an EC2 instance. Note
-that there's already has an AMI pre-installed with Nice DCV. So, you can use
-this script for DLAMI, or say, when you want to use the latest alinux2 AMI.
+- `mlmax/modules/environment/util/install-dcv.sh`: a bash script to install
+  Nice DCV on an EC2 instance. Note that there's already has an AMI
+pre-installed with Nice DCV. So, you can use this script for DLAMI, or say,
+when you want to use the latest alinux2 AMI.
