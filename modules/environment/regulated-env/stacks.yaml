@@ -11,23 +11,9 @@ Parameters:
   Username:
     Type: String
     Default: user1
-  NotebookInternet:
-    Description: Enable SageMaker notebook internet access
-    Type: String
-    Default: Disabled
-    AllowedValues:
-      - Enabled
-      - Disabled
   KeyAlias:
     Type: String
     Default: alias/regulated-key1
-  EnableInternet:
-    Description: Enable VPC with public internet access
-    Type: String
-    Default: false
-    AllowedValues:
-      - true
-      - false
 
 Resources:
   Keys:
@@ -41,8 +27,6 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: ./vpc.yaml
-      Parameters:
-        EnableInternet: !Ref EnableInternet
 
   Storage:
     Type: AWS::CloudFormation::Stack
@@ -63,7 +47,6 @@ Resources:
       Parameters:
         S3BucketName: !Ref S3BucketName
         Username: !Ref Username
-        Internet: !Ref NotebookInternet
 
   EC2:
     Type: AWS::CloudFormation::Stack

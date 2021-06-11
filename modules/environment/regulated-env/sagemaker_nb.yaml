@@ -8,12 +8,6 @@ Parameters:
   Username:
     Type: String
     Default: myname
-  Internet:
-    Type: String
-    Default: Enabled
-    AllowedValues:
-      - Enabled
-      - Disabled
 
 Resources:
   NotebookInstance:
@@ -23,7 +17,7 @@ Resources:
       InstanceType: "ml.t2.medium"
       RoleArn: !GetAtt SagemakerRole.Arn
       VolumeSizeInGB: 20
-      DirectInternetAccess: !Ref Internet
+      DirectInternetAccess: Disabled
       KmsKeyId: !ImportValue ExpCustomerKey
       SecurityGroupIds:
         - !ImportValue ExpVPCEndpointSecurityGroup
