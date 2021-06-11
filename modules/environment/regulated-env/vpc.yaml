@@ -100,7 +100,7 @@ Resources:
           Description: HTTPS
           FromPort: 443
           ToPort: 443
-          CidrIp: 10.0.0.0/0
+          CidrIp: !Ref VpcCIDR
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}
