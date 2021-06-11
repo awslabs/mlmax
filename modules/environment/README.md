@@ -39,13 +39,7 @@ to be compliant for data science work. This template will setup the
 minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
 bucket for Data Scientist to start working on customer engagement.
 
-### Without Internet
-
 ![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-without-internet.png)
-
-### With Internet
-
-![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-with-internet.png)
 
 **S3**
 
