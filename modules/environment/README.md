@@ -18,8 +18,7 @@ develop solutions.
 1) Update the following config in `config/config.ini`
     - KeyName: Existing EC2 key pair name that you have access to the private file
     - S3BucketName: Unique S3 bucket name for project
-    - EnableInternet: Allow public internet access in VPC by creating public subnets with internet gateway
-    - NotebookInternet: Enable public internet access in SageMaker notebook via SageMaker managed VPC
+    - VpcCIDR: The Cidr range for the VPC
 
 2) Prepare a S3 bucket in the same region to store cloudformation
 intermediate metedata. This could be an existing bucket or a new bucket. You
@@ -39,13 +38,7 @@ to be compliant for data science work. This template will setup the
 minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
 bucket for Data Scientist to start working on customer engagement.
 
-### Without Internet
-
-![](https://github.com/awslabs/mlmax/raw/main/modules/environment/regulated-env/images/vpc-without-internet.png)
-
-### With Internet
-
-![](https://github.com/awslabs/mlmax/raw/main/modules/environment/regulated-env/images/vpc-with-internet.png)
+![](https://github.com/awslabs/mlmax/raw/main/modules/environment/images/vpc-without-internet.png)
 
 **S3**
 
