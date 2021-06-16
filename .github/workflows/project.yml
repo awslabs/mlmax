@@ -1,0 +1,20 @@
+
+name: Auto Assign to Project
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  assign_one_project:
+    runs-on: ubuntu-latest
+    name: Assign to One Project
+    steps:
+    - name: Assign new issues to 'To do' and new PRs to 'In progress'
+      uses: srggrs/assign-one-project-github-action@1.2.1
+      with:
+        project: 'https://github.com/awslabs/mlmax/projects/1'
