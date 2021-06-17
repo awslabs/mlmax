@@ -2,7 +2,7 @@ name: Mark stale issues and pull requests
 
 on:
   schedule:
-  - cron: '02 02 * * *'
+  - cron: '01 * * * *'
 
 jobs:
   stale:
@@ -20,3 +20,4 @@ jobs:
         stale-pr-message: 'This pull request is stale. If left untouched, it will be automatically closed in 7 days.'
         stale-issue-label: 'stale'
         stale-pr-label: 'stale'
+        remove-stale-when-updated: 'true'
