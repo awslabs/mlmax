@@ -24,17 +24,42 @@ Parameters:
     Type: String
     ConstraintDescription: must be the name of an existing Kms Key.
 
-
 Mappings:
   AWSRegion2AMI:
-    ap-southeast-1:
-      AMZN2: ami-0187d3074098799c4
-    ap-southeast-2:
-      AMZN2: ami-0d10b7763a48a4bf0
     us-east-1:
-      AMZN2: ami-00f44084952227ef0
+      AMZN2: ami-06da18386448e0bb2
     us-east-2:
-      AMZN2: ami-0a48b929b40736cc3
+      AMZN2: ami-02fc03e64effbb81e
+    us-west-1:
+      AMZN2: ami-05b104638b311617c
+    us-west-2:
+      AMZN2: ami-03c1981b7c4e68106
+    ap-south-1:
+      AMZN2: ami-0e64613c7e8923f34
+    ap-northeast-1:
+      AMZN2: ami-037ed484873368428
+    ap-northeast-2:
+      AMZN2: ami-0151939c44c38e358
+    ap-northeast-3:
+      AMZN2: ami-09d0f3b739979cc39
+    ap-southeast-1:
+      AMZN2: ami-03b22b190af15e383
+    ap-southeast-2:
+      AMZN2: ami-0e966e6b570d093ca
+    ca-central-1:
+      AMZN2: ami-0e9ae085c3c134a90
+    eu-central-1:
+      AMZN2: ami-07f4cacde0048d491
+    eu-west-1:
+      AMZN2: ami-088b96e9fa1e46f67
+    eu-west-2:
+      AMZN2: ami-0c3f1ffa1af0a902c
+    eu-west-3:
+      AMZN2: ami-0d6d95e8568867039
+    eu-north-1:
+      AMZN2: ami-05e1cabe10125b07e
+    sa-east-1:
+      AMZN2: ami-06fba42dcfdf3443d
 
 Resources:
   EC2Instance:
