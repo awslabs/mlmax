@@ -51,7 +51,7 @@ deploy () {
       --stack-name ${STACK_NAME} \
       --template-file ./ec2_packaged.yaml \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-      --parameter-overrides $(cat config/ec2config.ini)
+      --parameter-overrides $(cat config/ec2_config.ini)
 
     rm -f ./ec2_packaged.yaml
 }
