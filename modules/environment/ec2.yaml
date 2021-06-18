@@ -23,6 +23,10 @@ Parameters:
   KmsKeyId:
     Type: String
     ConstraintDescription: must be the name of an existing Kms Key.
+  VolumeSize:
+    Description: The size of the EBS Volume (in GB).
+    Type: Number
+    Default: 105
 
 Mappings:
   AWSRegion2AMI:
@@ -82,7 +86,7 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 100
+            VolumeSize: !Ref VolumeSize
             VolumeType: gp3
             Iops: 600
             DeleteOnTermination: true
