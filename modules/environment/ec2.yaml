@@ -14,6 +14,16 @@ Parameters:
   EnvironmentName:
     Type: String
     Default: regulated-env
+  SecurityGroupId:
+    Type: String
+    ConstraintDescription: must be the name of an existing Subnet.
+  SubnetId:
+    Type: String
+    ConstraintDescription: must be the name of an existing Subnet.
+  KmsKeyId:
+    Type: String
+    ConstraintDescription: must be the name of an existing Kms Key.
+
 
 Mappings:
   AWSRegion2AMI:
@@ -36,8 +46,8 @@ Resources:
 
       InstanceType: !Ref InstanceType
       SecurityGroupIds:
-        - !ImportValue ExpVPCEndpointSecurityGroupId
-      SubnetId: !ImportValue ExpPrivateSubnet1
+        - !Ref SecurityGroupId
+      SubnetId: !Ref SubnetId
       KeyName: !Ref KeyName
       ImageId: !FindInMap
         - AWSRegion2AMI
@@ -52,7 +62,7 @@ Resources:
             Iops: 600
             DeleteOnTermination: true
             Encrypted: true
-            KmsKeyId: !ImportValue ExpCustomerKey
+            KmsKeyId: !Ref KmsKeyId
 
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
