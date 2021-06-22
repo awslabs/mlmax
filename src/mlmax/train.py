@@ -59,6 +59,7 @@ def parse_arg():
     parser.add_argument("--train", type=str, default="/opt/ml/input/data/train")
     parser.add_argument("--test", type=str, default="/opt/ml/input/data/test")
     parser.add_argument("--model-dir", type=str, default="/opt/ml/model")
+    parser.add_argument("--inspect", type=bool, default=False)
     args, _ = parser.parse_known_args()
     print(f"Received arguments {args}")
     return args
@@ -79,4 +80,6 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_arg()
+    if args.inspect == True:
+        os.environ['PYTHONINSPECT'] = '1'
     main(args)

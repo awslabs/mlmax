@@ -8,8 +8,8 @@ sagemaker_session.config = {'local': {'local_code': True}}
 
 # Configure local execution parameters
 INSPECT_AFTER_SCRIPT = True
-CODE_PATH = "../../src/mlmax/preprocessing.py"
-LOCAL_DATA_PATH = "../../tests/mlmax/opt/ml/processing/input"
+CODE_PATH = "../../../src/mlmax/preprocessing.py"
+LOCAL_DATA_PATH = "../../../tests/mlmax/opt/ml/processing/input"
 INPUT_DATA_PATH = "input/census-income-sample.csv"
 EXECUTION_MODE = "train"  # Configure to either 'train', or 'infer'
 
