@@ -22,7 +22,6 @@ print('Starting training job.')
 print('Note: if launching for the first time in local mode, container image download might take a few minutes to complete.')
 sklearn.fit(
     {"train": "file://../../../tests/mlmax/opt/ml/processing/train/",
-     "test": "file://../../../tests/mlmax/opt/ml/processing/test/",
-     "config": "file://"},
+     "test": "file://../../../tests/mlmax/opt/ml/processing/test/"},
     wait=True
 )
