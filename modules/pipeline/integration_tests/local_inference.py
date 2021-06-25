@@ -1,15 +1,11 @@
-from sagemaker.local import LocalSession
 from sagemaker.processing import ProcessingInput, ProcessingOutput
 from sagemaker.sklearn.processing import SKLearnProcessor
 
 # Adapted from: https://github.com/aws-samples/amazon-sagemaker-local-mode/blob/main/scikit_learn_local_processing/SKLearnProcessor_local_processing.py
-sagemaker_session = LocalSession()
-sagemaker_session.config = {'local': {'local_code': True}}
-
 # Configure local execution parameters
 INSPECT_AFTER_SCRIPT = True
-CODE_PATH = "../../../src/mlmax/evaluation.py"
-LOCAL_DATA_PATH = "../../../tests/mlmax/opt/ml/processing/test"
+CODE_PATH = "../../../src/mlmax/inference.py"
+LOCAL_DATA_PATH = "../../../tests/mlmax/opt/ml/processing/input"
 EXECUTION_MODE = "infer"  # Configure to either 'train', or 'infer'
 
 # For local training a dummy role will be sufficient
@@ -29,7 +25,7 @@ processor.run(
     inputs=[
         ProcessingInput(
             source=LOCAL_DATA_PATH,
-            destination="/opt/ml/processing/test",
+            destination="/opt/ml/processing/input",
             input_name="input",
         ),
         ProcessingInput(
@@ -40,19 +36,19 @@ processor.run(
     ],
     outputs=[
         ProcessingOutput(
-            source="/opt/ml/processing/evaluation",
-            output_name="evaluation",
+            source="/opt/ml/processing/test",
+            output_name="test_data",
         )
     ],
     wait=False
 )
 
-evaluation_job_description = processor.jobs[-1].describe()
-output_config = evaluation_job_description['ProcessingOutputConfig']
+inference_job_description = processor.jobs[-1].describe()
+output_config = inference_job_description['ProcessingOutputConfig']
 print(output_config)
 
 for output in output_config['Outputs']:
-    if output['OutputName'] == 'evaluation':
+    if output['OutputName'] == 'test_data':
         output_data_file = output['S3Output']['S3Uri']
 
 print('Output file is located on: {}'.format(output_data_file))

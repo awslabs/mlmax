@@ -1,17 +1,13 @@
-from sagemaker.local import LocalSession
 from sagemaker.processing import ProcessingInput, ProcessingOutput
 from sagemaker.sklearn.processing import SKLearnProcessor
 
 # Adapted from: https://github.com/aws-samples/amazon-sagemaker-local-mode/blob/main/scikit_learn_local_processing/SKLearnProcessor_local_processing.py
-sagemaker_session = LocalSession()
-sagemaker_session.config = {'local': {'local_code': True}}
-
 # Configure local execution parameters
 INSPECT_AFTER_SCRIPT = True
-CODE_PATH = "../../../src/mlmax/inference.py"
+CODE_PATH = "../../../src/mlmax/preprocessing.py"
 LOCAL_DATA_PATH = "../../../tests/mlmax/opt/ml/processing/input"
 INPUT_DATA_PATH = "input/census-income-sample.csv"
-EXECUTION_MODE = "infer"  # Configure to either 'train', or 'infer'
+EXECUTION_MODE = "train"  # Configure to either 'train', or 'infer'
 
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
@@ -30,26 +26,30 @@ processor.run(
     inputs=[
         ProcessingInput(
             source=LOCAL_DATA_PATH,
-            destination="/opt/ml/processing/input",
-            input_name="input",
-        ),
-        ProcessingInput(
-            source="../../../tests/mlmax/opt/ml/processing/model",
-            destination="/opt/ml/processing/model",
-            input_name="model",
-        ),
+            destination='/opt/ml/processing/input')
     ],
     outputs=[
         ProcessingOutput(
+            source="/opt/ml/processing/train",
+            output_name="train_data",
+        ),
+        ProcessingOutput(
             source="/opt/ml/processing/test",
             output_name="test_data",
-        )
+        ),
+        ProcessingOutput(
+            source="/opt/ml/processing/model",
+            output_name="proc_model",
+        ),
     ],
+    arguments=["--train-test-split-ratio", "0.2",
+               "--mode", EXECUTION_MODE,
+               "--data-input", INPUT_DATA_PATH],
     wait=False
 )
 
-inference_job_description = processor.jobs[-1].describe()
-output_config = inference_job_description['ProcessingOutputConfig']
+preprocessing_job_description = processor.jobs[-1].describe()
+output_config = preprocessing_job_description['ProcessingOutputConfig']
 print(output_config)
 
 for output in output_config['Outputs']:
