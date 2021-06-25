@@ -6,7 +6,6 @@ from sagemaker.sklearn.processing import SKLearnProcessor
 INSPECT_AFTER_SCRIPT = True
 CODE_PATH = "../../../src/mlmax/inference.py"
 LOCAL_DATA_PATH = "../../../tests/mlmax/opt/ml/processing/input"
-EXECUTION_MODE = "infer"  # Configure to either 'train', or 'infer'
 
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'

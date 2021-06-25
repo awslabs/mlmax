@@ -6,6 +6,7 @@ from sagemaker.sklearn.estimator import SKLearn
 
 # Configure local execution parameters
 CODE_PATH = "../../../src/mlmax/train.py"
+INSPECT_AFTER_SCRIPT = False
 
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
@@ -15,7 +16,7 @@ sklearn = SKLearn(
     py_version="py3",
     framework_version="0.20.0",
     instance_type="local",
-    hyperparameters={"inspect": "True"}
+    hyperparameters={"inspect": True if INSPECT_AFTER_SCRIPT else None}
 )
 
 print('Starting training job.')
