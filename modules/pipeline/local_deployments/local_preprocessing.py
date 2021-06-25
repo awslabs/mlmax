@@ -15,16 +15,12 @@ EXECUTION_MODE = "train"  # Configure to either 'train', or 'infer'
 
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
-if INSPECT_AFTER_SCRIPT:
-    command = ["python3", "-i", "/opt/ml/processing/input/code/preprocessing.py"]
-else:
-    command = ["python3", "/opt/ml/processing/input/code/preprocessing.py"]
 processor = SKLearnProcessor(framework_version='0.20.0',
                              instance_count=1,
                              instance_type='local',
                              role=role,
                              max_runtime_in_seconds=1200,
-                             command=command
+                             env={"PYTHONINSPECT": "1"} if INSPECT_AFTER_SCRIPT else None
                              )
 
 print('Starting processing job.')
