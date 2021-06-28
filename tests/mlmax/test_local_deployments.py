@@ -4,6 +4,27 @@ from sagemaker.sklearn.processing import SKLearnProcessor
 from sagemaker.sklearn.estimator import SKLearn
 import datatest as dt
 
+# Tests for local SageMaker docker deployment of MLMax scripts.
+# These tests require:
+# - AWS credentials available in the test environment
+# - Docker to be running
+
+# Due to their additional requirements and running time, these tests will be skipped
+# unless the --smlocal flag is specified, i.e. `pytest --smlocal`.
+
+# Further, these tests can be run with an 'inspectlocal' flag that will run the code
+# within the container in Python's inspect mode (e.g. `python -i entrypoint.py`). This
+# means that the container instance will not exit on script success or failure, but
+# will instead stay running. This means that the container instance can be entered for
+# manual inspection:
+# $ docker ps  # identify Container ID
+# $ docker exec -it /bin/bash <Container ID>
+# Tests must be manually ended with `ctrl-c` and closing any open connections to the
+# container.
+# Consequently, to run a single test/container for inspection, it must be specified, e.g.:
+# $ pytest tests/mlmax/test_local_deployments.py -k test_preprocessing_script_in_local_container --smlocal --inspectlocal
+
+
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
 
