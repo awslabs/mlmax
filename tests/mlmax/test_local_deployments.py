@@ -2,29 +2,31 @@ import pytest
 from sagemaker.processing import ProcessingInput, ProcessingOutput
 from sagemaker.sklearn.processing import SKLearnProcessor
 from sagemaker.sklearn.estimator import SKLearn
-
-# Configure local execution parameters
-INSPECT_AFTER_SCRIPT = False
+import datatest as dt
 
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
 
+
 @pytest.fixture()
-def processor():
+def processor(inspectlocal):
     processor = SKLearnProcessor(framework_version='0.20.0',
                                  instance_count=1,
                                  instance_type='local',
                                  role=role,
                                  max_runtime_in_seconds=1200,
-                                 env={"PYTHONINSPECT": "1"} if INSPECT_AFTER_SCRIPT else None
+                                 env={"PYTHONINSPECT": "1"} if inspectlocal else None
                                  )
     return processor
 
+
+@dt.working_directory(__file__)
+@pytest.mark.smlocal
 def test_preprocessing_script_in_local_container(processor):
-    code_path = "../../../src/mlmax/preprocessing.py"
+    code_path = "../../src/mlmax/preprocessing.py"
     execution_mode = "train"  # Configure to either 'train', or 'infer'
     input_data_path = "input/census-income-sample.csv"
-    local_data_path = "../../../tests/mlmax/opt/ml/processing/input"
+    local_data_path = "opt/ml/processing/input"
 
     processor.run(
         code=code_path,
@@ -53,10 +55,13 @@ def test_preprocessing_script_in_local_container(processor):
         wait=False
     )
 
-def test_training_script_in_local_container():
-    code_path = "../../../src/mlmax/train.py"
-    train_data_path = "../../../tests/mlmax/opt/ml/processing/train/"
-    test_data_path = "../../../tests/mlmax/opt/ml/processing/test/"
+
+@dt.working_directory(__file__)
+@pytest.mark.smlocal
+def test_training_script_in_local_container(inspectlocal):
+    code_path = "../../src/mlmax/train.py"
+    train_data_path = "opt/ml/processing/train/"
+    test_data_path = "opt/ml/processing/test/"
 
     sklearn = SKLearn(
         entry_point=code_path,
@@ -64,7 +69,7 @@ def test_training_script_in_local_container():
         py_version="py3",
         framework_version="0.20.0",
         instance_type="local",
-        hyperparameters={"inspect": True if INSPECT_AFTER_SCRIPT else None}
+        hyperparameters={"inspect": True if inspectlocal else None}
     )
     sklearn.fit(
         {"train": "file://" + train_data_path,
@@ -73,9 +78,12 @@ def test_training_script_in_local_container():
     )
 
 
+@dt.working_directory(__file__)
+@pytest.mark.smlocal
 def test_inference_script_in_local_container(processor):
-    code_path = "../../../src/mlmax/inference.py"
-    local_data_path = "../../../tests/mlmax/opt/ml/processing/input"
+    code_path = "../../src/mlmax/inference.py"
+    local_data_path = "opt/ml/processing/input"
+    model_path = "opt/ml/processing/model"
 
     processor.run(
         code=code_path,
@@ -86,7 +94,7 @@ def test_inference_script_in_local_container(processor):
                 input_name="input",
             ),
             ProcessingInput(
-                source="../../../tests/mlmax/opt/ml/processing/model",
+                source=model_path,
                 destination="/opt/ml/processing/model",
                 input_name="model",
             ),
@@ -101,9 +109,12 @@ def test_inference_script_in_local_container(processor):
     )
 
 
+@dt.working_directory(__file__)
+@pytest.mark.smlocal
 def test_evaluation_script_in_local_container(processor):
-    code_path = "../../../src/mlmax/evaluation.py"
-    local_data_path = "../../../tests/mlmax/opt/ml/processing/test"
+    code_path = "../../src/mlmax/evaluation.py"
+    local_data_path = "opt/ml/processing/test"
+    model_path = "opt/ml/processing/model"
 
     processor.run(
         code=code_path,
@@ -114,7 +125,7 @@ def test_evaluation_script_in_local_container(processor):
                 input_name="input",
             ),
             ProcessingInput(
-                source="../../../tests/mlmax/opt/ml/processing/model",
+                source=model_path,
                 destination="/opt/ml/processing/model",
                 input_name="model",
             ),

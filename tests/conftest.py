@@ -1,10 +1,34 @@
 # -*- coding: utf-8 -*-
-"""
-    Dummy conftest.py for mlmax.
+import pytest
 
-    If you don't know what this is for, just leave it empty.
-    Read more about conftest.py under:
-    https://pytest.org/latest/plugins.html
-"""
+def pytest_addoption(parser):
+    parser.addoption('--smlocal', action='store_true', dest="smlocal",
+                 default=False, help="enable local SageMaker environment tests")
+    parser.addoption(
+        "--inspectlocal", action="store_true",
+        default=None, help="run local SageMaker environment tests in inspect (python -i) mode"
+    )
 
-# import pytest
+
+@pytest.fixture
+def inspectlocal(request):
+    return request.config.getoption("--inspectlocal")
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "smlocal: runs in local SageMaker Docker environment")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--smlocal"):
+        # --smlocal given in cli: run MLMax scripts in local SageMaker environment
+        return
+    skip_local = pytest.mark.skip(reason="need --smlocal option to run")
+    for item in items:
+        if "smlocal" in item.keywords:
+            item.add_marker(skip_local)
+
+
+@pytest.fixture
+def cmdopt(request):
+    return request.config.getoption("--cmdopt")
