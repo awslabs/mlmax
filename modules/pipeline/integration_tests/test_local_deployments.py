@@ -9,12 +9,8 @@ INSPECT_AFTER_SCRIPT = False
 # For local training a dummy role will be sufficient
 role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
 
-def test_preprocessing_script_in_local_container():
-    code_path = "../../../src/mlmax/preprocessing.py"
-    execution_mode = "train"  # Configure to either 'train', or 'infer'
-    input_data_path = "input/census-income-sample.csv"
-    local_data_path = "../../../tests/mlmax/opt/ml/processing/input"
-
+@pytest.fixture()
+def processor():
     processor = SKLearnProcessor(framework_version='0.20.0',
                                  instance_count=1,
                                  instance_type='local',
@@ -22,6 +18,14 @@ def test_preprocessing_script_in_local_container():
                                  max_runtime_in_seconds=1200,
                                  env={"PYTHONINSPECT": "1"} if INSPECT_AFTER_SCRIPT else None
                                  )
+    return processor
+
+def test_preprocessing_script_in_local_container(processor):
+    code_path = "../../../src/mlmax/preprocessing.py"
+    execution_mode = "train"  # Configure to either 'train', or 'infer'
+    input_data_path = "input/census-income-sample.csv"
+    local_data_path = "../../../tests/mlmax/opt/ml/processing/input"
+
     processor.run(
         code=code_path,
         inputs=[
@@ -69,17 +73,9 @@ def test_training_script_in_local_container():
     )
 
 
-def test_inference_script_in_local_container():
+def test_inference_script_in_local_container(processor):
     code_path = "../../../src/mlmax/inference.py"
     local_data_path = "../../../tests/mlmax/opt/ml/processing/input"
-
-    processor = SKLearnProcessor(framework_version='0.20.0',
-                                 instance_count=1,
-                                 instance_type='local',
-                                 role=role,
-                                 max_runtime_in_seconds=1200,
-                                 env={"PYTHONINSPECT": "1"} if INSPECT_AFTER_SCRIPT else None
-                                 )
 
     processor.run(
         code=code_path,
@@ -105,17 +101,10 @@ def test_inference_script_in_local_container():
     )
 
 
-def test_evaluation_script_in_local_container():
+def test_evaluation_script_in_local_container(processor):
     code_path = "../../../src/mlmax/evaluation.py"
     local_data_path = "../../../tests/mlmax/opt/ml/processing/test"
 
-    processor = SKLearnProcessor(framework_version='0.20.0',
-                                 instance_count=1,
-                                 instance_type='local',
-                                 role=role,
-                                 max_runtime_in_seconds=1200,
-                                 env={"PYTHONINSPECT": "1"} if INSPECT_AFTER_SCRIPT else None
-                                 )
     processor.run(
         code=code_path,
         inputs=[
