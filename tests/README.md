@@ -2,9 +2,11 @@
 
 ## Unit test suite
 
-The unit test suite is run via PyTest:
+The unit test suite is run via PyTest from the project root directory:
 
-```$ pytest```
+```bash
+user@machine:mlmax$ pytest
+```
 
 ## SageMaker Local Mode tests
 
@@ -16,7 +18,9 @@ This means that environment and integration issues associated with deployment ca
 
 The tests can be run by including the `--smlocal` flag:
 
-```$ pytest --smlocal```
+```bash
+user@machine:mlmax$ pytest --smlocal
+```
 
 Due to their additional environment requirements and running time, these tests will be skipped unless the `--smlocal` flag is specified.
 
@@ -35,20 +39,69 @@ This means that the container instance will not exit on script success or failur
 
 This can be incredibly useful for debugging SageMaker container-specific issues.
 
-A typical way to enter the container would be via `bash`, e.g.:
+However, this does mean that the test will effectively hang, and must be manually ended with `ctrl-c` and closing any open Docker connections to the
+container. A walkthrough of this process is provided below.
 
+#### Typical workflow
+
+A typical workflow for an `--inspectlocal` call is as follows:
+
+1. The specific test/container to be inspect is specified with the `-k` flag, and the `--smlocal` and `--inspectlocal` flags are appended:
+
+The test framework will begin, announce that the test is being run, and appear to hang:
+
+```bash
+user@machine:mlmax$ pytest tests/mlmax/test_local_deployments.py -k test_preprocessing_script_in_local_container --smlocal --inspectlocal
+> =============== test session starts ===================
+> platform darwin -- Python 3.7.10, pytest-6.2.4, py-1.10.0, pluggy-0.13.1 -- /Users/user/Projects/mlmax/venv/bin/python
+> cachedir: .pytest_cache
+> rootdir: /Users/user/Projects/mlmax, configfile: tox.ini
+> plugins: cov-2.12.1, datatest-0.11.1
+>
+> collected 4 items / 3 deselected / 1 selected
+>
+> tests/mlmax/test_local_deployments.py::test_inference_script_in_local_container
 ```
-$ docker ps  # identify container ID
-$ docker exec -it /bin/bash <container ID>
+2. A new terminal must now be opened.
+   In this new terminal, the ID for the container just launched is identified with the `docker ps` command:
+
+```bash
+user@machine:mlmax$ docker ps  # identify container ID
+> CONTAINER ID   IMAGE                                                                                     COMMAND                  CREATED         STATUS         PORTS     NAMES
+> e1e0c76cc5f5   783357654285.dkr.ecr.ap-southeast-2.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3   "python3 /opt/ml/pro…"   3 minutes ago   Up 3 minutes             elpuqgbzps-algo-1-kdmha
 ```
 
-Tests running in `--inspectlocal` mode must be manually ended with `ctrl-c` and closing any open connections to the
-container.
+3. The container can now be entered via the `docker exec` command, e.g.:
 
-To run a single test/container for inspection, it must be specified, e.g.:
-
+```bash
+user@machine:mlmax$ docker exec -it e1e0 /bin/bash  # Note that a shortened version of the ID can be used
+root@e1e0c76cc5f5:/#  # Now in a Bash terminal inside the container - ready for inspection and debugging
 ```
-$ pytest tests/mlmax/test_local_deployments.py -k test_preprocessing_script_in_local_container --smlocal --inspectlocal
+
+At this point the container can be explored via `bash`.
+
+4. When inspection and debugging is complete, the `bash` terminal running inside the container must be closed:
+
+```bash
+root@e1e0c76cc5f5:/# exit
+> exit
+user@machine:mlmax$
+```
+
+5. Finally, the test framework in the **original** terminal must be manually shut down with `ctrl-c`, marked by `^C` in the example below:
+
+```bash
+> =============== test session starts ===================
+> platform darwin -- Python 3.7.10, pytest-6.2.4, py-1.10.0, pluggy-0.13.1 -- /Users/user/Projects/mlmax/venv/bin/python
+> cachedir: .pytest_cache
+> rootdir: /Users/user/Projects/mlmax, configfile: tox.ini
+> plugins: cov-2.12.1, datatest-0.11.1
+>
+> collected 4 items / 3 deselected / 1 selected
+>
+> tests/mlmax/test_local_deployments.py::test_inference_script_in_local_container ^C
+> !!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!
+> /Users/user/Projects/mlmax/venv/lib/python3.7/site-packages/sagemaker/local/image.py:889: KeyboardInterrupt
 ```
 
 ### Further information
