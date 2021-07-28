@@ -78,7 +78,12 @@ user@machine:mlmax$ docker exec -it e1e0 /bin/bash  # Note that a shortened vers
 root@e1e0c76cc5f5:/#  # Now in a Bash terminal inside the container - ready for inspection and debugging
 ```
 
-At this point the container can be explored via `bash`.
+At this point the container can be explored via typical `bash` commands:
+
+```bash
+root@e1e0c76cc5f5:/# ls /opt/ml/code
+> train.py
+```
 
 4. When inspection and debugging is complete, the `bash` terminal running inside the container must be closed:
 
