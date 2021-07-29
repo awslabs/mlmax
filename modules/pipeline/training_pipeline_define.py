@@ -117,7 +117,7 @@ def define_training_pipeline(
         train_instance_type="ml.m5.xlarge",
         role=sm_role,
         py_version="py3",
-        framework_version="0.20.0"
+        framework_version="0.20.0",
     )
 
     training_step = MLMaxTrainingStep(
