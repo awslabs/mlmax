@@ -8,7 +8,7 @@ develop solutions.
 
 | Principle                                          | Description                                                                                                                                                                                                                                                          |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Promote basic software development best practices. | Many data scientists come from a non-CS background, and thus it is important emphasize the benefit of tools and techniques of software development.                                                                                                                  |
+| Promote basic software development best practices. | Many data scientists come from a non-CS background, and thus it is important to emphasize the benefit of tools and techniques of software development.                                                                                                                  |
 | Provide a flexible set of baseline services.       | Data Scientists should be enabled to develop code in any environment capable to run remote python interpreter including modern IDEs (e.g., VS Code,), traditional IDEs (e.g., vim) or jupyter notebooks. There should not be a single, "one-size-fits-all" approach. |
 | Operate in an isolated environment                 | This means resources will have to reside in a private VPC and VPC endpoints will need to be created.                                                                                                                                                                 |
 | Data encryption in transit and at rest             | One aspect to enforce here is S3 encryption for all content at rest and requirement for data upload encryption header to be specified.                                                                                                                               |
@@ -32,7 +32,7 @@ specified in Step 1.
 
 ## Architecture
 
-Very often in a regulated industry such as Financial Service and Healthcase
+Very often in a regulated industry such as Financial Services and Healthcare
 where data security is critical, the customer will have stringent requirements
 to be compliant for data science work. This template will setup the
 minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
