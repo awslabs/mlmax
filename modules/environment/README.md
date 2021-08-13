@@ -32,7 +32,7 @@ specified in Step 1.
 
 ## Architecture
 
-Very often in a regulated industry such as Financial Services and Healthcare
+Very often in a regulated industry such as Financial Services or Healthcare
 where data security is critical, the customer will have stringent requirements
 to be compliant for data science work. This template will setup the
 minimum service such as bastianless EC2 instance, SageMaker Notebook and S3
