@@ -41,4 +41,5 @@ phases:
 artifacts:
   files:
     - modules/pipeline/templates/*.yaml
+    - modules/cicd/config/*.json
   discard-paths: yes
