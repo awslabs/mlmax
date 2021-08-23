@@ -27,13 +27,15 @@ phases:
   post_build:
     commands:
       - echo Package custom resources
-      - aws cloudformation package \
+      - |
+        aws cloudformation package \
         --region ${REGION} \
         --template-file templates/master.yaml \
         --s3-bucket ${PACKAGE_BUCKET} \
         --s3-prefix clouformation-packaged \
         --output-template-file templates/master_packaged.yaml
-      - aws cloudformation validate-template \
+      - |
+        aws cloudformation validate-template \
         --template-body file://./templates/master_packaged.yaml
       - echo Done
 
