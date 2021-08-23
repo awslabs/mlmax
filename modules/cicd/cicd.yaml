@@ -78,7 +78,6 @@ Resources:
                   - lambda:*
                 Resource:
                   - "*"
-
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -125,6 +124,82 @@ Resources:
                   - "codestar-connections:UseConnection"
                 Resource: "*"
             
+  ###################### CodeDeploy Role ##################################
+  DeployRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub ${StackName}-deploy-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "cloudformation.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "mlmax-codedeploy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CloudFormation
+                Effect: Allow
+                Action:
+                  - cloudformation:*
+                  - iam:AttachRolePolicy
+                  - iam:CreateRole
+                  - iam:CreatePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:DeleteRole
+                  - iam:DetachRolePolicy
+                  - iam:PutRolePolicy
+                  - iam:PassRole
+                  - iam:DeleteRolePolicy
+                  - iam:CreateServiceLinkedRole
+                  - iam:TagRole
+                  - lambda:InvokeFunction
+                  - states:*
+                Resource: "*"
+              - Sid: AllowCloudWatch
+                Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: "*"
+              - Sid: CodeDeploy 
+                Effect: Allow
+                Action:
+                  - codedeploy:*
+                Resource: "*"
+              - Sid: AllowPassRoleSageMaker
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: sagemaker.amazonaws.com
+              - Sid: AllowS3
+                Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${PackageBucket}"
+                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+
   ################ GITHUB connection to CodePipeline ######################################
   GitConnection:
     Type: 'AWS::CodeStarConnections::Connection'
@@ -176,7 +251,7 @@ Resources:
                 Category: Source
                 Provider: CodeStarSourceConnection
               OutputArtifacts:
-                - Name: Source
+                - Name: SourceOutput
               RunOrder: 1
               Configuration:
                 ConnectionArn: !Ref GitConnection
@@ -187,7 +262,7 @@ Resources:
           Actions:
             - Name: BuildTemplates
               InputArtifacts:
-                - Name: Source
+                - Name: SourceOutput
               OutputArtifacts:
                 - Name: BuildOutput
               ActionTypeId:
@@ -198,3 +273,19 @@ Resources:
               Configuration:
                 ProjectName: !Ref BuildProject
               RunOrder: 1
+            - Name: CreateMLPipelines
+              InputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: "1"
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !GetAtt DeployRole.Arn
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: MlMaxPipelineDemo-stage
+                TemplatePath: BuildOutput::master_packaged.yaml
+                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-stage.json
+              RunOrder: 2
