@@ -1,0 +1,200 @@
+Description: CodePipeline (CICD) for the training and infernce pipelines
+Parameters:
+    PackageBucket:
+        Type: String
+        Description: Path of the S3 bucket for the aws cloudformation package.
+
+    Region:
+      Description: AWS region to deploy application
+      Type: String
+    
+    StackName:
+      Description: default stack name for the CICD codepipeline 
+      Type: String
+
+    RepositoryName:
+      Type: String
+      Default: "awslabs/mlmax"
+
+    BuildImageName:
+      Description: Instance type
+      Type: String
+      Default: "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+
+    BranchName:
+      Description: Branch name where changes are to be detected
+      Type: String
+      Default: "cicd-pipeline"
+
+Resources:
+  ################## CodeBuild and CodePipeline Role ##############################
+  
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackName}-CodePipelineServiceRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+                - cloudformation.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackName}-AWS-CodePipeline
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - 'codebuild:BatchGetBuilds'
+                  - 'codebuild:StartBuild'
+                  - 'codebuild:BatchGetBuildBatches'
+                  - 'codebuild:StartBuildBatch'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${PackageBucket}"
+                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+              - Effect: Allow
+                Action:
+                  - iam:*
+                  - states:*
+                  - cloudformation:*
+                  - lambda:*
+                Resource:
+                  - "*"
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackName}-CodeBuildServiceRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+      Policies:
+        - PolicyName: CodeBuildBasePolicy-CodeBuildProject
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'iam:PassRole'
+                Resource:
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/${StackName}-CodeBuildServiceRole"
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${PackageBucket}"
+                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+              - Effect: Allow                                                           
+                Action:                                                                 
+                  - cloudformation:ValidateTemplate
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "codestar-connections:UseConnection"
+                Resource: "*"
+            
+  ################ GITHUB connection to CodePipeline ######################################
+  GitConnection:
+    Type: 'AWS::CodeStarConnections::Connection'
+    Properties:
+      ConnectionName: mlmax_git_conn
+      ProviderType: GitHub
+      
+  ################ CodeBuild Stage and CodePipeline Pipeline ##############################
+  BuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${StackName}-build'
+      Description: Builds the templates/files for executing the CI/CD.
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: modules/cicd/buildspec.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Type: LINUX_CONTAINER
+        Image: !Ref BuildImageName
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: PACKAGE_BUCKET
+            Type: PLAINTEXT
+            Value: !Ref PackageBucket
+          - Name: REGION
+            Type: PLAINTEXT
+            Value: !Ref Region
+      TimeoutInMinutes: 30
+
+  CICDPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub ${StackName}-codepipeline
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      ArtifactStore:
+          Type: S3
+          Location: !Sub ${PackageBucket}
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: ApplicationSource
+              ActionTypeId:
+                Version: '1'
+                Owner: AWS
+                Category: Source
+                Provider: CodeStarSourceConnection
+              OutputArtifacts:
+                - Name: Source
+              RunOrder: 1
+              Configuration:
+                ConnectionArn: !Ref GitConnection
+                FullRepositoryId: !Ref RepositoryName
+                BranchName: !Ref BranchName
+                DetectChanges: true 
+        - Name: Build
+          Actions:
+            - Name: BuildTemplates
+              InputArtifacts:
+                - Name: Source
+              OutputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildProject
+              RunOrder: 1
