@@ -1,0 +1,4 @@
+{
+    "PipelineName": "MlMaxPipelineDemo",
+    "TargetEnv": "stage"
+}
