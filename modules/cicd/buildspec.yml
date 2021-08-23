@@ -35,8 +35,7 @@ phases:
         --s3-prefix clouformation-packaged \
         --output-template-file templates/master_packaged.yaml
       - |
-        aws cloudformation validate-template \
-        --template-body file://./templates/master_packaged.yaml
+        aws cloudformation validate-template --template-body file://./templates/master_packaged.yaml
       - echo Done
 
 artifacts:
