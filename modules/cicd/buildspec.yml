@@ -23,6 +23,8 @@ phases:
       - echo Run the script to build the cloudformation templates
       - python training_pipeline_create.py
       - python inference_pipeline_create.py
+      - cd ../cicd
+      - python scripts/ml_pipelines_run_input.py
       
   post_build:
     commands:
