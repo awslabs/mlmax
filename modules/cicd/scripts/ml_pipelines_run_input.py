@@ -85,8 +85,8 @@ def generate_training_pipeline_input():
     }
     save_to_json(inputs, "config/training-pipeline-input.json")
     return (
-        f"s3://{s3_bucket_base_uri}/{preprocessing_job_name}/output/proc_model.tar.gz",
-        f"s3://{s3_bucket_base_uri}/{training_job_name}/output/model.tar.gz",
+        f"{s3_bucket_base_uri}/{preprocessing_job_name}/output/proc_model.tar.gz",
+        f"{s3_bucket_base_uri}/{training_job_name}/output/model.tar.gz",
     )
 
 
