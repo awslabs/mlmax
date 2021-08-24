@@ -319,7 +319,26 @@ Resources:
               OutputArtifacts:
                 - Name: InferencePipeline 
               Configuration:
-                StateMachineArn: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:MlMaxPipelineDemo-Training-stage"
+                StateMachineArn: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:MlMaxPipelineDemo-Inference-stage"
                 InputType: FilePath
                 Input: inference-pipeline-input.json
               RunOrder: 1
+        - Name: Deploy 
+          Actions:
+            - Name: CreateInferencePipeline
+              InputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: "1"
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !GetAtt DeployRole.Arn
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: MlMaxPipelineDemo-prod
+                TemplatePath: BuildOutput::master_packaged.yaml
+                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-prod.json
+              RunOrder: 2
+
