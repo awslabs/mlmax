@@ -5,8 +5,18 @@ Parameters:
     Default: "MlMax-Pipeline-Demo"
   TargetEnv:
     Type: String
+    AllowedValues:
+      - 'dev'
+      - 'stage'
+      - 'prod'
     Default: "dev"
 
+Conditions:
+  EnableTraining: !Not
+    - !Equals
+      - !Ref TargetEnv 
+      - 'prod'
+      
 Resources:
   # Define Roles
   IAMRoles:
@@ -18,6 +28,7 @@ Resources:
         TargetEnv: !Ref TargetEnv
   # Training Pipeline Step Function
   StepFunctionTrainingPipeline:
+    Condition: EnableTraining
     Type: AWS::CloudFormation::Stack
     Properties:
       # The Template URL is relative path to this template file.
