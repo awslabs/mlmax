@@ -1,5 +1,5 @@
-PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
 STACK_NAME="mlmax-demo-cicd-pipeline"
+PACKAGE_BUCKET=${1:-sagemaker-us-east-1-783128296767}
 
 get_region() {
     REGION=$(aws configure get region)
