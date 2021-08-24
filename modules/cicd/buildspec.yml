@@ -28,6 +28,7 @@ phases:
       
   post_build:
     commands:
+      - cd ../pipeline
       - echo Package custom resources
       - |
         aws cloudformation package \
