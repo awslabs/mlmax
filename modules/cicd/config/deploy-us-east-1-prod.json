@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "PipelineName": "MlMaxPipelineDemo",
+    "TargetEnv": "prod"
+  }
+}
