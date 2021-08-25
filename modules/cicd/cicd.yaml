@@ -325,7 +325,7 @@ Resources:
               RunOrder: 1
         - Name: Deploy 
           Actions:
-            - Name: CreateInferencePipeline
+            - Name: DeployInferencePipeline
               InputArtifacts:
                 - Name: BuildOutput
               ActionTypeId:
