@@ -4,6 +4,32 @@
 
 ![cicd_architecture](images/cicd_architecture.png)
 
+The CICD can be set up using a AWS codepipeline, as shown in the chart, it involves 5 accounts: (The accounts in red are needed to be created)
+
+- `Devops Account`: The account manages the build and deployment of the mlops.
+
+- `ML DEV Account`: The account data scientists and ML engineers can experiment their ML/AI models and pipelines.
+
+- `ML Staging Account`: The account where the automated model training and testing happens.
+
+- `ML Production Account`: The account where the production ML inference pipeline is deployed.
+
+- `Data/Arifacts Account`: The account manages the datalake, model artefacts and ML model predictions.
+
+Also it consists of 5 stages:
+
+- `Build`: In this stage, when there is new changes pushed into the git repo, the codeBuild is used to build the cloudformation templates for the training and inference pipelines.
+
+- `Train`: In this stage, the training pipeline in the staging account is automatically triggered and a model is trained.
+
+- `Inference/Test`: In this stage, the inference pipeline in the staging account is automatically triggered and it uses the trained model to do inference. This is a good integration test to see if the inference pipeline works fine, and check if the trained model and inference pipeline are ready to be deployed into production.
+
+- `Manual Approval`: In this stage, add the manual approval to ensure everything is fine before the deployment.
+
+- `Deploy`: Deploy the ML inference pipeline into the production account.
+
+**For simplicity, this implementation assume all the accounts are the same here.**
+
 ## Getting Started
 > make sure your aws cli in the `us-east-1` region
 ### Step 1: Create the cloudformation stack for the Codepipeline (CI/CD)
