@@ -12,20 +12,28 @@ Parameters:
     Default: "dev"
   InputDataURL:
     Type: String
+    Default: ""
   ProcModelS3:
-    Type: String
+    Type: String 
+    Default: ""
   PreprocessingCodeURL:
     Type: String
+    Default: ""
   InferenceCodeURL:
     Type: String
+    Default: ""
   ModelS3:
     Type: String
+    Default: ""
   PreprocessedTrainDataURL:
     Type: String
+    Default: ""
   PreprocessedTestDataURL:
     Type: String
+    Default: ""
   OutputPathURL:
     Type: String
+    Default: ""
 
 Conditions:
   EnableTraining: !Not
