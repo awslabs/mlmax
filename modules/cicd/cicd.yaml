@@ -324,6 +324,17 @@ Resources:
                 InputType: FilePath
                 Input: inference-pipeline-input.json
               RunOrder: 1
+        - Name: ManualApproval    
+          Actions:
+            - Name: ApproveDeploy
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Version: "1"
+                Provider: Manual
+              Configuration:
+                CustomData: "Shall this inference pipeline be put into production?"
+              RunOrder: 1
         - Name: Deploy 
           Actions:
             - Name: DeployInferencePipeline
