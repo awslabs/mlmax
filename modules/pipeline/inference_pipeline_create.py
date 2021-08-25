@@ -42,6 +42,16 @@ Parameters:
         'RoleArn: !Sub "${WorkflowExecutionRoleArn}"',
     )
 
+    # add output
+    data = (
+        data
+        + "\n"
+        + """Outputs:
+  StateMachineComponentArn:
+    Description: The step function ARN
+    Value: !GetAtt StateMachineComponent.Arn
+"""
+    )
     with open("./templates/my_inference_pipeline.yaml", "w") as file:
         file.write(data)
 
