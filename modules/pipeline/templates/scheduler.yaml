@@ -57,7 +57,7 @@ Resources:
     Type: "AWS::Events::Rule"
     Properties:
       Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
-      ScheduleExpression: cron(20 06 * * ? *)
+      ScheduleExpression: cron(15 07 * * ? *)
       State: "ENABLED"
       Targets:
         -
