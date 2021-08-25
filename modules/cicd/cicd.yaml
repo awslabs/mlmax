@@ -168,6 +168,7 @@ Resources:
                   - iam:TagRole
                   - lambda:InvokeFunction
                   - states:*
+                  - events:*
                 Resource: "*"
               - Sid: AllowCloudWatch
                 Effect: Allow
