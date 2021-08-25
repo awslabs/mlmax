@@ -339,6 +339,6 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName: MlMaxPipelineDemo-prod
                 TemplatePath: BuildOutput::master_packaged.yaml
-                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-prod.json
+                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-prod-build.json
               RunOrder: 2
 
