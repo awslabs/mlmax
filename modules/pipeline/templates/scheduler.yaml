@@ -57,7 +57,7 @@ Resources:
     Type: "AWS::Events::Rule"
     Properties:
       Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
-      ScheduleExpression: cron(15 07 * * ? *)
+      ScheduleExpression: cron(45 07 * * ? *)
       State: "ENABLED"
       Targets:
         -
@@ -70,8 +70,8 @@ Resources:
             InputTemplate: !Sub |-
               {
                 "InputDataURL": "${InputDataURL}",
-                "PreprocessingJobName": "${PipelineName}-${TargetEnv}-proc-<id>",
-                "InferenceJobName": "${PipelineName}-${TargetEnv}-infer-<id>",
+                "PreprocessingJobName": "mlmax-proc-<id>",
+                "InferenceJobName": "mlmax-infer-<id>",
                 "ProcModelS3": "${ProcModelS3}",
                 "PreprocessingCodeURL": "${PreprocessingCodeURL}",
                 "InferenceCodeURL": "${InferenceCodeURL}",
