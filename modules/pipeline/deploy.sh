@@ -47,7 +47,7 @@ deploy () {
       --region=${REGION} \
       --stack-name ${STACK_NAME} \
       --template-file ./templates/master_packaged.yaml \
-      --parameter-overrides $(cat config/deploy-${REGION}-${TARGET_ENV}.ini) \
+      --parameter-overrides $(cat config/deploy-${REGION}-${TARGET_ENV}.ini) PackageBucket=${PACKAGE_BUCKET} \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
     rm -f ./templates/master_packaged.yaml
