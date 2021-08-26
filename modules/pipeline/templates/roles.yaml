@@ -4,6 +4,8 @@ Description: A training pipeline Step Functions state machine.
 Parameters:
   TargetEnv:
     Type: String
+  PackageBucket:
+    Type: String
 
 Resources:
   # Define Step Function Role
@@ -102,23 +104,25 @@ Resources:
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-        #- !Ref ModelPolicy
-  #ModelPolicy:
-  #  Type: AWS::IAM::ManagedPolicy
-  #  Properties:
-  #    PolicyDocument:
-  #      Version: "2012-10-17"
-  #      Statement:
-  #        - Sid: AllowRWAccessToBucket
-  #          Effect: Allow
-  #          Action:
-  #            - s3:ListBucket
-  #            - s3:GetObject
-  #            - s3:PutObject
-  #            - s3:DeleteObject
-  #          Resource:
-  #            - !Sub "arn:aws:s3:::${Bucket}"
-  #            - !Sub "arn:aws:s3:::${Bucket}/*"
+        - !Ref ModelPolicy
+  ModelPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowRWAccessToBucket
+            Effect: Allow
+            Action:
+              - "s3:Delete*"
+              - "s3:Put*"
+              - "s3:Get*"
+              - "s3:List*"
+              - "s3:Create*"
+              - "s3:Head*"
+            Resource:
+              - !Sub "arn:aws:s3:::${PackageBucket}"
+              - !Sub "arn:aws:s3:::${PackageBucket}/*"
 
 Outputs:
   WorkflowExecutionRoleArn:
