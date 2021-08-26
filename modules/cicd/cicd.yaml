@@ -333,6 +333,7 @@ Resources:
                 Version: "1"
                 Provider: Manual
               Configuration:
+                ExternalEntityLink: !Sub https://console.aws.amazon.com/states/home?region=${AWS::Region}#/statemachines/view/arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:MlMaxPipelineDemo-Inference-stage
                 CustomData: "Shall this inference pipeline be put into production?"
               RunOrder: 1
         - Name: Deploy 
