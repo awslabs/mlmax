@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: A training pipeline Step Functions state machine.
 
 Parameters:
+  PipelineName:
+    Type: String
   TargetEnv:
     Type: String
   PackageBucket:
@@ -94,6 +96,7 @@ Resources:
   SagerMakerRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub "${PipelineName}-SageMakerRole-${TargetEnv}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -123,6 +126,14 @@ Resources:
             Resource:
               - !Sub "arn:aws:s3:::${PackageBucket}"
               - !Sub "arn:aws:s3:::${PackageBucket}/*"
+          - Effect: Allow
+            Action:
+              - "kms:Decrypt"
+              - "kms:Encrypt"
+              - "kms:ReEncrypt*"
+              - "kms:GenerateDataKey*"
+              - "kms:DescribeKey" 
+            Resource: "*"
 
 Outputs:
   WorkflowExecutionRoleArn:

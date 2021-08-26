@@ -54,6 +54,7 @@ Resources:
       # The Template URL is relative path to this template file.
       TemplateURL: ./roles.yaml
       Parameters:
+        PipelineName: !Ref PipelineName
         TargetEnv: !Ref TargetEnv
         PackageBucket: !Ref PackageBucket
   # Training Pipeline Step Function
