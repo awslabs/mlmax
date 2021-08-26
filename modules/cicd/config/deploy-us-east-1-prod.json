@@ -1,6 +1,7 @@
 {
   "Parameters": {
     "PipelineName": "MlMaxPipelineDemo",
-    "TargetEnv": "prod"
+    "TargetEnv": "prod",
+    "PackageBucket": "sagemaker-us-east-1-783128296767"
   }
 }
