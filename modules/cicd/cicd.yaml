@@ -78,6 +78,45 @@ Resources:
                   - lambda:*
                 Resource:
                   - "*"
+  InvokeStepFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackName}-InvokeStepFunctionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt CodePipelineServiceRole.Arn
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackName}-AWS-InvokeStepFunction
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:*
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${PackageBucket}"
+                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -144,6 +183,11 @@ Resources:
                 - "cloudformation.amazonaws.com"
             Action:
               - "sts:AssumeRole"
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt CodePipelineServiceRole.Arn
+            Action: 'sts:AssumeRole'
       Path: "/"
       Policies:
         - PolicyName: "mlmax-codedeploy"
@@ -302,6 +346,7 @@ Resources:
                 Provider: StepFunctions
               OutputArtifacts:
                 - Name: TrainingPipeline 
+              RoleArn: !GetAtt InvokeStepFunctionRole.Arn
               Configuration:
                 StateMachineArn: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:MlMaxPipelineDemo-Training-stage"
                 InputType: FilePath
@@ -319,6 +364,7 @@ Resources:
                 Provider: StepFunctions
               OutputArtifacts:
                 - Name: InferencePipeline 
+              RoleArn: !GetAtt InvokeStepFunctionRole.Arn
               Configuration:
                 StateMachineArn: !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:MlMaxPipelineDemo-Inference-stage"
                 InputType: FilePath
