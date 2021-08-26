@@ -10,6 +10,8 @@ Parameters:
       - 'stage'
       - 'prod'
     Default: "dev"
+  PackageBucket:
+    Type: String
   InputDataURL:
     Type: String
     Default: ""
@@ -53,6 +55,7 @@ Resources:
       TemplateURL: ./roles.yaml
       Parameters:
         TargetEnv: !Ref TargetEnv
+        PackageBucket: !Ref PackageBucket
   # Training Pipeline Step Function
   StepFunctionTrainingPipeline:
     Condition: EnableTraining
