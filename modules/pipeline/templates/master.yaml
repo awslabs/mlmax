@@ -10,6 +10,15 @@ Parameters:
       - 'stage'
       - 'prod'
     Default: "dev"
+  IsEnableTraining:
+    Type: String
+    Default: 'yes'
+  IsEnableScheduler:
+    Type: String
+    Default: 'no'
+  IsCreateSagemakerRole:
+    Type: String
+    Default: 'yes'
   PackageBucket:
     Type: String
   InputDataURL:
@@ -38,13 +47,12 @@ Parameters:
     Default: ""
 
 Conditions:
-  EnableTraining: !Not
-    - !Equals
-      - !Ref TargetEnv 
-      - 'prod'
+  EnableTraining: !Equals
+    - !Ref IsEnableTraining 
+    - 'yes'
   EnableScheduler: !Equals
-    - !Ref TargetEnv
-    - 'prod'
+    - !Ref IsEnableScheduler
+    - 'yes'
       
 Resources:
   # Define Roles
@@ -57,6 +65,7 @@ Resources:
         PipelineName: !Ref PipelineName
         TargetEnv: !Ref TargetEnv
         PackageBucket: !Ref PackageBucket
+        IsCreateSagemakerRole: !Ref IsCreateSagemakerRole
   # Training Pipeline Step Function
   StepFunctionTrainingPipeline:
     Condition: EnableTraining
@@ -66,7 +75,7 @@ Resources:
       TemplateURL: ./my_training_pipeline.yaml
       Parameters:
         PipelineName: !Ref PipelineName
-        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        SagerMakerRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${PipelineName}-SageMakerRole-${TargetEnv}"
         WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
         TargetEnv: !Ref TargetEnv
     DependsOn: IAMRoles
@@ -78,7 +87,7 @@ Resources:
       TemplateURL: ./my_inference_pipeline.yaml
       Parameters:
         PipelineName: !Ref PipelineName
-        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        SagerMakerRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${PipelineName}-SageMakerRole-${TargetEnv}"
         WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
         TargetEnv: !Ref TargetEnv
     DependsOn: IAMRoles
