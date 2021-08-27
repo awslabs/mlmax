@@ -32,12 +32,155 @@ Also it consists of 5 stages:
 
 ## Getting Started
 > make sure your aws cli in the `us-east-1` region
-### Step 1: Create the cloudformation stack for the Codepipeline (CI/CD)
+
+### Step 1: Set up cross account IAM roles
+
+#### In `Devops Account` AWS cli, run the command line below:
+
+
+    STACK_NAME="mlmax-demo-cicd-pipeline-roles"
+    TARGET_ENV="devops"
+    REGION="us-east-1"
+    PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
+    aws cloudformation deploy \
+      --region=${REGION} \
+      --stack-name ${STACK_NAME}-${TARGET_ENV} \
+      --template-file ./cicd_roles.yaml \
+      --parameter-overrides \
+      TargetEnv=${TARGET_ENV} \
+      StackName=${STACK_NAME} \
+      PackageBucket=${PACKAGE_BUCKET} \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+      
+    aws cloudformation describe-stacks --stack-name ${STACK_NAME}
+
+Get the `CodePipelineServiceRoleArn` from the output. arn:aws:iam::783128296767:role/mlmax-demo-cicd-pipeline-roles-CodePipelineServiceRole
+   
+#### In `Stage Account` AWS cli, run the command line below:
+
+    STACK_NAME="mlmax-demo-cicd-pipeline-roles"
+    TARGET_ENV="stage"
+    REGION="us-east-1"
+    PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
+    CodePipelineServiceRoleArn="arn:aws:iam::783128296767:role/mlmax-demo-cicd-pipeline-roles-CodePipelineServiceRole"
+    aws cloudformation deploy \
+      --region=${REGION} \
+      --stack-name ${STACK_NAME}-${TARGET_ENV} \
+      --template-file ./cicd_roles.yaml \
+      --parameter-overrides \
+      TargetEnv=${TARGET_ENV} \
+      StackName=${STACK_NAME} \
+      PackageBucket=${PACKAGE_BUCKET} \
+      CodePipelineServiceRoleArn=${CodePipelineServiceRoleArn} \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+     
+     aws cloudformation describe-stacks --stack-name ${STACK_NAME}
+
+- Get the `DeployRoleArn` from the output. arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role
+- Get the `InvokeStepFunctionRoleArn` from the output. arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole
+
+#### In `Prod Account` AWS cli, run the command line below:
+
+
+    STACK_NAME="mlmax-demo-cicd-pipeline-roles"
+    TARGET_ENV="prod"
+    REGION="us-east-1"
+    PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
+    CodePipelineServiceRoleArn="arn:aws:iam::783128296767:role/mlmax-demo-cicd-pipeline-roles-CodePipelineServiceRole"
+    aws cloudformation deploy \
+      --region=${REGION} \
+      --stack-name ${STACK_NAME}-${TARGET_ENV} \
+      --template-file ./cicd_roles.yaml \
+      --parameter-overrides \
+      TargetEnv=${TARGET_ENV} \
+      StackName=${STACK_NAME} \
+      PackageBucket=${PACKAGE_BUCKET} \
+      CodePipelineServiceRoleArn=${CodePipelineServiceRoleArn} \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+    
+    aws cloudformation describe-stacks --stack-name ${STACK_NAME}
+
+Get the `DeployRoleArn` from the output. arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role
+
+### Step 2: Set up cross account S3 bucket for CodePipeline Artifacts, Go to the Devops Account AWS console.
+PACKAGE_BUCKET=sagemaker-us-east-1-783128296767
+
+To do:
+- Create sagamaker role for CICD.
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::497394617784:role/MlMaxPipelineDemo-SageMakerRole-stage"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
+            ]
+        }
+    ]
+}
+
+### Step 3: Go to the Devops Account, Create the cloudformation stack for the Codepipeline (CI/CD)
 
     cd modules/cicd
     ./deploy.sh <PACKAGE_BUCKET>
     
-### Step 2: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
+### Step 4: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
 1. Open the AWS Developer Tools console at https://console.aws.amazon.com/codesuite/settings/connections.
 
 2. Choose **Settings > Connections**. The names of all connections associated with your AWS account are displayed.
