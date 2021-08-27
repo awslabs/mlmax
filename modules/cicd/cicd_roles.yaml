@@ -3,7 +3,10 @@ Description: A training pipeline Step Functions state machine.
 
 Parameters:
   StackName:
-    Description: default stack name for the CICD codepipeline 
+    Description: The stack name for the CICD codepipeline 
+    Type: String
+  PipelineName:
+    Description: The stack name for the ML pipelines 
     Type: String
   TargetEnv:
     Type: String
@@ -15,10 +18,19 @@ Parameters:
   PackageBucket:
     Type: String
     Description: Path of the S3 bucket for the aws cloudformation package.
-  CodePipelineServiceRoleArn:
-    Description: CodePipeline Role Arn 
+  DevopsAccountId:
+    Description: Devops AccountId
     Type: String
-    Default: ""
+  StageAccountId:
+    Description: Stage AccountId 
+    Type: String
+  ProdAccountId:
+    Description: Prod AccountId 
+    Type: String
+  #CodePipelineServiceRoleArn:
+  #  Description: CodePipeline Role Arn 
+  #  Type: String
+  #  Default: ""
 
 Conditions:
   IsDevops: !Equals
@@ -36,6 +48,48 @@ Conditions:
       - 'prod'
 
 Resources:
+  ############## SageMaker Execution Role ##########################
+  SagerMakerRole:
+    Condition: IsDeploy
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${PipelineName}-SageMakerRole-${TargetEnv}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sagemaker.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      Path: /
+      Policies:
+        - PolicyName: CrossAccountS3Access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: AllowRWAccessToBucket
+                Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${PackageBucket}"
+                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:ReEncrypt*"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey" 
+                Resource: "*"
   ################## CodePipeline Role ##############################
   CodePipelineServiceRole:
     Condition: IsDevops
@@ -117,7 +171,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Ref CodePipelineServiceRoleArn
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackName}-CodePipelineServiceRole"
             Action: 'sts:AssumeRole'
       Path: /
       Policies:
@@ -174,7 +228,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Ref CodePipelineServiceRoleArn
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackName}-CodePipelineServiceRole"
             Action: 'sts:AssumeRole'
       Path: "/"
       Policies:
@@ -217,9 +271,9 @@ Resources:
                 Action:
                   - iam:PassRole
                 Resource: "*"
-                #Condition:
-                #  StringEquals:
-                #    iam:PassedToService: sagemaker.amazonaws.com
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: sagemaker.amazonaws.com
               - Sid: AllowS3
                 Effect: Allow
                 Action:
