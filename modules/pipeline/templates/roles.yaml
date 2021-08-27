@@ -149,3 +149,4 @@ Outputs:
   SagerMakerRoleArn:
     Description: SageMaker ExecutionRole ARN
     Value: !GetAtt SagerMakerRole.Arn
+    Condition: CreateSagemakerRole
