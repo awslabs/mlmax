@@ -106,7 +106,10 @@ Get the `DeployRoleArn` from the output. arn:aws:iam::161422014849:role/mlmax-de
 PACKAGE_BUCKET=sagemaker-us-east-1-783128296767
 
 To do:
+- Currently need to manual update the KMS and S3 bucket policy since sagemaker roles are not created before the CICD. Need to update.
+- Make sagemaker role creation optional in the pipeline module.
 - Create sagamaker role for CICD.
+- Automate adding the S3 bucket policy.
 
 {
     "Version": "2012-10-17",
