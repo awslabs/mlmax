@@ -163,6 +163,11 @@ if __name__ == "__main__":
     proc_model_s3, model_s3 = generate_training_pipeline_input()
     inputs_inference = generate_inference_pipeline_input(proc_model_s3, model_s3)
     # generate prod cloudformation template configuration
+    config_stage = read_from_json(f"config/deploy-{region}-stage.json")
+    for key, value in inputs_inference.items():
+        if key not in ["PreprocessingJobName", "InferenceJobName"]:
+            config_stage["Parameters"][key] = value
+    save_to_json(config_stage, f"config/deploy-{region}-stage-build.json")
     config_prod = read_from_json(f"config/deploy-{region}-prod.json")
     for key, value in inputs_inference.items():
         if key not in ["PreprocessingJobName", "InferenceJobName"]:
