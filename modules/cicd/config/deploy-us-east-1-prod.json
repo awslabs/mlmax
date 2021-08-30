@@ -3,7 +3,7 @@
     "PipelineName": "MlMaxPipelineDemo",
     "TargetEnv": "prod",
     "PackageBucket": "sagemaker-us-east-1-783128296767",
-    "IsEnableTraining": "no",
+    "IsEnableTraining": "yes",
     "IsEnableScheduler": "yes",
     "IsCreateSagemakerRole": "no"
   }
