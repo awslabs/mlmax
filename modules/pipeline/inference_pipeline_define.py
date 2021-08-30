@@ -12,7 +12,7 @@ def define_inference_pipeline(
     inference_pipeline_name,
     return_yaml=True,
     dump_yaml_file="templates/sagemaker_inference_pipeline.yaml",
-    kms_key_id=kms_key_id,
+    kms_key_id=None,
 ):
     """
     Return YAML definition of the training pipeline, which consists of multiple
