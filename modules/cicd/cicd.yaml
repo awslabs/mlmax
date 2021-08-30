@@ -1,32 +1,40 @@
 Description: CodePipeline (CICD) for the training and infernce pipelines
 Parameters:
-  PackageBucket:
-    Type: String
-    Description: Path of the S3 bucket for the aws cloudformation package.
-
+  
   Region:
     Description: AWS region to deploy application
     Type: String
   
   StackName:
-    Description: default stack name for the CICD codepipeline 
+    Description: The stack name for the CICD codepipeline
+    Type: String
+
+  StackNameRoles:
+    Description: The stack name for the CICD codepipeline roles
     Type: String
   
-  CodePipelineServiceRoleArn:
-    Description: CodePipeline Role Arn 
+  PipelineName:
+    Description: The stack name for the ML pipelines 
     Type: String
+
+  PackageBucket:
+    Type: String
+    Description: Path of the S3 bucket for the aws cloudformation package.
+  #CodePipelineServiceRoleArn:
+  #  Description: CodePipeline Role Arn 
+  #  Type: String
    
-  DeployRoleStageArn:
-    Description: Stage Env Deploy Action Role Arn 
-    Type: String
-  
-  DeployRoleProdArn:
-    Description: Prod Deploy Action Role Arn 
-    Type: String
-    
-  InvokeStepFunctionRoleArn:
-    Description: Invoke StepFunction Action Role Arn 
-    Type: String
+  #DeployRoleStageArn:
+  #  Description: Stage Env Deploy Action Role Arn 
+  #  Type: String
+  #
+  #DeployRoleProdArn:
+  #  Description: Prod Deploy Action Role Arn 
+  #  Type: String
+  #  
+  #InvokeStepFunctionRoleArn:
+  #  Description: Invoke StepFunction Action Role Arn 
+  #  Type: String
 
   DevopsAccountId:
     Description: Devops AccountId
@@ -52,7 +60,7 @@ Parameters:
   BranchName:
     Description: Branch name where changes are to be detected
     Type: String
-    Default: "cicd-pipeline"
+    Default: "cicd-pipeline-cross-accounts"
 
 Resources:
 ################## Kms Key #####################################
@@ -67,20 +75,20 @@ Resources:
           - Sid: Allows admin of the key
             Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+              AWS: !Sub "arn:aws:iam::${DevopsAccountId}:root"
             Action: ["kms:*"]
             Resource: "*"
           - Sid: Allow use of the key from the other accounts
             Effect: Allow
             Principal:
               AWS:
-                - !Ref CodePipelineServiceRoleArn
-                - !Ref DeployRoleStageArn
-                - !Ref DeployRoleProdArn
-                - !Ref InvokeStepFunctionRoleArn
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
                 - !GetAtt CodeBuildServiceRole.Arn
-                #- !Sub "arn:aws:iam::${StageAccountId}:role/MlMaxPipelineDemo-SageMakerRole-stage"
-                #- !Sub "arn:aws:iam::${ProdAccountId}:role/MlMaxPipelineDemo-SageMakerRole-prod"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${PipelineName}-SageMakerRole-stage"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${PipelineName}-SageMakerRole-prod"
             Action:
               - kms:Encrypt
               - kms:Decrypt
@@ -185,7 +193,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: !Sub ${StackName}-codepipeline
-      RoleArn: !Ref CodePipelineServiceRoleArn
+      RoleArn: !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
       ArtifactStore:
           Type: S3
           Location: !Sub ${PackageBucket}
@@ -232,14 +240,14 @@ Resources:
                 Owner: AWS
                 Version: "1"
                 Provider: CloudFormation
-              RoleArn: !Ref DeployRoleStageArn
+              RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
-                RoleArn: !Ref DeployRoleStageArn
+                RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName: MlMaxPipelineDemo-stage
                 TemplatePath: BuildOutput::master_packaged.yaml
-                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-stage.json
+                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-stage-build.json
               RunOrder: 2
         - Name: Train
           Actions:
@@ -253,9 +261,9 @@ Resources:
                 Provider: StepFunctions
               OutputArtifacts:
                 - Name: TrainingPipeline 
-              RoleArn: !Ref InvokeStepFunctionRoleArn
+              RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
               Configuration:
-                StateMachineArn: !Sub "arn:aws:states:${AWS::Region}:${StageAccountId}:stateMachine:MlMaxPipelineDemo-Training-stage"
+                StateMachineArn: !Sub "arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Training-stage"
                 InputType: FilePath
                 Input: training-pipeline-input.json
               RunOrder: 1
@@ -271,9 +279,9 @@ Resources:
                 Provider: StepFunctions
               OutputArtifacts:
                 - Name: InferencePipeline 
-              RoleArn: !Ref InvokeStepFunctionRoleArn
+              RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
               Configuration:
-                StateMachineArn: !Sub "arn:aws:states:${AWS::Region}:${StageAccountId}:stateMachine:MlMaxPipelineDemo-Inference-stage"
+                StateMachineArn: !Sub "arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Inference-stage"
                 InputType: FilePath
                 Input: inference-pipeline-input.json
               RunOrder: 1
@@ -286,7 +294,7 @@ Resources:
                 Version: "1"
                 Provider: Manual
               Configuration:
-                ExternalEntityLink: !Sub https://console.aws.amazon.com/states/home?region=${AWS::Region}#/statemachines/view/arn:aws:states:${AWS::Region}:${StageAccountId}:stateMachine:MlMaxPipelineDemo-Inference-stage
+                ExternalEntityLink: !Sub https://console.aws.amazon.com/states/home?region=${Region}#/statemachines/view/arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Inference-stage
                 CustomData: "Shall this inference pipeline be put into production?"
               RunOrder: 1
         - Name: Deploy 
@@ -299,13 +307,13 @@ Resources:
                 Owner: AWS
                 Version: "1"
                 Provider: CloudFormation
-              RoleArn: !Ref DeployRoleProdArn
+              RoleArn: !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
-                RoleArn: !Ref DeployRoleProdArn
+                RoleArn: !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName: MlMaxPipelineDemo-prod
                 TemplatePath: BuildOutput::master_packaged.yaml
                 TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-prod-build.json
-              RunOrder: 2
+              RunOrder: 1
 
