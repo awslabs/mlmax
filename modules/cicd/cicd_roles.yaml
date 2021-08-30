@@ -3,7 +3,10 @@ Description: A training pipeline Step Functions state machine.
 
 Parameters:
   StackName:
-    Description: The stack name for the CICD codepipeline 
+    Description: The stack name for the CICD codepipeline
+    Type: String
+  StackNameRoles:
+    Description: The stack name for the CICD codepipeline roles
     Type: String
   PipelineName:
     Description: The stack name for the ML pipelines 
@@ -95,7 +98,7 @@ Resources:
     Condition: IsDevops
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${StackName}-CodePipelineServiceRole
+      RoleName: !Sub ${StackNameRoles}-CodePipelineServiceRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -107,7 +110,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Path: /
       Policies:
-        - PolicyName: !Sub ${StackName}-AWS-CodePipeline
+        - PolicyName: !Sub ${StackNameRoles}-AWS-CodePipeline
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -156,10 +159,10 @@ Resources:
                 Resource: "*"
   ################## Invoke Step Function Role ##############################
   InvokeStepFunctionRole:
-    Condition: IsStage
+    Condition: IsDeploy
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${StackName}-InvokeStepFunctionRole
+      RoleName: !Sub ${StackNameRoles}-InvokeStepFunctionRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -171,11 +174,11 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackName}-CodePipelineServiceRole"
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
             Action: 'sts:AssumeRole'
       Path: /
       Policies:
-        - PolicyName: !Sub ${StackName}-AWS-InvokeStepFunction
+        - PolicyName: !Sub ${StackNameRoles}-AWS-InvokeStepFunction
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -209,7 +212,7 @@ Resources:
     Condition: IsDeploy
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub ${StackName}-deploy-role
+      RoleName: !Sub ${StackNameRoles}-deploy-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -228,7 +231,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackName}-CodePipelineServiceRole"
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
             Action: 'sts:AssumeRole'
       Path: "/"
       Policies:
@@ -304,7 +307,7 @@ Outputs:
   InvokeStepFunctionRoleArn:
     Description: Invoke StepFunction Role ARN
     Value: !GetAtt InvokeStepFunctionRole.Arn
-    Condition: IsStage
+    Condition: IsDeploy
   DeployRoleArn:
     Description: Deploy Role ARN
     Value: !GetAtt DeployRole.Arn
