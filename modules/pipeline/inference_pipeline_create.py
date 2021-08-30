@@ -1,4 +1,5 @@
 from inference_pipeline_define import define_inference_pipeline
+import os
 
 
 def format_template_str():
