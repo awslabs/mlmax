@@ -1,4 +1,5 @@
 from training_pipeline_define import define_training_pipeline
+import os
 
 
 def format_template_str():
@@ -51,6 +52,7 @@ def create_training_pipeline(
     training_pipeline_name,
     return_yaml=True,
     dump_yaml_file="templates/sagemaker_training_pipeline.yaml",
+    kms_key_id=kms_key_id,
 ):
     """
     Return YAML definition of the training pipeline, which consists of multiple
@@ -71,6 +73,7 @@ def create_training_pipeline(
         training_pipeline_name,
         return_yaml,
         dump_yaml_file,
+        kms_key_id=kms_key_id,
     )
     # dump YAML cloud formation template
     yml = training_pipeline.get_cloudformation_template()
@@ -92,11 +95,13 @@ def example_create_training_pipeline():
     sm_role = "${SagerMakerRoleArn}"
     workflow_execution_role = "${WorkflowExecutionRoleArn}"
     training_pipeline_name = "${TrainingPipelineName}"
+    kms_key_id = os.getenv("KMSKEY_ARN", None) 
     yaml_rep = create_training_pipeline(
         sm_role=sm_role,
         workflow_execution_role=workflow_execution_role,
         training_pipeline_name=training_pipeline_name,
         dump_yaml_file=None,
+        kms_key_id=kms_key_id,
     )
     with open("/tmp/my_training_pipeline.yaml", "w") as fout:
         fout.write(yaml_rep)
