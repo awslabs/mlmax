@@ -133,3 +133,12 @@ To do:
 
 3. On the pipeline details page, choose Release change. This starts the most recent revision available in each source location specified in a source action through the pipeline.
 ![codepipeline-screenshot.png](images/codepipeline-screenshot.png)
+
+### Step 4: Check the run results.
+
+There is a bug in Sagemaker using kms key to encryt trained models. Need to manually re-save the  proc_model.tar.gz and model.tar.gz in the S3 console:
+
+1. Click Edit Server-side encryption.
+![bug.png](images/bug.png)
+2. Click Save changes.
+![bug2.png](images/bug2.png)
