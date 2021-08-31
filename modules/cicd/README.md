@@ -38,69 +38,37 @@ Also it consists of 5 stages:
 #### In `Devops Account` AWS cli, run the command line below:
 
 
-    STACK_NAME="mlmax-demo-cicd-pipeline-roles"
+    source config/cicd.ini
     TARGET_ENV="devops"
-    REGION="us-east-1"
-    PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
     aws cloudformation deploy \
-      --region=${REGION} \
-      --stack-name ${STACK_NAME}-${TARGET_ENV} \
+      --region=${Region} \
+      --stack-name ${StackNameRoles}-${TARGET_ENV} \
       --template-file ./cicd_roles.yaml \
-      --parameter-overrides \
-      TargetEnv=${TARGET_ENV} \
-      StackName=${STACK_NAME} \
-      PackageBucket=${PACKAGE_BUCKET} \
+      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-      
-    aws cloudformation describe-stacks --stack-name ${STACK_NAME}
-
-Get the `CodePipelineServiceRoleArn` from the output. arn:aws:iam::783128296767:role/mlmax-demo-cicd-pipeline-roles-CodePipelineServiceRole
    
 #### In `Stage Account` AWS cli, run the command line below:
 
-    STACK_NAME="mlmax-demo-cicd-pipeline-roles"
+    source config/cicd.ini
     TARGET_ENV="stage"
-    REGION="us-east-1"
-    PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
-    CodePipelineServiceRoleArn="arn:aws:iam::783128296767:role/mlmax-demo-cicd-pipeline-roles-CodePipelineServiceRole"
     aws cloudformation deploy \
-      --region=${REGION} \
-      --stack-name ${STACK_NAME}-${TARGET_ENV} \
+      --region=${Region} \
+      --stack-name ${StackNameRoles}-${TARGET_ENV} \
       --template-file ./cicd_roles.yaml \
-      --parameter-overrides \
-      TargetEnv=${TARGET_ENV} \
-      StackName=${STACK_NAME} \
-      PackageBucket=${PACKAGE_BUCKET} \
-      CodePipelineServiceRoleArn=${CodePipelineServiceRoleArn} \
+      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-     
-     aws cloudformation describe-stacks --stack-name ${STACK_NAME}
-
-- Get the `DeployRoleArn` from the output. arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role
-- Get the `InvokeStepFunctionRoleArn` from the output. arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole
+      
 
 #### In `Prod Account` AWS cli, run the command line below:
 
-
-    STACK_NAME="mlmax-demo-cicd-pipeline-roles"
+    source config/cicd.ini
     TARGET_ENV="prod"
-    REGION="us-east-1"
-    PACKAGE_BUCKET="sagemaker-us-east-1-783128296767"
-    CodePipelineServiceRoleArn="arn:aws:iam::783128296767:role/mlmax-demo-cicd-pipeline-roles-CodePipelineServiceRole"
     aws cloudformation deploy \
-      --region=${REGION} \
-      --stack-name ${STACK_NAME}-${TARGET_ENV} \
+      --region=${Region} \
+      --stack-name ${StackNameRoles}-${TARGET_ENV} \
       --template-file ./cicd_roles.yaml \
-      --parameter-overrides \
-      TargetEnv=${TARGET_ENV} \
-      StackName=${STACK_NAME} \
-      PackageBucket=${PACKAGE_BUCKET} \
-      CodePipelineServiceRoleArn=${CodePipelineServiceRoleArn} \
+      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-    
-    aws cloudformation describe-stacks --stack-name ${STACK_NAME}
-
-Get the `DeployRoleArn` from the output. arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role
 
 ### Step 2: Set up cross account S3 bucket for CodePipeline Artifacts, Go to the Devops Account AWS console.
 PACKAGE_BUCKET=sagemaker-us-east-1-783128296767
