@@ -187,6 +187,9 @@ Resources:
           - Name: REGION
             Type: PLAINTEXT
             Value: !Ref Region
+          - Name: KMSKEY_ARN
+            Type: PLAINTEXT
+            Value: !GetAtt KMSKey.Arn
       TimeoutInMinutes: 30
 
   CICDPipeline:
