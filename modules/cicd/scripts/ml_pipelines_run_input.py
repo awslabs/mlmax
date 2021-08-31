@@ -107,11 +107,13 @@ def generate_inference_pipeline_input(proc_model_s3, model_s3):
 
     sagemaker_session = sagemaker.Session()
     s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
+    kms_key_id=os.getenv("KMSKEY_ARN", None)
     # upload preprocessing script
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
         key_prefix=f"{preprocessing_job_name}/source",
+        extra_args={'SSEKMSKeyId': kms_key_id},
     )
     print(f"Using preprocessing script from {input_preprocessing_code}")
     # upload inference script
@@ -119,6 +121,7 @@ def generate_inference_pipeline_input(proc_model_s3, model_s3):
         INFERENCE_SCRIPT_LOCATION,
         bucket=sagemaker_session.default_bucket(),
         key_prefix=f"{inference_job_name}/source",
+        extra_args={'SSEKMSKeyId': kms_key_id},
     )
 
     # Step 3 - Get the lastest preprocessing and ml models
