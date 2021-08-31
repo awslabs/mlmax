@@ -6,6 +6,7 @@ import uuid
 import boto3
 import sagemaker
 import json
+import os
 
 
 def save_to_json(data, file_path):
