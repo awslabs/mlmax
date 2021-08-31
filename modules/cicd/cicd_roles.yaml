@@ -159,7 +159,7 @@ Resources:
                 Resource: "*"
   ################## Invoke Step Function Role ##############################
   InvokeStepFunctionRole:
-    Condition: IsDeploy
+    Condition: IsStage
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub ${StackNameRoles}-InvokeStepFunctionRole
@@ -307,7 +307,7 @@ Outputs:
   InvokeStepFunctionRoleArn:
     Description: Invoke StepFunction Role ARN
     Value: !GetAtt InvokeStepFunctionRole.Arn
-    Condition: IsDeploy
+    Condition: IsStage
   DeployRoleArn:
     Description: Deploy Role ARN
     Value: !GetAtt DeployRole.Arn
