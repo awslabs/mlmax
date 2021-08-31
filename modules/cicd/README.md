@@ -71,12 +71,8 @@ Also it consists of 5 stages:
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
 ### Step 2: Set up cross account S3 bucket for CodePipeline Artifacts, Go to the Devops Account AWS console.
-PACKAGE_BUCKET=sagemaker-us-east-1-783128296767
 
 To do:
-- Currently need to manual update the KMS and S3 bucket policy since sagemaker roles are not created before the CICD. Need to update.
-- Make sagemaker role creation optional in the pipeline module.
-- Create sagamaker role for CICD.
 - Automate adding the S3 bucket policy.
 
 {
@@ -85,59 +81,15 @@ To do:
         {
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role"
+                "AWS": [
+                    "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role",
+                    "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role",
+                    "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole",
+                    "arn:aws:iam::497394617784:role/MlMaxPipelineDemo-SageMakerRole-prod",
+                    "arn:aws:iam::161422014849:role/MlMaxPipelineDemo-SageMakerRole-stage"
+                ]
             },
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:PutObjectAcl"
-            ],
-            "Resource": [
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::497394617784:role/MlMaxPipelineDemo-SageMakerRole-stage"
-            },
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:PutObjectAcl",
-                "s3:ListBucket"
-            ],
-            "Resource": [
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role"
-            },
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:PutObjectAcl"
-            ],
-            "Resource": [
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole"
-            },
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:PutObjectAcl"
-            ],
+            "Action": "s3:*",
             "Resource": [
                 "arn:aws:s3:::sagemaker-us-east-1-783128296767",
                 "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
