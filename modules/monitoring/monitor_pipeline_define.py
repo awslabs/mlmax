@@ -87,7 +87,10 @@ def define_monitor_pipeline(
         inputs=inputs,
         outputs=outputs,
         container_arguments=["--train-test-split-ratio", "0.2", "--mode", "train"],
-        container_entrypoint=["python3", "/opt/ml/processing/input/code/monitoring.py",],
+        container_entrypoint=[
+            "python3",
+            "/opt/ml/processing/input/code/monitoring.py",
+        ],
     )
 
     # Create Fail state to mark the workflow failed in case any of the steps fail.
@@ -97,13 +100,16 @@ def define_monitor_pipeline(
 
     # Add the Error handling in the workflow
     catch_state_processing = stepfunctions.steps.states.Catch(
-        error_equals=["States.TaskFailed"], next_step=failed_state_sagemaker_processing_failure,
+        error_equals=["States.TaskFailed"],
+        next_step=failed_state_sagemaker_processing_failure,
     )
     processing_step.add_catch(catch_state_processing)
 
     # Create the Workflow
     workflow_graph = Chain([processing_step])
     data_pipeline = Workflow(
-        name=data_pipeline_name, definition=workflow_graph, role=workflow_execution_role,
+        name=data_pipeline_name,
+        definition=workflow_graph,
+        role=workflow_execution_role,
     )
     return data_pipeline
