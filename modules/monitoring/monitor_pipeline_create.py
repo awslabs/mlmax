@@ -38,7 +38,8 @@ Parameters:
 
     # replace Role Arn
     data = data.replace(
-        "RoleArn: ${WorkflowExecutionRoleArn}", 'RoleArn: !Sub "${WorkflowExecutionRoleArn}"',
+        "RoleArn: ${WorkflowExecutionRoleArn}",
+        'RoleArn: !Sub "${WorkflowExecutionRoleArn}"',
     )
 
     # add output

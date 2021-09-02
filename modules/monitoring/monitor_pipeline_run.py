@@ -13,9 +13,7 @@ def get_existing_monitor_pipeline(workflow_arn):
     Create a dummpy implementation of get existing data pipeline
     """
     data_pipeline = Workflow(
-        name="data_pipeline_name",
-        definition=Chain([]),
-        role="workflow_execution_role",
+        name="data_pipeline_name", definition=Chain([]), role="workflow_execution_role",
     )
 
     return data_pipeline.attach(workflow_arn)
