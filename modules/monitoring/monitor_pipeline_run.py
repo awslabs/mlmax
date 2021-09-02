@@ -13,7 +13,9 @@ def get_existing_monitor_pipeline(workflow_arn):
     Create a dummpy implementation of get existing data pipeline
     """
     data_pipeline = Workflow(
-        name="data_pipeline_name", definition=Chain([]), role="workflow_execution_role",
+        name="data_pipeline_name",
+        definition=Chain([]),
+        role="workflow_execution_role",
     )
 
     return data_pipeline.attach(workflow_arn)
@@ -49,8 +51,10 @@ def example_run_monitor_pipeline(workflow_arn, region):
 
     # Step 3 - Define data URLs, preprocessed data URLs can be made
     # input_data = "s3://ml-proserve-nyc-taxi-data/manifest/taxi.manifest"
-    input_data = f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
-    output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output/training-baseline"
+    input_data = (
+        f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
+    )
+    output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output/profiling"
     execution = data_pipeline.execute(
         inputs={
             "PreprocessingJobName": preprocessing_job_name,
@@ -81,7 +85,8 @@ if __name__ == "__main__":
     data_pipeline_name = config["default"]["PipelineName"]
     target_env = config["default"]["TargetEnv"]
     workflow_arn = (
-        f"arn:aws:states:{region}:{account}:" f"stateMachine:{data_pipeline_name}-{target_env}"
+        f"arn:aws:states:{region}:{account}:"
+        f"stateMachine:{data_pipeline_name}-{target_env}"
     )
     print(f"State Machine Name is {data_pipeline_name}-{target_env}")
     example_run_monitor_pipeline(workflow_arn, region)

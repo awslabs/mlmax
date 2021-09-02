@@ -7,3 +7,4 @@ s3fs
 scikit-learn==0.20.0
 matplotlib
 pandas
+loguru
