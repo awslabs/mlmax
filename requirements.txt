@@ -11,3 +11,4 @@ pytest
 datatest
 pytest-cov
 numpy
+loguru

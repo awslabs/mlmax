@@ -6,12 +6,6 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 from loguru import logger
-
-try:
-    from sklearn.externals import joblib
-except ImportError:
-    import joblib
-
 from sklearn.model_selection import train_test_split
 
 columns = [
