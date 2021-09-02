@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  PipelineName:
+    Type: String
+    Default: "MlMax-Monitor-Demo"
+  TargetEnv:
+    Type: String
+    Default: "dev"
+
+Resources:
+  # Define Roles
+  IAMRoles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./roles.yaml
+      Parameters:
+        TargetEnv: !Ref TargetEnv
+  # Monitor Pipeline Step Function
+  StepFunctionMonitorPipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./my_monitor_pipeline.yaml
+      Parameters:
+        PipelineName: !Ref PipelineName
+        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
+        TargetEnv: !Ref TargetEnv
+    DependsOn: IAMRoles
