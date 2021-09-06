@@ -142,3 +142,9 @@ There is a bug in Sagemaker using kms key to encryt trained models. Need to manu
 ![bug.png](images/bug.png)
 2. Click Save changes.
 ![bug2.png](images/bug2.png)
+
+## To do
+- Support deploy in multiple regions
+- Add support fork from mlmax to automatically trigger the Codepipeline
+- Clean the cicd.ini and deploy-xxx-xxx.ini to avoid duplicate parameters
+- Automatically create s3 artifact bucket. 
