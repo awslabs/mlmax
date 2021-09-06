@@ -89,8 +89,8 @@ def generate_training_pipeline_input():
     }
     save_to_json(inputs, "config/training-pipeline-input.json")
     return (
-        preprocessed_model_url, 
-        f"{s3_bucket_base_uri}/{training_job_name}/output",
+        f"{s3_bucket_base_uri}/{preprocessing_job_name}/output/proc_model.tar.gz",
+        f"{s3_bucket_base_uri}/{training_job_name}/output/model.tar.gz",
     )
 
 
@@ -134,7 +134,7 @@ def generate_inference_pipeline_input(proc_model_s3, model_s3):
     )
 
     s3_bucket_base_uri = "{}{}".format("s3://", sagemaker_session.default_bucket())
-    output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output"
+    output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output_data"
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
 
