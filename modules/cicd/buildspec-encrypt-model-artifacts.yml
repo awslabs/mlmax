@@ -12,8 +12,8 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Run the script to build the cloudformation templates
-      - ProcModelS3 = $(cat inference-pipeline-input.json | jq -r '.ProcModelS3')
-      - ModelS3 = $(cat inference-pipeline-input.json | jq -r '.ModelS3')
+      - ProcModelS3=$(cat inference-pipeline-input.json | jq -r '.ProcModelS3')
+      - ModelS3=$(cat inference-pipeline-input.json | jq -r '.ModelS3')
       - aws s3 cp ${ProcModelS3} ${ProcModelS3} --sse aws:kms --sse-kms-key-id ${KMSKEY_ARN} 
       - aws s3 cp ${ModelS3} ${ModelS3} --sse aws:kms --sse-kms-key-id ${KMSKEY_ARN} 
       - echo Done
