@@ -191,6 +191,34 @@ Resources:
             Type: PLAINTEXT
             Value: !GetAtt KMSKey.Arn
       TimeoutInMinutes: 30
+  BuildProjectEncryptModelArtifacts:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${StackName}-build-encrypt-model-artifacts'
+      Description: Hotfix - Encrypt the Sagemaker model artifacts for crossaccount access.
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-encrypt-model-artifacts.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Type: LINUX_CONTAINER
+        Image: !Ref BuildImageName
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: PACKAGE_BUCKET
+            Type: PLAINTEXT
+            Value: !Ref PackageBucket
+          - Name: REGION
+            Type: PLAINTEXT
+            Value: !Ref Region
+          - Name: KMSKEY_ARN
+            Type: PLAINTEXT
+            Value: !GetAtt KMSKey.Arn
+      TimeoutInMinutes: 30
+
 
   CICDPipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -270,6 +298,19 @@ Resources:
                 InputType: FilePath
                 Input: training-pipeline-input.json
               RunOrder: 1
+            - Name: EncryptModelArtifacts 
+              InputArtifacts:
+                - Name: BuildOutput
+              # OutputArtifacts:
+              #   - Name: EncryptModelArtifactsOutput 
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildProjectEncryptModelArtifacts
+              RunOrder: 2
         - Name: Inference 
           Actions:
             - Name: StartInferencePipeline
