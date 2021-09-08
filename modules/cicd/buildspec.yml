@@ -45,4 +45,5 @@ artifacts:
   files:
     - modules/pipeline/templates/*.yaml
     - modules/cicd/config/*.json
+    - modules/cicd/*.yml
   discard-paths: yes
