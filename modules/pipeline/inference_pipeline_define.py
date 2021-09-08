@@ -48,7 +48,7 @@ def define_inference_pipeline(
     # sagemaker_session = sagemaker.Session()
 
     sklearn_processor = SKLearnProcessor(
-        framework_version="0.23.1",
+        framework_version="0.23-1",
         role=sm_role,
         instance_type="ml.m5.xlarge",
         instance_count=1,
@@ -103,7 +103,7 @@ def define_inference_pipeline(
     the model S3 URL. Output is the inferred data.
     """
     sklearn_processor2 = SKLearnProcessor(
-        framework_version="0.23.1",
+        framework_version="0.23-1",
         role=sm_role,
         instance_type="ml.m5.xlarge",
         instance_count=1,
