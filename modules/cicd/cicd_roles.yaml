@@ -92,6 +92,7 @@ Resources:
                   - "kms:ReEncrypt*"
                   - "kms:GenerateDataKey*"
                   - "kms:DescribeKey" 
+                  - "kms:CreateGrant"
                 Resource: "*"
   ################## CodePipeline Role ##############################
   CodePipelineServiceRole:
