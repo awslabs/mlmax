@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: A training pipeline Step Functions state machine.
+Description: Define the IAM roles.
 
 Parameters:
   PipelineName:
@@ -8,6 +8,13 @@ Parameters:
     Type: String
   PackageBucket:
     Type: String
+  IsCreateSagemakerRole:
+    Type: String
+
+Conditions:
+  CreateSagemakerRole: !Equals 
+    - !Ref IsCreateSagemakerRole
+    - 'yes'
 
 Resources:
   # Define Step Function Role
@@ -94,6 +101,7 @@ Resources:
 
   # Define SageMaker Execution Role
   SagerMakerRole:
+    Condition: CreateSagemakerRole
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub "${PipelineName}-SageMakerRole-${TargetEnv}"
@@ -107,33 +115,32 @@ Resources:
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-        - !Ref ModelPolicy
-  ModelPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: AllowRWAccessToBucket
-            Effect: Allow
-            Action:
-              - "s3:Delete*"
-              - "s3:Put*"
-              - "s3:Get*"
-              - "s3:List*"
-              - "s3:Create*"
-              - "s3:Head*"
-            Resource:
-              - !Sub "arn:aws:s3:::${PackageBucket}"
-              - !Sub "arn:aws:s3:::${PackageBucket}/*"
-          - Effect: Allow
-            Action:
-              - "kms:Decrypt"
-              - "kms:Encrypt"
-              - "kms:ReEncrypt*"
-              - "kms:GenerateDataKey*"
-              - "kms:DescribeKey" 
-            Resource: "*"
+      Path: /
+      Policies:
+        - PolicyName: CrossAccountS3Access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: AllowRWAccessToBucket
+                Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${PackageBucket}"
+                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:ReEncrypt*"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey" 
+                Resource: "*"
 
 Outputs:
   WorkflowExecutionRoleArn:
@@ -142,3 +149,4 @@ Outputs:
   SagerMakerRoleArn:
     Description: SageMaker ExecutionRole ARN
     Value: !GetAtt SagerMakerRole.Arn
+    Condition: CreateSagemakerRole

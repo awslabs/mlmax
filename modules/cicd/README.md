@@ -32,12 +32,78 @@ Also it consists of 5 stages:
 
 ## Getting Started
 > make sure your aws cli in the `us-east-1` region
-### Step 1: Create the cloudformation stack for the Codepipeline (CI/CD)
+
+### Step 1: Set up cross account IAM roles
+
+#### In `Devops Account` AWS cli, run the command line below:
+
+
+    source config/cicd.ini
+    TARGET_ENV="devops"
+    aws cloudformation deploy \
+      --region=${Region} \
+      --stack-name ${StackNameRoles}-${TARGET_ENV} \
+      --template-file ./cicd_roles.yaml \
+      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+   
+#### In `Stage Account` AWS cli, run the command line below:
+
+    source config/cicd.ini
+    TARGET_ENV="stage"
+    aws cloudformation deploy \
+      --region=${Region} \
+      --stack-name ${StackNameRoles}-${TARGET_ENV} \
+      --template-file ./cicd_roles.yaml \
+      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+      
+
+#### In `Prod Account` AWS cli, run the command line below:
+
+    source config/cicd.ini
+    TARGET_ENV="prod"
+    aws cloudformation deploy \
+      --region=${Region} \
+      --stack-name ${StackNameRoles}-${TARGET_ENV} \
+      --template-file ./cicd_roles.yaml \
+      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
+      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+
+### Step 2: Set up cross account S3 bucket for CodePipeline Artifacts, Go to the Devops Account AWS console.
+
+To do:
+- Automate adding the S3 bucket policy.
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                    "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role",
+                    "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role",
+                    "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole",
+                    "arn:aws:iam::497394617784:role/MlMaxPipelineDemo-SageMakerRole-prod",
+                    "arn:aws:iam::161422014849:role/MlMaxPipelineDemo-SageMakerRole-stage"
+                ]
+            },
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
+                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
+            ]
+        }
+    ]
+}
+
+### Step 3: Go to the Devops Account, Create the cloudformation stack for the Codepipeline (CI/CD)
 
     cd modules/cicd
     ./deploy.sh <PACKAGE_BUCKET>
     
-### Step 2: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
+### Step 4: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
 1. Open the AWS Developer Tools console at https://console.aws.amazon.com/codesuite/settings/connections.
 
 2. Choose **Settings > Connections**. The names of all connections associated with your AWS account are displayed.
@@ -67,3 +133,18 @@ Also it consists of 5 stages:
 
 3. On the pipeline details page, choose Release change. This starts the most recent revision available in each source location specified in a source action through the pipeline.
 ![codepipeline-screenshot.png](images/codepipeline-screenshot.png)
+
+### Step 4: Check the run results.
+
+There is a bug in Sagemaker using kms key to encryt trained models. Need to manually re-save the  proc_model.tar.gz and model.tar.gz in the S3 console:
+
+1. Click Edit Server-side encryption.
+![bug.png](images/bug.png)
+2. Click Save changes.
+![bug2.png](images/bug2.png)
+
+## To do
+- Support deploy in multiple regions
+- Add support fork from mlmax to automatically trigger the Codepipeline
+- Clean the cicd.ini and deploy-xxx-xxx.ini to avoid duplicate parameters
+- Automatically create s3 artifact bucket. 

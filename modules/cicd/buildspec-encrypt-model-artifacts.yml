@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.7
+    commands:
+      - echo "Installing requirements"
+      - pip install --upgrade --force-reinstall boto3 awscli # Upgrade boto3 and awscli
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Run the script to build the cloudformation templates
+      - ProcModelS3=$(cat inference-pipeline-input.json | jq -r '.ProcModelS3')
+      - ModelS3=$(cat inference-pipeline-input.json | jq -r '.ModelS3')
+      - aws s3 cp ${ProcModelS3} ${ProcModelS3} --sse aws:kms --sse-kms-key-id ${KMSKEY_ARN} 
+      - aws s3 cp ${ModelS3} ${ModelS3} --sse aws:kms --sse-kms-key-id ${KMSKEY_ARN} 
+      - echo Done

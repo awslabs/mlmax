@@ -1,27 +1,12 @@
-STACK_NAME="mlmax-demo-cicd-pipeline"
-PACKAGE_BUCKET=${1:-sagemaker-us-east-1-783128296767}
-
-get_region() {
-    REGION=$(aws configure get region)
-    if [ "$REGION" == "None" ]; then
-      echo "REGION is unset in your AWS configuration";
-      exit 1;
-    else
-      echo "REGION is set to ${REGION}";
-    fi
-}
+source config/cicd.ini
 
 deploy () {
     aws cloudformation deploy \
-      --region=${REGION} \
-      --stack-name ${STACK_NAME} \
+      --region=${Region} \
+      --stack-name ${StackName} \
       --template-file ./cicd.yaml \
-      --parameter-overrides \
-      PackageBucket=${PACKAGE_BUCKET} \
-      Region=${REGION} \
-      StackName=${STACK_NAME} \
+      --parameter-overrides $(cat config/cicd.ini) \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 }
 
-get_region
 deploy

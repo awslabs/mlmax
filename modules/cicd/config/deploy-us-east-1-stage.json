@@ -2,6 +2,9 @@
   "Parameters": {
     "PipelineName": "MlMaxPipelineDemo",
     "TargetEnv": "stage",
-    "PackageBucket": "sagemaker-us-east-1-783128296767"
+    "PackageBucket": "sagemaker-us-east-1-783128296767",
+    "IsEnableTraining": "yes",
+    "IsEnableScheduler": "yes",
+    "IsCreateSagemakerRole": "no"
   }
 }

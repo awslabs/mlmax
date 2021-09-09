@@ -12,6 +12,7 @@ def define_inference_pipeline(
     inference_pipeline_name,
     return_yaml=True,
     dump_yaml_file="templates/sagemaker_inference_pipeline.yaml",
+    kms_key_id=None,
 ):
     """
     Return YAML definition of the training pipeline, which consists of multiple
@@ -47,7 +48,7 @@ def define_inference_pipeline(
     # sagemaker_session = sagemaker.Session()
 
     sklearn_processor = SKLearnProcessor(
-        framework_version="0.20.0",
+        framework_version="0.23-1",
         role=sm_role,
         instance_type="ml.m5.xlarge",
         instance_count=1,
@@ -92,6 +93,7 @@ def define_inference_pipeline(
             "python3",
             "/opt/ml/processing/input/code/preprocessing.py",
         ],
+        kms_key_id=kms_key_id,
     )
 
     """
@@ -101,7 +103,7 @@ def define_inference_pipeline(
     the model S3 URL. Output is the inferred data.
     """
     sklearn_processor2 = SKLearnProcessor(
-        framework_version="0.20.0",
+        framework_version="0.23-1",
         role=sm_role,
         instance_type="ml.m5.xlarge",
         instance_count=1,
@@ -140,6 +142,7 @@ def define_inference_pipeline(
         inputs=inputs,
         outputs=outputs,
         container_entrypoint=["python3", "/opt/ml/processing/input/code/inference.py",],
+        kms_key_id=kms_key_id,
     )
 
     # Create Fail state to mark the workflow failed in case any of the steps fail.
