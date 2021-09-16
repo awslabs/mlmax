@@ -67,7 +67,7 @@ def parse_arg():
 
 def main(args):
     """
-    To run locally:
+    To run locally for debug/development purposes on *NIX system:
 
     python train.py --train /tmp/train --test /tmp/test --model-dir /tmp/model
     """
