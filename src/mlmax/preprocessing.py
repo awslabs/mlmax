@@ -82,16 +82,16 @@ def split_data(df, args):
 def fit(df, args):
     preprocess = make_column_transformer(
         (
-            KBinsDiscretizer(encode="onehot-dense", n_bins=10),
             ["age", "num persons worked for employer"],
+            KBinsDiscretizer(encode="onehot-dense", n_bins=10),
         ),
         (
-            StandardScaler(),
             ["capital gains", "capital losses", "dividends from stocks"],
+            StandardScaler(),
         ),
         (
-            OneHotEncoder(sparse=False),
             ["education", "major industry code", "class of worker"],
+            OneHotEncoder(sparse=False),
         ),
     )
     print("Creating preprocessing and feature engineering transformations")

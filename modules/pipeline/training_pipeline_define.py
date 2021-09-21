@@ -57,7 +57,7 @@ def define_training_pipeline(
     Data pre-processing and feature engineering
     """
     sklearn_processor = SKLearnProcessor(
-        framework_version="0.23-1",
+        framework_version="0.20.0",
         role=sm_role,
         instance_type="ml.m5.xlarge",
         instance_count=1,
@@ -119,7 +119,7 @@ def define_training_pipeline(
         train_instance_type="ml.m5.xlarge",
         role=sm_role,
         py_version="py3",
-        framework_version="0.23-1",
+        framework_version="0.20.0",
         output_kms_key=kms_key_id,
     )
 
@@ -167,7 +167,7 @@ def define_training_pipeline(
     ]
 
     model_evaluation_processor = SKLearnProcessor(
-        framework_version="0.23-1",
+        framework_version="0.20.0",
         role=sm_role,
         instance_type="ml.m5.xlarge",
         instance_count=1,
