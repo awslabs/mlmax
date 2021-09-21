@@ -1,4 +1,5 @@
 import os
+
 from inference_pipeline_define import define_inference_pipeline
 
 
