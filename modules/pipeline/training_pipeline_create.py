@@ -1,6 +1,7 @@
 import os
 from training_pipeline_define import define_training_pipeline
 
+
 def format_template_str():
     with open("/tmp/my_training_pipeline.yaml", "r") as file:
         data = file.read()
