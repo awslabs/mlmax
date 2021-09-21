@@ -95,7 +95,7 @@ def example_create_training_pipeline():
     sm_role = "${SagerMakerRoleArn}"
     workflow_execution_role = "${WorkflowExecutionRoleArn}"
     training_pipeline_name = "${TrainingPipelineName}"
-    kms_key_id = os.getenv("KMSKEY_ARN", None) 
+    kms_key_id = os.getenv("KMSKEY_ARN", None)
     yaml_rep = create_training_pipeline(
         sm_role=sm_role,
         workflow_execution_role=workflow_execution_role,
