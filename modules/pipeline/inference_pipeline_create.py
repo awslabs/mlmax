@@ -1,6 +1,5 @@
-from inference_pipeline_define import define_inference_pipeline
 import os
-
+from inference_pipeline_define import define_inference_pipeline
 
 def format_template_str():
     with open("/tmp/my_inference_pipeline.yaml", "r") as file:
