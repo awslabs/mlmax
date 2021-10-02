@@ -185,7 +185,7 @@ You will need an S3 bucket for this step.
 
 ```bash
 # ./deploy.sh <target_env> <s3_bucket>
-./deploy.sh dev  sagemaker-ap-southeast-1-342474125894
+./deploy.sh dev  sagemaker-ap-southeast-1-xxxx
 ```
 
 **5. Manually Run the Monitor Pipeline**
