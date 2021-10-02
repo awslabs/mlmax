@@ -36,9 +36,12 @@ def define_monitor_pipeline(
     execution_input = ExecutionInput(
         schema={
             "PreprocessingJobName": str,
+            "PreprocessingInferJobName": str,
             "PreprocessingCodeURL": str,
             "MonitorTrainOutputURL": str,
+            "MonitorInferOutputURL": str,
             "InputDataURL": str,
+            "InferDataURL": str,
         }
     )
 
@@ -57,13 +60,16 @@ def define_monitor_pipeline(
         env={"mode": "python"},
     )
 
+    #############################
+    # Baseline
+    #############################
     # Create ProcessingInputs and ProcessingOutputs objects for Inputs and
     # Outputs respectively for the SageMaker Processing Job
     inputs = [
         ProcessingInput(
             source=execution_input["InputDataURL"],
-            destination="/opt/ml/processing/input",
-            input_name="input-data",
+            destination="/opt/ml/processing/train_input",
+            input_name="train-input-data",
         ),
         ProcessingInput(
             source=execution_input["PreprocessingCodeURL"],
@@ -74,19 +80,61 @@ def define_monitor_pipeline(
 
     outputs = [
         ProcessingOutput(
-            source="/opt/ml/processing/profiling",
+            source="/opt/ml/processing/profiling/inference",
             destination=execution_input["MonitorTrainOutputURL"],
-            output_name="train-baseline",
+            output_name="baseline-data",
         )
     ]
 
     processing_step = ProcessingStep(
-        "SageMaker pre-processing step",
+        "SageMaker pre-processing Baseline",
         processor=processor,
         job_name=execution_input["PreprocessingJobName"],
         inputs=inputs,
         outputs=outputs,
         container_arguments=["--train-test-split-ratio", "0.2", "--mode", "train"],
+        container_entrypoint=[
+            "python3",
+            "/opt/ml/processing/input/code/monitoring.py",
+        ],
+    )
+
+    #############################
+    # Inference
+    #############################
+    inputs = [
+        ProcessingInput(
+            source=execution_input["InferDataURL"],
+            destination="/opt/ml/processing/infer_input",
+            input_name="infer-input-data",
+        ),
+        ProcessingInput(
+            source=execution_input["MonitorTrainOutputURL"],
+            destination="/opt/ml/processing/profiling",
+            input_name="baseline-data",
+        ),
+        ProcessingInput(
+            source=execution_input["PreprocessingCodeURL"],
+            destination="/opt/ml/processing/input/code",
+            input_name="code",
+        ),
+    ]
+
+    outputs = [
+        ProcessingOutput(
+            source="/opt/ml/processing/profiling/inference",
+            destination=execution_input["MonitorInferOutputURL"],
+            output_name="monitor-output",
+        )
+    ]
+
+    processing_step_inference = ProcessingStep(
+        "SageMaker pre-processing Inference",
+        processor=processor,
+        job_name=execution_input["PreprocessingInferJobName"],
+        inputs=inputs,
+        outputs=outputs,
+        container_arguments=["--mode", "infer"],
         container_entrypoint=[
             "python3",
             "/opt/ml/processing/input/code/monitoring.py",
@@ -104,9 +152,10 @@ def define_monitor_pipeline(
         next_step=failed_state_sagemaker_processing_failure,
     )
     processing_step.add_catch(catch_state_processing)
+    processing_step_inference.add_catch(catch_state_processing)
 
     # Create the Workflow
-    workflow_graph = Chain([processing_step])
+    workflow_graph = Chain([processing_step, processing_step_inference])
     data_pipeline = Workflow(
         name=data_pipeline_name,
         definition=workflow_graph,

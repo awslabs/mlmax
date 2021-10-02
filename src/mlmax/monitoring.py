@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
@@ -51,6 +52,7 @@ def split_data(df, args):
 
 
 def write_dataframe(data: pd.DataFrame, args, file_prefix, header=False) -> None:
+    """Write dataframe into args.data_dir directory + file_prefix."""
     output_path = os.path.join(args.data_dir, file_prefix)
     logger.info(f"Saving data to {output_path}")
     pd.DataFrame(data).to_csv(output_path, header=header, index=False)
@@ -257,7 +259,17 @@ def parse_arg():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", type=str, default="train")
     parser.add_argument("--data_dir", type=str, default="/opt/ml/processing")
-    parser.add_argument("--data_input", type=str, default="input/census-income.csv")
+    parser.add_argument(
+        "--train_input", type=str, default="train_input/census-income.csv"
+    )
+    parser.add_argument(
+        "--infer_input", type=str, default="infer_input/census-income.csv"
+    )
+    parser.add_argument(
+        "--infer_baseline",
+        type=str,
+        default="profiling/baseline/train_features_baseline.csv",
+    )
     parser.add_argument("--train_test_split_ratio", type=float, default=0.3)
     args, _ = parser.parse_known_args()
     logger.info(f"Received arguments {args}")
@@ -265,27 +277,56 @@ def parse_arg():
 
 
 def main(args):
-    input_data_path = os.path.join(args.data_dir, args.data_input)
-    df = read_data(input_data_path)
+    """
+    All profiling output artifacts will be placed at /opt/ml/processing/profiling.
+
+    Tree:
+    /opt/ml/processing/profiling/baseline/
+    /opt/ml/processing/profiling/inference/
+    """
+    # Create directory
+    data_dir = Path(args.data_dir)
+    (data_dir / "profiling/baseline").mkdir(exist_ok=True, parents=True)
+    (data_dir / "profiling/inference").mkdir(exist_ok=True, parents=True)
 
     if args.mode == "train":
+        infer_data_path = os.path.join(args.data_dir, args.train_input)
+
+        df = read_data(infer_data_path)
         X_train, X_test, y_train, y_test = split_data(df, args)
 
-        # Training data (before preprocess) as baseline
+        # Calculate baseline metrics based on training data
         write_dataframe(
-            X_train, args, "profiling/train_features_baseline.csv", header=True
+            X_train, args, "profiling/baseline/train_features_baseline.csv", header=True
         )
         write_dataframe(
-            y_train, args, "profiling/train_labels_baseline.csv", header=True
+            y_train, args, "profiling/baseline/train_labels_baseline.csv", header=True
         )
-        write_dataframe(X_test, args, "profiling/test_features.csv", header=True)
-        write_dataframe(y_test, args, "profiling/test_labels.csv", header=True)
+        write_dataframe(
+            X_test, args, "profiling/baseline/test_features.csv", header=True
+        )
+        write_dataframe(y_test, args, "profiling/baseline/test_labels.csv", header=True)
 
         result = train_data_profiling(X_train, y_train, args)
-        write_json(result, args, "profiling/statistic_baseline.json")
+        write_json(result, args, "profiling/baseline/baseline_statistic.json")
 
         test_result = infer_data_profiling(X_train, X_test, args)
-        write_json(test_result, args, "profiling/psi.json")
+        write_json(test_result, args, "profiling/baseline/baseline_psi.json")
+
+    if args.mode == "infer":
+        # Read baseline training features
+        baseline_data_path = os.path.join(args.data_dir, args.infer_baseline)
+        X_train = pd.read_csv(baseline_data_path)
+
+        # Read new inference features
+        infer_data_path = os.path.join(args.data_dir, args.infer_input)
+        X_infer = read_data(infer_data_path)
+        X_infer = X_infer.drop(["income"], axis=1)
+
+        test_result = infer_data_profiling(X_train, X_infer, args)
+        write_json(test_result, args, "profiling/inference/infer_psi.json")
+
+        # Trigger alert if PSI higher than threshold config PsiThreshold
 
 
 if __name__ == "__main__":
@@ -293,10 +334,12 @@ if __name__ == "__main__":
     Local run:
 
     DATA=s3://sagemaker-sample-data-us-east-1/processing/census/census-income.csv
-    aws s3 cp $DATA /tmp/input/
-    mkdir /tmp/{profiling}
-    python preprocessing.py --mode "train" --data-dir /tmp
-
+    mkdir -p /opt/ml/processing/train_input
+    mkdir -p /opt/ml/processing/infer_input
+    aws s3 cp $DATA /opt/ml/processing/train_input/
+    aws s3 cp $DATA /opt/ml/processing/infer_input/
+    python monitoring.py --mode "train" --data_dir /opt/ml/processing
+    python monitoring.py --mode "infer" --data_dir /opt/ml/processing
     """
 
     args = parse_arg()
