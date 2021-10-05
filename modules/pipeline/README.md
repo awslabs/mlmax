@@ -61,6 +61,12 @@ python training_pipeline_run.py dev
 python inference_pipeline_run.py dev
 ```
 
+**7. Deploy the Scheduler for the Inference Pipeline**
+```
+# ./deploy_scheduler.sh <target_env>
+./deploy_scheduler.sh dev
+```
+
 ## Architecture
 
 The ML training and inference pipeline consists of Amazon Sakemaker running

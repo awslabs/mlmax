@@ -4,6 +4,7 @@ import uuid
 
 import boto3
 import sagemaker
+import datetime
 from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
 
@@ -27,11 +28,13 @@ def get_latest_models():
     client = boto3.client("sagemaker")
 
     # Get the preprocessing model
+    dt = datetime.datetime.now()
     response = client.list_processing_jobs(
-        NameContains="scikit-learn-sm-preprocessing",
+        NameContains='scikit-learn-sm-preprocessing',
         StatusEquals="Completed",
         SortBy="CreationTime",
         SortOrder="Descending",
+        #CreationTimeBefore=datetime.datetime(dt.year, dt.month, dt.day)
     )
     processing_job_name = response["ProcessingJobSummaries"][0]["ProcessingJobName"]
     proc_model_s3 = (
@@ -130,9 +133,29 @@ def example_run_inference_pipeline(workflow_arn, region):
     )
     execution.get_output(wait=True)
     execution.render_progress()
+    
+    # Save the inference pipeline input for later use
+    input_items = {
+        "StateMachineComponentArn": workflow_arn,
+        "InputDataURL": input_data,
+        "ProcModelS3": proc_model_s3,
+        "PreprocessingCodeURL": input_preprocessing_code,
+        "InferenceCodeURL": input_inference_code,
+        "ModelS3": model_s3,
+        "PreprocessedTrainDataURL": preprocessed_training_data,
+        "PreprocessedTestDataURL": preprocessed_test_data,
+        "OutputPathBaseURL": f"{s3_bucket_base_uri}",
+    }
+    
+    text = '\n'.join(['='.join(item) for item in input_items.items()])
+    with open('config/scheduler.ini', 'w') as config_file:
+        config_file.write(text)
 
 
 if __name__ == "__main__":
+    """
+        this is a demo
+    """
     sts = boto3.client("sts")
     account = sts.get_caller_identity().get("Account")
     region = sts.meta.region_name
