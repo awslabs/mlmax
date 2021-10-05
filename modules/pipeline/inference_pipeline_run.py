@@ -28,7 +28,7 @@ def get_latest_models():
     client = boto3.client("sagemaker")
 
     # Get the preprocessing model
-    dt = datetime.datetime.now()
+    #dt = datetime.datetime.now()
     response = client.list_processing_jobs(
         NameContains='scikit-learn-sm-preprocessing',
         StatusEquals="Completed",
