@@ -61,7 +61,7 @@ python training_pipeline_run.py dev
 python inference_pipeline_run.py dev
 ```
 
-**7. Deploy the Scheduler for the Inference Pipeline**
+**7. (Optional) Deploy the Scheduler for the Inference Pipeline**
 ```
 # ./deploy_scheduler.sh <target_env>
 ./deploy_scheduler.sh dev
