@@ -4,6 +4,7 @@ import uuid
 
 import boto3
 import sagemaker
+
 # import datetime
 from stepfunctions.steps import Chain
 from stepfunctions.workflow import Workflow
@@ -30,7 +31,7 @@ def get_latest_models():
     # Get the preprocessing model
     # dt = datetime.datetime.now()
     response = client.list_processing_jobs(
-        NameContains='scikit-learn-sm-preprocessing',
+        NameContains="scikit-learn-sm-preprocessing",
         StatusEquals="Completed",
         SortBy="CreationTime",
         SortOrder="Descending",
@@ -147,14 +148,14 @@ def example_run_inference_pipeline(workflow_arn, region):
         "OutputPathBaseURL": f"{s3_bucket_base_uri}",
     }
 
-    text = '\n'.join(['='.join(item) for item in input_items.items()])
-    with open('config/scheduler.ini', 'w') as config_file:
+    text = "\n".join(["=".join(item) for item in input_items.items()])
+    with open("config/scheduler.ini", "w") as config_file:
         config_file.write(text)
 
 
 if __name__ == "__main__":
     """
-        this is a demo
+    this is a demo
     """
     sts = boto3.client("sts")
     account = sts.get_caller_identity().get("Account")
