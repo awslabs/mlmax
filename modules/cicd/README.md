@@ -101,7 +101,7 @@ To do:
 ### Step 3: Go to the Devops Account, Create the cloudformation stack for the Codepipeline (CI/CD)
 
     cd modules/cicd
-    ./deploy.sh <PACKAGE_BUCKET>
+    ./deploy.sh
 
 ### Step 4: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
 1. Open the AWS Developer Tools console at https://console.aws.amazon.com/codesuite/settings/connections.
