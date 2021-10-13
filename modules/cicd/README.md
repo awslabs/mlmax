@@ -140,5 +140,3 @@ To do:
 ## To do
 - Support deploy in multiple regions
 - Add support fork from mlmax to automatically trigger the Codepipeline
-- Clean the cicd.ini and deploy-xxx-xxx.ini to avoid duplicate parameters
-- Automatically create s3 artifact bucket.
