@@ -18,7 +18,7 @@ def read_from_json(file_path):
     return data
 
 
-def generate_training_pipeline_input():
+def generate_training_pipeline_input(bucket):
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job, and
     unique_id = uuid.uuid1().hex
@@ -43,7 +43,7 @@ def generate_training_pipeline_input():
         bucket=sagemaker_session.default_bucket(),
         key_prefix=f"{evaluation_job_name}/source",
     )
-    s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
+    s3_bucket_base_uri = f"s3://{bucket}"
     sm_submit_dir_url = (
         f"{s3_bucket_base_uri}/{training_job_name}/source/sourcedir.tar.gz"
     )
@@ -53,7 +53,7 @@ def generate_training_pipeline_input():
     tar.close()
     sagemaker_session.upload_data(
         "/tmp/sourcedir.tar.gz",
-        bucket=sagemaker_session.default_bucket(),
+        bucket=bucket,
         key_prefix=f"{training_job_name}/source",
     )
 
@@ -95,7 +95,7 @@ def generate_training_pipeline_input():
     )
 
 
-def generate_inference_pipeline_input(proc_model_s3, model_s3):
+def generate_inference_pipeline_input(proc_model_s3, model_s3, bucket):
 
     # Step 1 - Generate unique names for Pre-Processing Job, Training Job
     unique_id = uuid.uuid1().hex
@@ -107,18 +107,18 @@ def generate_inference_pipeline_input(proc_model_s3, model_s3):
     INFERENCE_SCRIPT_LOCATION = "../../src/mlmax/inference.py"
 
     sagemaker_session = sagemaker.Session()
-    s3_bucket_base_uri = f"s3://{sagemaker_session.default_bucket()}"
+    s3_bucket_base_uri = f"s3://{bucket}"
     # upload preprocessing script
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
-        bucket=sagemaker_session.default_bucket(),
+        bucket=bucket,
         key_prefix=f"{preprocessing_job_name}/source",
     )
     print(f"Using preprocessing script from {input_preprocessing_code}")
     # upload inference script
     input_inference_code = sagemaker_session.upload_data(
         INFERENCE_SCRIPT_LOCATION,
-        bucket=sagemaker_session.default_bucket(),
+        bucket=bucket,
         key_prefix=f"{inference_job_name}/source",
     )
 
@@ -134,7 +134,7 @@ def generate_inference_pipeline_input(proc_model_s3, model_s3):
         f"s3://sagemaker-sample-data-{region}/processing/census/census-income.csv"
     )
 
-    s3_bucket_base_uri = "{}{}".format("s3://", sagemaker_session.default_bucket())
+    s3_bucket_base_uri = "{}{}".format("s3://", bucket)
     output_data = f"{s3_bucket_base_uri}/{preprocessing_job_name}/output_data"
     preprocessed_training_data = f"{output_data}/train_data"
     preprocessed_test_data = f"{output_data}/test_data"
@@ -162,10 +162,15 @@ if __name__ == "__main__":
     sts = boto3.client("sts")
     account = sts.get_caller_identity().get("Account")
     region = sts.meta.region_name
-    proc_model_s3, model_s3 = generate_training_pipeline_input()
-    inputs_inference = generate_inference_pipeline_input(proc_model_s3, model_s3)
     # get package bucket from environment variable
     package_bucket = os.getenv("PACKAGE_BUCKET")
+
+    # generate the input json for training and inference pipelines
+    proc_model_s3, model_s3 = generate_training_pipeline_input(package_bucket)
+    inputs_inference = generate_inference_pipeline_input(
+        proc_model_s3, model_s3, package_bucket
+    )
+
     # generate prod cloudformation template configuration
     config_stage = read_from_json(f"config/deploy-{region}-stage.json")
     config_stage["Parameters"]["PackageBucket"] = package_bucket
