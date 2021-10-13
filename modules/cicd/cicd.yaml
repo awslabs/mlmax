@@ -67,7 +67,7 @@ Resources:
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${StackName}-artifact-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub ${StackName}-artifact-${Region}-${DevopsAccountId}
       AccessControl: Private
       VersioningConfiguration:
         Status: Enabled
@@ -156,7 +156,7 @@ Resources:
                 Action:
                   - 'iam:PassRole'
                 Resource:
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/${StackName}-CodeBuildServiceRole"
+                  - !Sub "arn:aws:iam::${DevopsAccountId}:role/service-role/${StackName}-CodeBuildServiceRole"
               - Effect: Allow
                 Action:
                   - "s3:Delete*"
@@ -168,8 +168,8 @@ Resources:
                 Resource:
                   - !Sub ${ArtifactBucket.Arn}/*
                   - !GetAtt ArtifactBucket.Arn
-                  - !Sub "arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}"
-                  - !Sub "arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}/*"
+                  - !Sub "arn:aws:s3:::sagemaker-${Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::sagemaker-${Region}-${DevopsAccountId}/*"
               - Effect: Allow
                 Action:
                   - cloudformation:ValidateTemplate
