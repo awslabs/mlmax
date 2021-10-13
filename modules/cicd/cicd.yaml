@@ -1,10 +1,10 @@
 Description: CodePipeline (CICD) for the training and infernce pipelines
 Parameters:
-  
+
   Region:
     Description: AWS region to deploy application
     Type: String
-  
+
   StackName:
     Description: The stack name for the CICD codepipeline
     Type: String
@@ -12,28 +12,28 @@ Parameters:
   StackNameRoles:
     Description: The stack name for the CICD codepipeline roles
     Type: String
-  
+
   PipelineName:
-    Description: The stack name for the ML pipelines 
+    Description: The stack name for the ML pipelines
     Type: String
 
-  PackageBucket:
-    Type: String
-    Description: Path of the S3 bucket for the aws cloudformation package.
+  # PackageBucket:
+  #   Type: String
+  #   Description: Path of the S3 bucket for the aws cloudformation package.
   #CodePipelineServiceRoleArn:
-  #  Description: CodePipeline Role Arn 
+  #  Description: CodePipeline Role Arn
   #  Type: String
-   
+
   #DeployRoleStageArn:
-  #  Description: Stage Env Deploy Action Role Arn 
+  #  Description: Stage Env Deploy Action Role Arn
   #  Type: String
   #
   #DeployRoleProdArn:
-  #  Description: Prod Deploy Action Role Arn 
+  #  Description: Prod Deploy Action Role Arn
   #  Type: String
-  #  
+  #
   #InvokeStepFunctionRoleArn:
-  #  Description: Invoke StepFunction Action Role Arn 
+  #  Description: Invoke StepFunction Action Role Arn
   #  Type: String
 
   DevopsAccountId:
@@ -41,13 +41,13 @@ Parameters:
     Type: String
 
   StageAccountId:
-    Description: Stage AccountId 
+    Description: Stage AccountId
     Type: String
 
   ProdAccountId:
-    Description: Prod AccountId 
+    Description: Prod AccountId
     Type: String
-    
+
   RepositoryName:
     Type: String
     Default: "awslabs/mlmax"
@@ -60,9 +60,39 @@ Parameters:
   BranchName:
     Description: Branch name where changes are to be detected
     Type: String
-    Default: "cicd-pipeline-cross-accounts"
+    Default: "main"
 
 Resources:
+################## Artifact Bucket #############################
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${StackName}-artifact-${AWS::Region}-${AWS::AccountId}
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: Allow use of the key from the other accounts
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
+                - !GetAtt CodeBuildServiceRole.Arn
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${PipelineName}-SageMakerRole-stage"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${PipelineName}-SageMakerRole-prod"
+            Action: "s3:*"
+            Resource:
+              - !Sub ${ArtifactBucket.Arn}/*
+              - !GetAtt ArtifactBucket.Arn
 ################## Kms Key #####################################
   KMSKey:
     Type: AWS::KMS::Key
@@ -136,10 +166,12 @@ Resources:
                   - "s3:Create*"
                   - "s3:Head*"
                 Resource:
-                  - !Sub "arn:aws:s3:::${PackageBucket}"
-                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
-              - Effect: Allow                                                           
-                Action:                                                                 
+                  - !Sub ${ArtifactBucket.Arn}/*
+                  - !GetAtt ArtifactBucket.Arn
+                  - !Sub "arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}"
+                  - !Sub "arn:aws:s3:::sagemaker-${AWS::Region}-${AWS::AccountId}/*"
+              - Effect: Allow
+                Action:
                   - cloudformation:ValidateTemplate
                 Resource:
                   - "*"
@@ -153,7 +185,7 @@ Resources:
                   - "kms:Encrypt"
                   - "kms:ReEncrypt*"
                   - "kms:GenerateDataKey*"
-                  - "kms:DescribeKey" 
+                  - "kms:DescribeKey"
                 Resource: "*"
 
   ################ GITHUB connection to CodePipeline ######################################
@@ -162,7 +194,7 @@ Resources:
     Properties:
       ConnectionName: mlmax_git_conn
       ProviderType: GitHub
-      
+
   ################ CodeBuild Stage and CodePipeline Pipeline ##############################
   BuildProject:
     Type: AWS::CodeBuild::Project
@@ -183,7 +215,7 @@ Resources:
         EnvironmentVariables:
           - Name: PACKAGE_BUCKET
             Type: PLAINTEXT
-            Value: !Ref PackageBucket
+            Value: !Ref ArtifactBucket
           - Name: REGION
             Type: PLAINTEXT
             Value: !Ref Region
@@ -210,7 +242,7 @@ Resources:
         EnvironmentVariables:
           - Name: PACKAGE_BUCKET
             Type: PLAINTEXT
-            Value: !Ref PackageBucket
+            Value: !Ref ArtifactBucket
           - Name: REGION
             Type: PLAINTEXT
             Value: !Ref Region
@@ -227,7 +259,7 @@ Resources:
       RoleArn: !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
       ArtifactStore:
           Type: S3
-          Location: !Sub ${PackageBucket}
+          Location: !Ref ArtifactBucket
           EncryptionKey:
             Id: !GetAtt KMSKey.Arn
             Type: KMS
@@ -247,7 +279,7 @@ Resources:
                 ConnectionArn: !Ref GitConnection
                 FullRepositoryId: !Ref RepositoryName
                 BranchName: !Ref BranchName
-                DetectChanges: true 
+                DetectChanges: true
         - Name: Build
           Actions:
             - Name: BuildTemplates
@@ -291,18 +323,18 @@ Resources:
                 Version: 1
                 Provider: StepFunctions
               OutputArtifacts:
-                - Name: TrainingPipeline 
+                - Name: TrainingPipeline
               RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
               Configuration:
                 StateMachineArn: !Sub "arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Training-stage"
                 InputType: FilePath
                 Input: training-pipeline-input.json
               RunOrder: 1
-            - Name: EncryptModelArtifacts 
+            - Name: EncryptModelArtifacts
               InputArtifacts:
                 - Name: BuildOutput
               # OutputArtifacts:
-              #   - Name: EncryptModelArtifactsOutput 
+              #   - Name: EncryptModelArtifactsOutput
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -311,7 +343,7 @@ Resources:
               Configuration:
                 ProjectName: !Ref BuildProjectEncryptModelArtifacts
               RunOrder: 2
-        - Name: Inference 
+        - Name: Inference
           Actions:
             - Name: StartInferencePipeline
               InputArtifacts:
@@ -322,14 +354,14 @@ Resources:
                 Version: 1
                 Provider: StepFunctions
               OutputArtifacts:
-                - Name: InferencePipeline 
+                - Name: InferencePipeline
               RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
               Configuration:
                 StateMachineArn: !Sub "arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Inference-stage"
                 InputType: FilePath
                 Input: inference-pipeline-input.json
               RunOrder: 1
-        - Name: ManualApproval    
+        - Name: ManualApproval
           Actions:
             - Name: ApproveDeploy
               ActionTypeId:
@@ -341,7 +373,7 @@ Resources:
                 ExternalEntityLink: !Sub https://console.aws.amazon.com/states/home?region=${Region}#/statemachines/view/arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Inference-stage
                 CustomData: "Shall this inference pipeline be put into production?"
               RunOrder: 1
-        - Name: Deploy 
+        - Name: Deploy
           Actions:
             - Name: DeployInferencePipeline
               InputArtifacts:
@@ -360,4 +392,3 @@ Resources:
                 TemplatePath: BuildOutput::master_packaged.yaml
                 TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-prod-build.json
               RunOrder: 1
-
