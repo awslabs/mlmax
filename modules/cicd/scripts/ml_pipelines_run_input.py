@@ -1,21 +1,22 @@
-import argparse
-import configparser
+import json
+import os
 import tarfile
 import uuid
 
 import boto3
 import sagemaker
-import json
 
 
 def save_to_json(data, file_path):
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
+
 def read_from_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data
+
 
 def generate_training_pipeline_input():
 
@@ -156,19 +157,24 @@ def generate_inference_pipeline_input(proc_model_s3, model_s3):
     save_to_json(inputs, "config/inference-pipeline-input.json")
     return inputs
 
+
 if __name__ == "__main__":
     sts = boto3.client("sts")
     account = sts.get_caller_identity().get("Account")
     region = sts.meta.region_name
     proc_model_s3, model_s3 = generate_training_pipeline_input()
     inputs_inference = generate_inference_pipeline_input(proc_model_s3, model_s3)
+    # get package bucket from environment variable
+    package_bucket = os.getenv("PACKAGE_BUCKET")
     # generate prod cloudformation template configuration
     config_stage = read_from_json(f"config/deploy-{region}-stage.json")
+    config_stage["Parameters"]["PackageBucket"] = package_bucket
     for key, value in inputs_inference.items():
         if key not in ["PreprocessingJobName", "InferenceJobName"]:
             config_stage["Parameters"][key] = value
     save_to_json(config_stage, f"config/deploy-{region}-stage-build.json")
     config_prod = read_from_json(f"config/deploy-{region}-prod.json")
+    config_prod["Parameters"]["PackageBucket"] = package_bucket
     for key, value in inputs_inference.items():
         if key not in ["PreprocessingJobName", "InferenceJobName"]:
             config_prod["Parameters"][key] = value
