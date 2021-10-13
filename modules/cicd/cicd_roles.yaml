@@ -9,7 +9,7 @@ Parameters:
     Description: The stack name for the CICD codepipeline roles
     Type: String
   PipelineName:
-    Description: The stack name for the ML pipelines 
+    Description: The stack name for the ML pipelines
     Type: String
   TargetEnv:
     Type: String
@@ -18,20 +18,20 @@ Parameters:
       - 'stage'
       - 'prod'
     Default: "devops"
-  PackageBucket:
-    Type: String
-    Description: Path of the S3 bucket for the aws cloudformation package.
+  # PackageBucket:
+  #   Type: String
+  #   Description: Path of the S3 bucket for the aws cloudformation package.
   DevopsAccountId:
     Description: Devops AccountId
     Type: String
   StageAccountId:
-    Description: Stage AccountId 
+    Description: Stage AccountId
     Type: String
   ProdAccountId:
-    Description: Prod AccountId 
+    Description: Prod AccountId
     Type: String
   #CodePipelineServiceRoleArn:
-  #  Description: CodePipeline Role Arn 
+  #  Description: CodePipeline Role Arn
   #  Type: String
   #  Default: ""
 
@@ -83,15 +83,13 @@ Resources:
                   - "s3:Create*"
                   - "s3:Head*"
                 Resource:
-                  - !Sub "arn:aws:s3:::${PackageBucket}"
-                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
               - Effect: Allow
                 Action:
                   - "kms:Decrypt"
-                  - "kms:Encrypt"
-                  - "kms:ReEncrypt*"
                   - "kms:GenerateDataKey*"
-                  - "kms:DescribeKey" 
+                  - "kms:DescribeKey"
                   - "kms:CreateGrant"
                 Resource: "*"
   ################## CodePipeline Role ##############################
@@ -135,8 +133,8 @@ Resources:
                   - "s3:Create*"
                   - "s3:Head*"
                 Resource:
-                  - !Sub "arn:aws:s3:::${PackageBucket}"
-                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
               - Effect: Allow
                 Action:
                   - iam:*
@@ -156,7 +154,7 @@ Resources:
                   - "kms:Encrypt"
                   - "kms:ReEncrypt*"
                   - "kms:GenerateDataKey*"
-                  - "kms:DescribeKey" 
+                  - "kms:DescribeKey"
                 Resource: "*"
   ################## Invoke Step Function Role ##############################
   InvokeStepFunctionRole:
@@ -197,15 +195,15 @@ Resources:
                   - "s3:Create*"
                   - "s3:Head*"
                 Resource:
-                  - !Sub "arn:aws:s3:::${PackageBucket}"
-                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
               - Effect: Allow
                 Action:
                   - "kms:Decrypt"
                   - "kms:Encrypt"
                   - "kms:ReEncrypt*"
                   - "kms:GenerateDataKey*"
-                  - "kms:DescribeKey" 
+                  - "kms:DescribeKey"
                 Resource: "*"
 
   ###################### CodeDeploy Role ##################################
@@ -265,7 +263,7 @@ Resources:
                 Action:
                   - cloudwatch:PutMetricData
                 Resource: "*"
-              - Sid: CodeDeploy 
+              - Sid: CodeDeploy
                 Effect: Allow
                 Action:
                   - codedeploy:*
@@ -288,8 +286,8 @@ Resources:
                   - "s3:Create*"
                   - "s3:Head*"
                 Resource:
-                  - !Sub "arn:aws:s3:::${PackageBucket}"
-                  - !Sub "arn:aws:s3:::${PackageBucket}/*"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
               - Sid: kms
                 Effect: Allow
                 Action:
@@ -297,7 +295,7 @@ Resources:
                   - "kms:Encrypt"
                   - "kms:ReEncrypt*"
                   - "kms:GenerateDataKey*"
-                  - "kms:DescribeKey" 
+                  - "kms:DescribeKey"
                 Resource: "*"
 
 Outputs:
