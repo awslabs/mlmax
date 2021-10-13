@@ -35,12 +35,12 @@ def generate_training_pipeline_input(bucket):
     sagemaker_session = sagemaker.Session()
     input_preprocessing_code = sagemaker_session.upload_data(
         PREPROCESSING_SCRIPT_LOCATION,
-        bucket=sagemaker_session.default_bucket(),
+        bucket=bucket,
         key_prefix=f"{preprocessing_job_name}/source",
     )
     input_evaluation_code = sagemaker_session.upload_data(
         EVALUATION_SCRIPT_LOCATION,
-        bucket=sagemaker_session.default_bucket(),
+        bucket=bucket,
         key_prefix=f"{evaluation_job_name}/source",
     )
     s3_bucket_base_uri = f"s3://{bucket}"
