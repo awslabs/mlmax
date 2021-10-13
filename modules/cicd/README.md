@@ -46,7 +46,7 @@ Also it consists of 5 stages:
       --template-file ./cicd_roles.yaml \
       --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-   
+
 #### In `Stage Account` AWS cli, run the command line below:
 
     source config/cicd.ini
@@ -57,7 +57,7 @@ Also it consists of 5 stages:
       --template-file ./cicd_roles.yaml \
       --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
       --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-      
+
 
 #### In `Prod Account` AWS cli, run the command line below:
 
@@ -102,7 +102,7 @@ To do:
 
     cd modules/cicd
     ./deploy.sh <PACKAGE_BUCKET>
-    
+
 ### Step 4: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
 1. Open the AWS Developer Tools console at https://console.aws.amazon.com/codesuite/settings/connections.
 
@@ -111,7 +111,7 @@ To do:
 3. In Name, choose the name of the pending connection you want to update. Update a pending connection is enabled when you choose a connection with a Pending status.
 
 4. Choose Update a pending connection.
-    
+
 5. Choose **Authorize AWS Connector for GitHub**. The connection page displays and shows the GitHub Apps field.
 ![github-conn-access.png](images/github-conn-access.png)
 
@@ -136,15 +136,9 @@ To do:
 
 ### Step 4: Check the run results.
 
-There is a bug in Sagemaker using kms key to encryt trained models. Need to manually re-save the  proc_model.tar.gz and model.tar.gz in the S3 console:
-
-1. Click Edit Server-side encryption.
-![bug.png](images/bug.png)
-2. Click Save changes.
-![bug2.png](images/bug2.png)
 
 ## To do
 - Support deploy in multiple regions
 - Add support fork from mlmax to automatically trigger the Codepipeline
 - Clean the cicd.ini and deploy-xxx-xxx.ini to avoid duplicate parameters
-- Automatically create s3 artifact bucket. 
+- Automatically create s3 artifact bucket.
