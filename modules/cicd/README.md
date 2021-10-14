@@ -33,7 +33,19 @@ Also it consists of 5 stages:
 ## Getting Started
 > make sure your aws cli in the `us-east-1` region
 
-### Step 1: Set up cross account IAM roles
+### Step 0: Download the repo
+
+    git clone https://github.com/awslabs/mlmax.git
+    cd modules/cicd
+
+### Step 1: Customize your config file at ./config/cicd.ini
+> Replace the following config file with your own AWS accounts.
+
+    DevopsAccountId=xxxxxxxxxxxx
+    StageAccountId=xxxxxxxxxxxx
+    ProdAccountId=xxxxxxxxxxxx
+
+### Step 2: Set up cross account IAM roles
 
 #### In `Devops Account` AWS cli, run the command line below:
 
@@ -47,37 +59,8 @@ Also it consists of 5 stages:
 
     ./create_roles.sh prod
 
-### Step 2: Set up cross account S3 bucket for CodePipeline Artifacts, Go to the Devops Account AWS console.
+### Step 3: In `Devops Account`, Create the cloudformation stack for the Codepipeline (CI/CD)
 
-To do:
-- Automate adding the S3 bucket policy.
-
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": [
-                    "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-deploy-role",
-                    "arn:aws:iam::497394617784:role/mlmax-demo-cicd-pipeline-roles-deploy-role",
-                    "arn:aws:iam::161422014849:role/mlmax-demo-cicd-pipeline-roles-InvokeStepFunctionRole",
-                    "arn:aws:iam::497394617784:role/MlMaxPipelineDemo-SageMakerRole-prod",
-                    "arn:aws:iam::161422014849:role/MlMaxPipelineDemo-SageMakerRole-stage"
-                ]
-            },
-            "Action": "s3:*",
-            "Resource": [
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767",
-                "arn:aws:s3:::sagemaker-us-east-1-783128296767/*"
-            ]
-        }
-    ]
-}
-
-### Step 3: Go to the Devops Account, Create the cloudformation stack for the Codepipeline (CI/CD)
-
-    cd modules/cicd
     ./deploy.sh
 
 ### Step 4: The first time you set up the above CICD CodePipeline, you need too use the Developer Tools console to complete a pending connection.
@@ -103,7 +86,7 @@ To do:
 
 9. On the **Connect to GitHub page**, the connection ID for your new installation appears in GitHub Apps. Choose **Connect**.
 
-### Step 3: Go to your CodePipeline and release changes to trigger the running of the CodePipeline.
+### Step 5: Go to your CodePipeline and release changes to trigger the running of the CodePipeline.
 1. open the CodePipeline console at http://console.aws.amazon.com/codesuite/codepipeline/home.
 
 2. In Name, choose `mlmax-demo-cicd-pipeline-codepipeline`.
@@ -111,8 +94,28 @@ To do:
 3. On the pipeline details page, choose Release change. This starts the most recent revision available in each source location specified in a source action through the pipeline.
 ![codepipeline-screenshot.png](images/codepipeline-screenshot.png)
 
-### Step 4: Check the run results.
+### Step 6: Manually approve the deployment to `Prod Account`
+1. Scroll down to the `Manual Approval` Stage, and **click review and approve**.
+![cicd_manual_approval](images/cicd_manual_approval.png)
 
+2. Wait a couple of minutes to see if the inference pipeline is successfully deployed to `Prod Account`
+![cicd_deploy](images/cicd_deploy.png)
+
+### Step 7: Check the run results on `Prod Account`.
+> In this demo, the inference pipeline is scheduled to be executed daily, so it might take some time to see it will be executed on the Prod account.
+
+1. Log on to the AWS console of the `Prod Account`.
+
+2. Open the StepFunction console at https://console.aws.amazon.com/states/home
+
+3. In Name, choose `MlMaxPipelineDemo-Inference-prod`
+![cicd_prod_stepfunction](images/cicd_prod_stepfunction.png)
+
+4. Check if the latest execution is successful.
+![cicd_prod_execution](images/cicd_prod_execution.png)
+
+5. You can further check the details of the execution by clicking the execution.
+![cicd_prod_execution_details](images/cicd_prod_execution_details.png)
 
 ## To do
 - Support deploy in multiple regions
