@@ -59,7 +59,7 @@ Also it consists of 5 stages:
 
     ./create_roles.sh prod
 
-### Step 3: In `Devops Account`, Create the cloudformation stack for the Codepipeline (CI/CD)
+### Step 3: In `Devops Account` AWS cli, Create the cloudformation stack for the Codepipeline (CI/CD)
 
     ./deploy.sh
 
