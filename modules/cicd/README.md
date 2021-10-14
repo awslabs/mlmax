@@ -28,7 +28,7 @@ Also it consists of 5 stages:
 
 - `Deploy`: Deploy the ML inference pipeline into the production account.
 
-**For simplicity, this implementation assume all the accounts are the same here.**
+**For simplicity, this implementation assumes Data/artifact and Devops accounts are the same here, and ML Dev account is not used here.**
 
 ## Getting Started
 > make sure your aws cli in the `us-east-1` region
@@ -37,38 +37,15 @@ Also it consists of 5 stages:
 
 #### In `Devops Account` AWS cli, run the command line below:
 
-
-    source config/cicd.ini
-    TARGET_ENV="devops"
-    aws cloudformation deploy \
-      --region=${Region} \
-      --stack-name ${StackNameRoles}-${TARGET_ENV} \
-      --template-file ./cicd_roles.yaml \
-      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
-      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+    ./create_roles.sh devops
 
 #### In `Stage Account` AWS cli, run the command line below:
 
-    source config/cicd.ini
-    TARGET_ENV="stage"
-    aws cloudformation deploy \
-      --region=${Region} \
-      --stack-name ${StackNameRoles}-${TARGET_ENV} \
-      --template-file ./cicd_roles.yaml \
-      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
-      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
-
+    ./create_roles.sh stage
 
 #### In `Prod Account` AWS cli, run the command line below:
 
-    source config/cicd.ini
-    TARGET_ENV="prod"
-    aws cloudformation deploy \
-      --region=${Region} \
-      --stack-name ${StackNameRoles}-${TARGET_ENV} \
-      --template-file ./cicd_roles.yaml \
-      --parameter-overrides $(cat config/cicd.ini) TargetEnv=${TARGET_ENV} \
-      --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+    ./create_roles.sh prod
 
 ### Step 2: Set up cross account S3 bucket for CodePipeline Artifacts, Go to the Devops Account AWS console.
 
