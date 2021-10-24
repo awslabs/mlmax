@@ -7,12 +7,12 @@ import pytest
 
 from mlmax.monitoring import (
     calculate_psi,
+    generate_psi,
+    generate_statistic,
     get_cat_counts,
     get_cols_types,
     get_dataframe_stats,
     get_num_distribution,
-    infer_data_profiling,
-    train_data_profiling,
     write_dataframe,
     write_json,
 )
@@ -23,9 +23,13 @@ def args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", type=str, default="train")
     parser.add_argument("--data_dir", type=str, default="/opt/ml/processing")
-    parser.add_argument("--data_input", type=str, default="input/census-income.csv")
+    parser.add_argument(
+        "--data_input", type=str, default="train_input/census-income.csv"
+    )
     parser.add_argument("--train_test_split_ratio", type=float, default=0.3)
-    parser.add_argument("--transformer_input", type=str, default="proc_model/proc_model.tar.gz")
+    parser.add_argument(
+        "--transformer_input", type=str, default="proc_model/proc_model.tar.gz"
+    )
     parser.add_argument("--model_input", type=str, default="model/model.tar.gz")
     args, _ = parser.parse_known_args()
     print(f"Received arguments {args}")
@@ -35,7 +39,10 @@ def args():
 @pytest.fixture
 def dummy_df():
     df = pd.DataFrame(
-        {"f1": np.arange(1, 11), "f2": ["a", "a", "a", "a", "a", "b", "c", "d", "d", "d"]}
+        {
+            "f1": np.arange(1, 11),
+            "f2": ["a", "a", "a", "a", "a", "b", "c", "d", "d", "d"],
+        }
     )
     df.astype(dtype={"f1": int, "f2": str})
     return df
@@ -139,7 +146,7 @@ def test_get_cat_counts(dummy_df):
 
 
 def test_train_data_profiling(dummy_df, args):
-    result = train_data_profiling(dummy_df, dummy_df, args)
+    result = generate_statistic(dummy_df, dummy_df, args)
     expected = {
         "features": [
             {
@@ -212,6 +219,6 @@ def test_calculate_psi(psi_df):
 
 
 def test_infer_data_profiling(psi_df):
-    result = infer_data_profiling(psi_df, psi_df)
+    result = generate_psi(psi_df, psi_df)
     expected = {"features": [{"name": "f1", "psi": 0.0}, {"name": "f2", "psi": 0.0}]}
     assert result == expected

@@ -113,7 +113,15 @@ def get_cat_counts(data: pd.Series) -> dict:
     return count_dict
 
 
-def train_data_profiling(X_train: pd.DataFrame, y_train: pd.Series, args=None):
+def generate_statistic(X_train: pd.DataFrame, y_train: pd.Series, args=None):
+    """
+    Examples of X_train:
+
+            age                    education                 major industry code ...
+    26873    28             5th or 6th grade        Business and repair services
+    179865   31   Bachelors degree(BA AB BS)   Finance insurance and real estate
+
+    """
     cat_cols, num_cols = get_cols_types(X_train)
     logger.info(f"Categorical cols: {cat_cols}")
     logger.info(f"Numerical cols: {num_cols}")
@@ -143,21 +151,13 @@ def calculate_psi(
     actual: pd.Series,
     buckettype: str = "bins",
     bins: int = 10,
-    axis: int = 0,
+    # axis: int = 0,
 ):
-    """Calculate the PSI (population stability index) across all variables
+    """Calculate the PSI (population stability index) for a feature.
+
     Ref:
     https://mwburke.github.io/data%20science/2018/04/29/population-stability-index.html
 
-    Args:
-       expected: numpy matrix of original values
-       actual: numpy matrix of new values, same size as expected
-       buckettype: "bins" or "quantiles"
-       buckets: number of quantiles to use in bucketing variables
-       axis: axis by which variables are defined, 0 for vertical, 1 for horizontal
-
-    Returns:
-       psi_values: ndarray of psi values for each variable
     """
     assert buckettype in ["bins", "quantiles"]
 
@@ -173,6 +173,7 @@ def calculate_psi(
         """
 
         def scale_range(input_arr: np.ndarray, new_min: float, new_max: float):
+            """Scale values into 10 equal range intervals."""
             temp = (new_max - new_min) * (input_arr - np.min(input_arr))
             temp = temp / (np.max(input_arr) - np.min(input_arr))
             temp = temp + new_min
@@ -201,7 +202,7 @@ def calculate_psi(
             breakpoints = np.stack(
                 [np.percentile(expected_array, b) for b in breakpoints]
             )
-
+        # Percentage of count for each bin
         expected_percents = np.histogram(expected_array, breakpoints)[0] / len(
             expected_array
         )
@@ -214,24 +215,16 @@ def calculate_psi(
 
         return psi_value
 
-    if len(expected.shape) == 1:
-        psi_values = np.empty(len(expected.shape))
-    else:
-        psi_values = np.empty(expected.shape[axis])
-
-    for i in range(0, len(psi_values)):
-        if len(psi_values) == 1:
-            psi_values = psi(expected, actual, bins)
-        elif axis == 0:
-            psi_values[i] = psi(expected[:, i], actual[:, i], bins)
-        elif axis == 1:
-            psi_values[i] = psi(expected[i, :], actual[i, :], bins)
-
+    psi_values = psi(expected, actual, bins)
     return psi_values
 
 
-def get_psi_score(X_train: pd.DataFrame, X_test: pd.DataFrame, args=None):
-    """Get PSI for numerical columns."""
+def get_psi_score(X_train: pd.DataFrame, X_test: pd.DataFrame, args=None) -> List[dict]:
+    """Get PSI for numerical columns.
+
+    Return:
+        [{'name': 'age', 'psi': 0.000531655721643536}]
+    """
     _, num_cols = get_cols_types(X_train)
 
     psi_list = []
@@ -245,9 +238,7 @@ def get_psi_score(X_train: pd.DataFrame, X_test: pd.DataFrame, args=None):
     return psi_list
 
 
-def infer_data_profiling(
-    X_train: pd.DataFrame, X_test: pd.DataFrame, args=None
-) -> dict:
+def generate_psi(X_train: pd.DataFrame, X_test: pd.DataFrame, args=None) -> dict:
     psi_score_list = get_psi_score(X_train, X_test)
 
     # Reformat
@@ -290,12 +281,14 @@ def main(args):
     (data_dir / "profiling/inference").mkdir(exist_ok=True, parents=True)
 
     if args.mode == "train":
-        infer_data_path = os.path.join(args.data_dir, args.train_input)
 
+        # TODO: if there data has been in proper format, there is no processing
+        # required.
+        infer_data_path = os.path.join(args.data_dir, args.train_input)
         df = read_data(infer_data_path)
         X_train, X_test, y_train, y_test = split_data(df, args)
 
-        # Calculate baseline metrics based on training data
+        # Save baseline data for future reference
         write_dataframe(
             X_train, args, "profiling/baseline/train_features_baseline.csv", header=True
         )
@@ -307,10 +300,13 @@ def main(args):
         )
         write_dataframe(y_test, args, "profiling/baseline/test_labels.csv", header=True)
 
-        result = train_data_profiling(X_train, y_train, args)
+        # Calculate baseline metrics based on training data
+        result = generate_statistic(X_train, y_train, args)
         write_json(result, args, "profiling/baseline/baseline_statistic.json")
 
-        test_result = infer_data_profiling(X_train, X_test, args)
+        # Calculate PSI for baseline data (train vs test set).
+        # Expected to have good score.
+        test_result = generate_psi(X_train, X_test, args)
         write_json(test_result, args, "profiling/baseline/baseline_psi.json")
 
     if args.mode == "infer":
@@ -323,10 +319,12 @@ def main(args):
         X_infer = read_data(infer_data_path)
         X_infer = X_infer.drop(["income"], axis=1)
 
-        test_result = infer_data_profiling(X_train, X_infer, args)
+        # Calculate PSI for inference vs baseline data
+        test_result = generate_psi(X_train, X_infer, args)
         write_json(test_result, args, "profiling/inference/infer_psi.json")
 
-        # Trigger alert if PSI higher than threshold config PsiThreshold
+        # TODO
+        # Trigger alert if PSI higher than threshold configuration
 
 
 if __name__ == "__main__":
@@ -337,7 +335,7 @@ if __name__ == "__main__":
     mkdir -p /opt/ml/processing/train_input
     mkdir -p /opt/ml/processing/infer_input
     aws s3 cp $DATA /opt/ml/processing/train_input/
-    aws s3 cp $DATA /opt/ml/processing/infer_input/
+    cp /opt/ml/processing/train_input/census-income.csv /opt/ml/processing/infer_input/
     python monitoring.py --mode "train" --data_dir /opt/ml/processing
     python monitoring.py --mode "infer" --data_dir /opt/ml/processing
     """
