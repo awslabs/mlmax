@@ -14,17 +14,10 @@ Parameters:
   EnvironmentName:
     Type: String
     Default: regulated-env
-
-Mappings:
-  AWSRegion2AMI:
-    ap-southeast-1:
-      AMZN2: ami-0187d3074098799c4
-    ap-southeast-2:
-      AMZN2: ami-0d10b7763a48a4bf0
-    us-east-1:
-      AMZN2: ami-00f44084952227ef0
-    us-east-2:
-      AMZN2: ami-0a48b929b40736cc3
+  Ami:
+    Description: AMI id (default to the latest alinux2 for x64)
+    Type: String
+    Default: resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
 
 Resources:
   EC2Instance:
@@ -39,10 +32,7 @@ Resources:
         - !ImportValue ExpVPCEndpointSecurityGroupId
       SubnetId: !ImportValue ExpPrivateSubnet1
       KeyName: !Ref KeyName
-      ImageId: !FindInMap
-        - AWSRegion2AMI
-        - !Ref "AWS::Region"
-        - AMZN2
+      ImageId: !Ref Ami
       IamInstanceProfile: !Ref InstanceProfile
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
