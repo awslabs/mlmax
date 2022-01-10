@@ -25,6 +25,7 @@ class SmPrivateKwargs:
         s3_kms_key: str = "abcde",
         sgs: List[str] = ["sg-abcde"],
         volume_kms_key: str = "abcde",
+        encrypt_inter_container_traffic: bool = True,
         tag_team: str = "team_A",
         tag_project: str = "project_X",
     ) -> None:
@@ -35,11 +36,34 @@ class SmPrivateKwargs:
             subnets (List[str], optional): List of subnets. Defaults to
                 ["subnet-abcde"].
             network_isolation (bool, optional): Network isolation. Defaults to False.
-            s3_kms_key (str, optional): KMS key for S3. Defaults to "abcde".
+            s3_kms_key (str, optional): KMS key for S3. Per the API documentation
+                (https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_OutputDataConfig.html#sagemaker-Type-OutputDataConfig-KmsKeyId),
+                if not provided, SageMaker uses the default KMS key for Amazon S3 of the
+                account linked to your IAM role. Also according to the same
+                documentation, the accepted formats are (1) KMS Key ID, (2) ARN of a KMS
+                key, (3) KMS Key alias, and (4) ARN of a KMS key alias. Defaults to
+                "abcde".
             sgs (List[str], optional): List of security groups. Defaults to
                 ["sg-abcde"].
-            volume_kms_key (str, optional): KMS key for EBS volume on job instances.
+            volume_kms_key (str, optional): KMS key for EBS volume on job instances. You
+                cannot use an AWS Managed Key such as ``alias/aws/ebs`` because its key
+                policy cannot be edited, so cross-account permissions cannot be granted
+                for these key policies. Please ensure that the customer-managed key
+                allows cross-account use in its policy
+                (https://docs.aws.amazon.com/sagemaker/latest/dg/sms-security-kms-permissions.html).
+                Accepted formats are (1) KMS key ID, and (2) ARN of a KMS key (see
+                https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_ResourceConfig.html#sagemaker-Type-ResourceConfig-VolumeKmsKeyId).
+                Also note that when using instances with local NVMe (e.g., instance type
+                with ``d``, you must set this to `False` otherwise the ``Create*Job``
+                API will fail (refer to the before-mentioned documentation URL).
                 Defaults to "abcde".
+            encrypt_inter_container_traffic (bool): Whether to traffic between job
+                containers is encrypted. Applicable for training and processing. For
+                implementer of this class: model monitor requires inter-container
+                traffic encryption disabled (see
+                `sagemaker.model_monitor.model_monitoring.ModelMonitor._validate_network_config()`).
+                Hence, implementers must ignore this flag when setting the
+                `NetworkConfig` for model monitor. Defaults to True.
             tag_team (str, optional): Team name as mandated by your IT or billing
                 department. Defaults to "team_A".
             tag_project (str, optional): Project name as mandated by your IT or billing
@@ -51,6 +75,7 @@ class SmPrivateKwargs:
         self.s3_kms_key = s3_kms_key
         self.sgs = sgs
         self.volume_kms_key = volume_kms_key
+        self.encrypt_inter_container_traffic = encrypt_inter_container_traffic
         self.raw_tags = {"team": tag_team, "project": tag_project}
 
     @property
@@ -84,6 +109,7 @@ class SmPrivateKwargs:
                 subnets=self.subnets,
                 tags=self.tags,
                 volume_kms_key=self.volume_kms_key,
+                encrypt_inter_container_traffic=self.encrypt_inter_container_traffic,
             )
         return self._train
 
@@ -123,6 +149,9 @@ class SmPrivateKwargs:
                     enable_network_isolation=self.network_isolation,
                     security_group_ids=self.sgs,
                     subnets=self.subnets,
+                    encrypt_inter_container_traffic=(
+                        self.encrypt_inter_container_traffic
+                    ),
                 ),
             )
         return self._processing
