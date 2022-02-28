@@ -32,7 +32,7 @@ determines how the machine learning operations interacts with the data stores,
 both to ingest data for processing, managing feature stores, and for processing
 and use of output data. A common pattern is to take an extract, or mirror, of
 the data into S3 on a project basis.
-5. [** CICD
+5. [**CICD
    Pipeline**](https://github.com/awslabs/mlmax/blob/main/modules/cicd/):
 This module provides the guidance to setting up a continuous integration (CI)
 and continuous deployment (CD) pipeline, and automate the delivery of the ML
