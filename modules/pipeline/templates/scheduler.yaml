@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A CloudWatch-based scheduler for the Step Functions state machine.
+
+Parameters:
+  PipelineName:
+    Type: String
+  TargetEnv:
+    Type: String
+  StateMachineComponentArn:
+    Type: String
+  InputDataURL:
+    Type: String
+  ProcModelS3:
+    Type: String
+  PreprocessingCodeURL:
+    Type: String
+  InferenceCodeURL:
+    Type: String
+  ModelS3:
+    Type: String
+  PreprocessedTrainDataURL:
+    Type: String
+  PreprocessedTestDataURL:
+    Type: String
+  OutputPathURL:
+    Type: String
+
+Resources:
+  # Define the CloudWatch schedule Role.
+  ScheduleRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "AllowCWEServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "ExecuteStateMachine"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "states:StartExecution"
+                Resource: "*"
+  ScheduleRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: !Sub "${PipelineName}-ScheduleRule-${TargetEnv}"
+      ScheduleExpression: cron(45 07 * * ? *)
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !Ref StateMachineComponentArn
+          Id: !Sub "${PipelineName}-ScheduleRuleTargets-${TargetEnv}"
+          RoleArn: !GetAtt ScheduleRole.Arn
+          InputTransformer:
+            InputPathsMap:
+              "id": "$.id"
+            InputTemplate: !Sub |-
+              {
+                "InputDataURL": "${InputDataURL}",
+                "PreprocessingJobName": "mlmax-proc-<id>",
+                "InferenceJobName": "mlmax-infer-<id>",
+                "ProcModelS3": "${ProcModelS3}",
+                "PreprocessingCodeURL": "${PreprocessingCodeURL}",
+                "InferenceCodeURL": "${InferenceCodeURL}",
+                "ModelS3": "${ModelS3}",
+                "PreprocessedTrainDataURL": "${PreprocessedTrainDataURL}",
+                "PreprocessedTestDataURL": "${PreprocessedTestDataURL}",
+                "OutputPathURL": "${OutputPathURL}"
+              }

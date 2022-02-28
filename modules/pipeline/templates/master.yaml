@@ -5,8 +5,55 @@ Parameters:
     Default: "MlMax-Pipeline-Demo"
   TargetEnv:
     Type: String
+    AllowedValues:
+      - 'dev'
+      - 'stage'
+      - 'prod'
     Default: "dev"
+  IsEnableTraining:
+    Type: String
+    Default: 'yes'
+  IsEnableScheduler:
+    Type: String
+    Default: 'no'
+  IsCreateSagemakerRole:
+    Type: String
+    Default: 'yes'
+  PackageBucket:
+    Type: String
+  InputDataURL:
+    Type: String
+    Default: ""
+  ProcModelS3:
+    Type: String 
+    Default: ""
+  PreprocessingCodeURL:
+    Type: String
+    Default: ""
+  InferenceCodeURL:
+    Type: String
+    Default: ""
+  ModelS3:
+    Type: String
+    Default: ""
+  PreprocessedTrainDataURL:
+    Type: String
+    Default: ""
+  PreprocessedTestDataURL:
+    Type: String
+    Default: ""
+  OutputPathURL:
+    Type: String
+    Default: ""
 
+Conditions:
+  EnableTraining: !Equals
+    - !Ref IsEnableTraining 
+    - 'yes'
+  EnableScheduler: !Equals
+    - !Ref IsEnableScheduler
+    - 'yes'
+      
 Resources:
   # Define Roles
   IAMRoles:
@@ -15,20 +62,24 @@ Resources:
       # The Template URL is relative path to this template file.
       TemplateURL: ./roles.yaml
       Parameters:
+        PipelineName: !Ref PipelineName
         TargetEnv: !Ref TargetEnv
+        PackageBucket: !Ref PackageBucket
+        IsCreateSagemakerRole: !Ref IsCreateSagemakerRole
   # Training Pipeline Step Function
   StepFunctionTrainingPipeline:
+    Condition: EnableTraining
     Type: AWS::CloudFormation::Stack
     Properties:
       # The Template URL is relative path to this template file.
       TemplateURL: ./my_training_pipeline.yaml
       Parameters:
         PipelineName: !Ref PipelineName
-        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        SagerMakerRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${PipelineName}-SageMakerRole-${TargetEnv}"
         WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
         TargetEnv: !Ref TargetEnv
     DependsOn: IAMRoles
-    # Inference Pipeline Step Function
+  # Inference Pipeline Step Function
   StepFunctionInferencePipeline:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -36,7 +87,29 @@ Resources:
       TemplateURL: ./my_inference_pipeline.yaml
       Parameters:
         PipelineName: !Ref PipelineName
-        SagerMakerRoleArn: !GetAtt IAMRoles.Outputs.SagerMakerRoleArn
+        SagerMakerRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${PipelineName}-SageMakerRole-${TargetEnv}"
         WorkflowExecutionRoleArn: !GetAtt IAMRoles.Outputs.WorkflowExecutionRoleArn
         TargetEnv: !Ref TargetEnv
     DependsOn: IAMRoles
+  # Scheduler of the data Pipeline Step Function
+  Scheduler:
+    Condition: EnableScheduler
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      # The Template URL is relative path to this template file.
+      TemplateURL: ./scheduler.yaml
+      Parameters:
+        PipelineName: !Ref PipelineName
+        TargetEnv: !Ref TargetEnv
+        StateMachineComponentArn: !GetAtt StepFunctionInferencePipeline.Outputs.StateMachineComponentArn
+        InputDataURL: !Ref InputDataURL
+        ProcModelS3: !Ref ProcModelS3
+        PreprocessingCodeURL: !Ref PreprocessingCodeURL
+        InferenceCodeURL: !Ref InferenceCodeURL
+        ModelS3: !Ref ModelS3
+        PreprocessedTrainDataURL: !Ref PreprocessedTrainDataURL
+        PreprocessedTestDataURL: !Ref PreprocessedTestDataURL
+        OutputPathURL: !Ref OutputPathURL
+    DependsOn:
+      - IAMRoles
+      - StepFunctionInferencePipeline

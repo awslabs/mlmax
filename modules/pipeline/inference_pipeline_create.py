@@ -1,3 +1,5 @@
+import os
+
 from inference_pipeline_define import define_inference_pipeline
 
 
@@ -42,6 +44,16 @@ Parameters:
         'RoleArn: !Sub "${WorkflowExecutionRoleArn}"',
     )
 
+    # add output
+    data = (
+        data
+        + "\n"
+        + """Outputs:
+  StateMachineComponentArn:
+    Description: The step function ARN
+    Value: !GetAtt StateMachineComponent.Arn
+"""
+    )
     with open("./templates/my_inference_pipeline.yaml", "w") as file:
         file.write(data)
 
@@ -52,6 +64,7 @@ def create_inference_pipeline(
     inference_pipeline_name,
     return_yaml=True,
     dump_yaml_file="templates/sagemaker_inference_pipeline.yaml",
+    kms_key_id=None,
 ):
     """
     Return YAML definition of the inference pipeline, which consists of
@@ -72,6 +85,7 @@ def create_inference_pipeline(
         inference_pipeline_name,
         return_yaml,
         dump_yaml_file,
+        kms_key_id=kms_key_id,
     )
     # dump YAML cloud formation template
     yml = inference_pipeline.get_cloudformation_template()
@@ -93,11 +107,13 @@ def example_create_inference_pipeline():
     sm_role = "${SagerMakerRoleArn}"
     workflow_execution_role = "${WorkflowExecutionRoleArn}"
     inference_pipeline_name = "${InferencePipelineName}"
+    kms_key_id = os.getenv("KMSKEY_ARN", None)
     yaml_rep = create_inference_pipeline(
         sm_role=sm_role,
         workflow_execution_role=workflow_execution_role,
         inference_pipeline_name=inference_pipeline_name,
         dump_yaml_file=None,
+        kms_key_id=kms_key_id,
     )
     with open("/tmp/my_inference_pipeline.yaml", "w") as fout:
         fout.write(yaml_rep)

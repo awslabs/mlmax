@@ -1,0 +1,49 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.7
+    commands:
+      - echo "Installing requirements"
+      - pip install --upgrade --force-reinstall boto3 awscli # Upgrade boto3 and awscli
+      - cd modules/pipeline
+      - pip install -r requirements.txt
+
+  pre_build:
+    commands:
+      - echo List source files
+      - echo Get CodePipeline name
+      - export PIPELINE_NAME=${CODEBUILD_INITIATOR#codepipeline/}
+      - echo $PIPELINE_NAME
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Run the script to build the cloudformation templates
+      - python training_pipeline_create.py
+      - python inference_pipeline_create.py
+      - cd ../cicd
+      - python scripts/ml_pipelines_run_input.py
+      
+  post_build:
+    commands:
+      - cd ../pipeline
+      - echo Package custom resources
+      - |
+        aws cloudformation package \
+        --region ${REGION} \
+        --template-file templates/master.yaml \
+        --s3-bucket ${PACKAGE_BUCKET} \
+        --s3-prefix clouformation-packaged \
+        --output-template-file templates/master_packaged.yaml
+      - |
+        aws cloudformation validate-template --template-body file://./templates/master_packaged.yaml
+      - echo Done
+
+artifacts:
+  files:
+    - modules/pipeline/templates/*.yaml
+    - modules/cicd/config/*.json
+    - modules/cicd/*.yml
+  discard-paths: yes

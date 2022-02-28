@@ -1,0 +1,394 @@
+Description: CodePipeline (CICD) for the training and infernce pipelines
+Parameters:
+
+  Region:
+    Description: AWS region to deploy application
+    Type: String
+
+  StackName:
+    Description: The stack name for the CICD codepipeline
+    Type: String
+
+  StackNameRoles:
+    Description: The stack name for the CICD codepipeline roles
+    Type: String
+
+  PipelineName:
+    Description: The stack name for the ML pipelines
+    Type: String
+
+  # PackageBucket:
+  #   Type: String
+  #   Description: Path of the S3 bucket for the aws cloudformation package.
+  #CodePipelineServiceRoleArn:
+  #  Description: CodePipeline Role Arn
+  #  Type: String
+
+  #DeployRoleStageArn:
+  #  Description: Stage Env Deploy Action Role Arn
+  #  Type: String
+  #
+  #DeployRoleProdArn:
+  #  Description: Prod Deploy Action Role Arn
+  #  Type: String
+  #
+  #InvokeStepFunctionRoleArn:
+  #  Description: Invoke StepFunction Action Role Arn
+  #  Type: String
+
+  DevopsAccountId:
+    Description: Devops AccountId
+    Type: String
+
+  StageAccountId:
+    Description: Stage AccountId
+    Type: String
+
+  ProdAccountId:
+    Description: Prod AccountId
+    Type: String
+
+  RepositoryName:
+    Type: String
+    Default: "awslabs/mlmax"
+
+  BuildImageName:
+    Description: Instance type
+    Type: String
+    Default: "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
+
+  BranchName:
+    Description: Branch name where changes are to be detected
+    Type: String
+    Default: "main"
+
+Resources:
+################## Artifact Bucket #############################
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${StackName}-artifact-${Region}-${DevopsAccountId}
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: Allow use of the key from the other accounts
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
+                - !GetAtt CodeBuildServiceRole.Arn
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${PipelineName}-SageMakerRole-stage"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${PipelineName}-SageMakerRole-prod"
+            Action: "s3:*"
+            Resource:
+              - !Sub ${ArtifactBucket.Arn}/*
+              - !GetAtt ArtifactBucket.Arn
+################## Kms Key #####################################
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Id: pipeline-kms-key
+        Statement:
+          - Sid: Allows admin of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${DevopsAccountId}:root"
+            Action: ["kms:*"]
+            Resource: "*"
+          - Sid: Allow use of the key from the other accounts
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
+                - !GetAtt CodeBuildServiceRole.Arn
+                - !Sub "arn:aws:iam::${StageAccountId}:role/${PipelineName}-SageMakerRole-stage"
+                - !Sub "arn:aws:iam::${ProdAccountId}:role/${PipelineName}-SageMakerRole-prod"
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+  KMSAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/codepipeline-crossaccounts
+      TargetKeyId: !Ref KMSKey
+################## CodeBuild Role ##############################
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackName}-CodeBuildServiceRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+      Policies:
+        - PolicyName: CodeBuildBasePolicy-CodeBuildProject
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'iam:PassRole'
+                Resource:
+                  - !Sub "arn:aws:iam::${DevopsAccountId}:role/service-role/${StackName}-CodeBuildServiceRole"
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub ${ArtifactBucket.Arn}/*
+                  - !GetAtt ArtifactBucket.Arn
+                  - !Sub "arn:aws:s3:::sagemaker-${Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::sagemaker-${Region}-${DevopsAccountId}/*"
+              - Effect: Allow
+                Action:
+                  - cloudformation:ValidateTemplate
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "codestar-connections:UseConnection"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:ReEncrypt*"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey"
+                Resource: "*"
+
+  ################ GITHUB connection to CodePipeline ######################################
+  GitConnection:
+    Type: 'AWS::CodeStarConnections::Connection'
+    Properties:
+      ConnectionName: mlmax_git_conn
+      ProviderType: GitHub
+
+  ################ CodeBuild Stage and CodePipeline Pipeline ##############################
+  BuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${StackName}-build'
+      Description: Builds the templates/files for executing the CI/CD.
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: modules/cicd/buildspec.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Type: LINUX_CONTAINER
+        Image: !Ref BuildImageName
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: PACKAGE_BUCKET
+            Type: PLAINTEXT
+            Value: !Ref ArtifactBucket
+          - Name: REGION
+            Type: PLAINTEXT
+            Value: !Ref Region
+          - Name: KMSKEY_ARN
+            Type: PLAINTEXT
+            Value: !GetAtt KMSKey.Arn
+      TimeoutInMinutes: 30
+  BuildProjectEncryptModelArtifacts:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${StackName}-build-encrypt-model-artifacts'
+      Description: Hotfix - Encrypt the Sagemaker model artifacts for crossaccount access.
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-encrypt-model-artifacts.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Type: LINUX_CONTAINER
+        Image: !Ref BuildImageName
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: PACKAGE_BUCKET
+            Type: PLAINTEXT
+            Value: !Ref ArtifactBucket
+          - Name: REGION
+            Type: PLAINTEXT
+            Value: !Ref Region
+          - Name: KMSKEY_ARN
+            Type: PLAINTEXT
+            Value: !GetAtt KMSKey.Arn
+      TimeoutInMinutes: 30
+
+
+  CICDPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub ${StackName}-codepipeline
+      RoleArn: !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+      ArtifactStore:
+          Type: S3
+          Location: !Ref ArtifactBucket
+          EncryptionKey:
+            Id: !GetAtt KMSKey.Arn
+            Type: KMS
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: ApplicationSource
+              ActionTypeId:
+                Version: '1'
+                Owner: AWS
+                Category: Source
+                Provider: CodeStarSourceConnection
+              OutputArtifacts:
+                - Name: SourceOutput
+              RunOrder: 1
+              Configuration:
+                ConnectionArn: !Ref GitConnection
+                FullRepositoryId: !Ref RepositoryName
+                BranchName: !Ref BranchName
+                DetectChanges: true
+        - Name: Build
+          Actions:
+            - Name: BuildTemplates
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildProject
+              RunOrder: 1
+            - Name: CreateMLPipelines
+              InputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: "1"
+                Provider: CloudFormation
+              RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-deploy-role"
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: MlMaxPipelineDemo-stage
+                TemplatePath: BuildOutput::master_packaged.yaml
+                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-stage-build.json
+              RunOrder: 2
+        - Name: Train
+          Actions:
+            - Name: StartTrainingPipeline
+              InputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Invoke
+                Owner: AWS
+                Version: 1
+                Provider: StepFunctions
+              OutputArtifacts:
+                - Name: TrainingPipeline
+              RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
+              Configuration:
+                StateMachineArn: !Sub "arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Training-stage"
+                InputType: FilePath
+                Input: training-pipeline-input.json
+              RunOrder: 1
+            - Name: EncryptModelArtifacts
+              InputArtifacts:
+                - Name: BuildOutput
+              # OutputArtifacts:
+              #   - Name: EncryptModelArtifactsOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildProjectEncryptModelArtifacts
+              RunOrder: 2
+        - Name: Inference
+          Actions:
+            - Name: StartInferencePipeline
+              InputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Invoke
+                Owner: AWS
+                Version: 1
+                Provider: StepFunctions
+              OutputArtifacts:
+                - Name: InferencePipeline
+              RoleArn: !Sub "arn:aws:iam::${StageAccountId}:role/${StackNameRoles}-InvokeStepFunctionRole"
+              Configuration:
+                StateMachineArn: !Sub "arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Inference-stage"
+                InputType: FilePath
+                Input: inference-pipeline-input.json
+              RunOrder: 1
+        - Name: ManualApproval
+          Actions:
+            - Name: ApproveDeploy
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Version: "1"
+                Provider: Manual
+              Configuration:
+                ExternalEntityLink: !Sub https://console.aws.amazon.com/states/home?region=${Region}#/statemachines/view/arn:aws:states:${Region}:${StageAccountId}:stateMachine:${PipelineName}-Inference-stage
+                CustomData: "Shall this inference pipeline be put into production?"
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: DeployInferencePipeline
+              InputArtifacts:
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: "1"
+                Provider: CloudFormation
+              RoleArn: !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub "arn:aws:iam::${ProdAccountId}:role/${StackNameRoles}-deploy-role"
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: MlMaxPipelineDemo-prod
+                TemplatePath: BuildOutput::master_packaged.yaml
+                TemplateConfiguration: !Sub BuildOutput::deploy-${Region}-prod-build.json
+              RunOrder: 1

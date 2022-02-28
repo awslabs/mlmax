@@ -1,0 +1,9 @@
+{
+  "Parameters": {
+    "PipelineName": "MlMaxPipelineDemo",
+    "TargetEnv": "prod",
+    "IsEnableTraining": "yes",
+    "IsEnableScheduler": "yes",
+    "IsCreateSagemakerRole": "no"
+  }
+}

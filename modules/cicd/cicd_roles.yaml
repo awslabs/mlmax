@@ -1,0 +1,313 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A training pipeline Step Functions state machine.
+
+Parameters:
+  StackName:
+    Description: The stack name for the CICD codepipeline
+    Type: String
+  StackNameRoles:
+    Description: The stack name for the CICD codepipeline roles
+    Type: String
+  PipelineName:
+    Description: The stack name for the ML pipelines
+    Type: String
+  TargetEnv:
+    Type: String
+    AllowedValues:
+      - 'devops'
+      - 'stage'
+      - 'prod'
+    Default: "devops"
+  # PackageBucket:
+  #   Type: String
+  #   Description: Path of the S3 bucket for the aws cloudformation package.
+  DevopsAccountId:
+    Description: Devops AccountId
+    Type: String
+  StageAccountId:
+    Description: Stage AccountId
+    Type: String
+  ProdAccountId:
+    Description: Prod AccountId
+    Type: String
+  #CodePipelineServiceRoleArn:
+  #  Description: CodePipeline Role Arn
+  #  Type: String
+  #  Default: ""
+
+Conditions:
+  IsDevops: !Equals
+    - !Ref TargetEnv
+    - 'devops'
+  IsStage: !Equals
+    - !Ref TargetEnv
+    - 'stage'
+  IsDeploy: !Or
+    - !Equals
+      - !Ref TargetEnv
+      - 'stage'
+    - !Equals
+      - !Ref TargetEnv
+      - 'prod'
+
+Resources:
+  ############## SageMaker Execution Role ##########################
+  SagerMakerRole:
+    Condition: IsDeploy
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${PipelineName}-SageMakerRole-${TargetEnv}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sagemaker.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      Path: /
+      Policies:
+        - PolicyName: CrossAccountS3Access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: AllowRWAccessToBucket
+                Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey"
+                  - "kms:CreateGrant"
+                Resource: "*"
+  ################## CodePipeline Role ##############################
+  CodePipelineServiceRole:
+    Condition: IsDevops
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackNameRoles}-CodePipelineServiceRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+                - cloudformation.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackNameRoles}-AWS-CodePipeline
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - 'codebuild:BatchGetBuilds'
+                  - 'codebuild:StartBuild'
+                  - 'codebuild:BatchGetBuildBatches'
+                  - 'codebuild:StartBuildBatch'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
+              - Effect: Allow
+                Action:
+                  - iam:*
+                  - states:*
+                  - cloudformation:*
+                  - lambda:*
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:ReEncrypt*"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey"
+                Resource: "*"
+  ################## Invoke Step Function Role ##############################
+  InvokeStepFunctionRole:
+    Condition: IsStage
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackNameRoles}-InvokeStepFunctionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackNameRoles}-AWS-InvokeStepFunction
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:*
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:ReEncrypt*"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey"
+                Resource: "*"
+
+  ###################### CodeDeploy Role ##################################
+  DeployRole:
+    Condition: IsDeploy
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub ${StackNameRoles}-deploy-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "cloudformation.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${DevopsAccountId}:role/${StackNameRoles}-CodePipelineServiceRole"
+            Action: 'sts:AssumeRole'
+      Path: "/"
+      Policies:
+        - PolicyName: "mlmax-codedeploy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CloudFormation
+                Effect: Allow
+                Action:
+                  - cloudformation:*
+                  - iam:AttachRolePolicy
+                  - iam:CreateRole
+                  - iam:CreatePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:DeleteRole
+                  - iam:DetachRolePolicy
+                  - iam:PutRolePolicy
+                  - iam:PassRole
+                  - iam:DeleteRolePolicy
+                  - iam:CreateServiceLinkedRole
+                  - iam:TagRole
+                  - lambda:InvokeFunction
+                  - states:*
+                  - events:*
+                Resource: "*"
+              - Sid: AllowCloudWatch
+                Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: "*"
+              - Sid: CodeDeploy
+                Effect: Allow
+                Action:
+                  - codedeploy:*
+                Resource: "*"
+              - Sid: AllowPassRoleSageMaker
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: sagemaker.amazonaws.com
+              - Sid: AllowS3
+                Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}"
+                  - !Sub "arn:aws:s3:::${StackName}-artifact-${AWS::Region}-${DevopsAccountId}/*"
+              - Sid: kms
+                Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:ReEncrypt*"
+                  - "kms:GenerateDataKey*"
+                  - "kms:DescribeKey"
+                Resource: "*"
+
+Outputs:
+  CodePipelineServiceRoleArn:
+    Description: CodePipeline Role ARN
+    Value: !GetAtt CodePipelineServiceRole.Arn
+    Condition: IsDevops
+  InvokeStepFunctionRoleArn:
+    Description: Invoke StepFunction Role ARN
+    Value: !GetAtt InvokeStepFunctionRole.Arn
+    Condition: IsStage
+  DeployRoleArn:
+    Description: Deploy Role ARN
+    Value: !GetAtt DeployRole.Arn
+    Condition: IsDeploy
