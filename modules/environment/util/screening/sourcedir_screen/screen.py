@@ -9,7 +9,9 @@ if __name__ == "__main__":
         type=Path,
         default=os.environ.get("SM_OUTPUT_DATA_DIR", "/opt/ml/processing/output"),
     )
-    parser.add_argument("--module", choices=["mxnet", "sklearn", "torch"], default="mxnet")
+    parser.add_argument(
+        "--module", choices=["mxnet", "sklearn", "torch"], default="mxnet"
+    )
     args = parser.parse_args()
     print(vars(args))
 
